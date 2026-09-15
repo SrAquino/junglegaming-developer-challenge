@@ -48,7 +48,7 @@ The task assignments above are project-specific judgments. Official model roles,
 - [x] Create a Vite + React + TypeScript application with strict type checking.
 - [x] Install compatible versions of PixiJS, TanStack Query, Axios, MSW and Playwright; commit the lockfile (commit `2cdc3e6`).
 - [x] Add scripts for development, build, preview, lint and type checking (Playwright will be added with its dependency and test setup).
-- [ ] Separate simulation, rendering, input, React UI, API contracts, mocks and tests into clear modules.
+- [x] Separate simulation, rendering, input, React UI, API contracts, mocks and tests into clear modules.
 - [ ] Add initial README.md and ARCHITECTURE.md; update them as decisions are made.
 - [ ] Integrate the existing supplied assets into the build and retain their source and license information; document any additions or conversions.
 - [ ] Configure Chromium desktop and mobile Playwright projects, isolated state, HTML reports and traces on failure.

@@ -30,3 +30,35 @@ textarea {
   padding: 2rem;
   text-align: center;
 }
+
+.main-menu {
+  max-width: 34rem;
+}
+
+.eyebrow {
+  color: #78cad2;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.main-menu h1 {
+  margin: 0.5rem 0;
+  font-size: clamp(3rem, 10vw, 5.5rem);
+}
+
+.primary-button {
+  margin-top: 2rem;
+  border: 0;
+  border-radius: 0.5rem;
+  padding: 0.8rem 2rem;
+  color: #061d2d;
+  background: #f8c75b;
+  font-weight: 800;
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
