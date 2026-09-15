@@ -29,6 +29,8 @@ Gameplay values live in `src/game/config/game-config.ts`. The default match last
 
 Movement, rotation, health, collision sizes, spawn distribution, damage, projectile speed/range/lifetime, weapon cooldowns and Shooter range are part of the same typed configuration. Balance changes therefore do not require changes to the simulation systems.
 
+The first two successful enemy spawns guarantee one Chaser and one Shooter; later spawns use the configured weights. Spawn candidates must be clear of the island and ships and at least 420 logical pixels from the player. Enemies route around the central island, Chasers damage on impact without awarding score, and Shooters require range and line of sight.
+
 ## Controls
 
 - Sail forward: `W` or `↑`

@@ -8,8 +8,14 @@ import { weaponSystem } from '../systems/weapon-system.ts'
 import { projectileSystem } from '../systems/projectile-system.ts'
 import { combatSystem } from '../systems/combat-system.ts'
 import { effectSystem } from '../systems/effect-system.ts'
+import { enemySpawnSystem } from '../systems/enemy-spawn-system.ts'
+import { enemyBehaviorSystem } from '../systems/enemy-behavior-system.ts'
+import type { EnemyEntity } from '../entities/entity.ts'
+import type { Texture } from 'pixi.js'
 import {
   cannonBallAssetUrl,
+  chaserShipAssetUrl,
+  shooterShipAssetUrl,
   islandRockAssetUrl,
   loadPlayerShipTexture,
   loadTexture,
@@ -27,7 +33,7 @@ export class FirstPlayableScene implements GameRenderer {
 
   public constructor(input: GameInput) {
     this.input = input
-    this.session = new GameSession({ systems: [playerMovementSystem, weaponSystem, projectileSystem, combatSystem, effectSystem] })
+    this.session = new GameSession({ systems: [playerMovementSystem, enemySpawnSystem, weaponSystem, projectileSystem, combatSystem, enemyBehaviorSystem, effectSystem] })
   }
 
   private readonly input: GameInput
@@ -49,10 +55,12 @@ export class FirstPlayableScene implements GameRenderer {
       return
     }
 
-    const [shipTexture, rockTexture, cannonBallTexture] = await Promise.all([
+    const [shipTexture, rockTexture, cannonBallTexture, chaserTexture, shooterTexture] = await Promise.all([
       loadPlayerShipTexture(),
       loadTexture(islandRockAssetUrl),
       loadTexture(cannonBallAssetUrl),
+      loadTexture(chaserShipAssetUrl),
+      loadTexture(shooterShipAssetUrl),
     ])
     if (this.destroyed) {
       this.destroyApplication()
@@ -92,6 +100,9 @@ export class FirstPlayableScene implements GameRenderer {
     const projectileSprites = new Map<string, Sprite>()
     const effectGraphics = new Map<string, Graphics>()
     const enemyHealthBars = new Map<string, HealthBar>()
+    const enemySprites = new Map<string, Sprite>()
+    const enemyLayer = new Container()
+    world.addChildAt(enemyLayer, 2)
 
     this.session.start(defaultGameConfig)
     application.ticker.add(() => {
@@ -111,6 +122,7 @@ export class FirstPlayableScene implements GameRenderer {
       ship.tint = observation.playerHealth <= 35 ? 0xd88372 : 0xffffff
       updateHealthBar(playerHealthBar, observation.playerPosition.x, observation.playerPosition.y, observation.playerHealth, defaultGameConfig.player.maxHealth)
       const simulation = this.session.getWorldForRendering()
+      syncEnemies(simulation.enemies, enemySprites, enemyLayer, { chaser: chaserTexture, shooter: shooterTexture })
       syncEnemyHealthBars(simulation.enemies, enemyHealthBars, world)
       syncProjectiles(simulation.projectiles, projectileSprites, projectileLayer, cannonBallTexture)
       syncEffects(simulation.effects, effectGraphics, effectLayer)
@@ -118,6 +130,10 @@ export class FirstPlayableScene implements GameRenderer {
       host.dataset.playerY = observation.playerPosition.y.toFixed(2)
       host.dataset.playerRotation = observation.playerRotation.toFixed(4)
       host.dataset.projectileCount = String(observation.projectileCount)
+      host.dataset.enemies = JSON.stringify(simulation.enemies.map(({ id, enemyType, position, health }) => ({ id, enemyType, position, health })))
+      host.dataset.score = String(observation.score)
+      host.dataset.playerHealth = String(observation.playerHealth)
+      host.dataset.elapsedMs = observation.elapsedMs.toFixed(2)
     })
   }
 
@@ -149,6 +165,26 @@ export class FirstPlayableScene implements GameRenderer {
 interface HealthBar {
   container: Container
   fill: Graphics
+}
+
+function syncEnemies(enemies: readonly EnemyEntity[], sprites: Map<string, Sprite>, layer: Container, textures: Record<'chaser' | 'shooter', Texture>): void {
+  const activeIds = new Set(enemies.map((enemy) => enemy.id))
+  for (const [id, sprite] of sprites) {
+    if (!activeIds.has(id)) { sprite.destroy(); sprites.delete(id) }
+  }
+  for (const enemy of enemies) {
+    let sprite = sprites.get(enemy.id)
+    if (!sprite) {
+      sprite = new Sprite(textures[enemy.enemyType])
+      sprite.anchor.set(0.5)
+      sprite.scale.set(0.65)
+      layer.addChild(sprite)
+      sprites.set(enemy.id, sprite)
+    }
+    sprite.position.set(enemy.position.x, enemy.position.y)
+    sprite.rotation = enemy.rotation + Math.PI / 2
+    sprite.tint = enemy.health / enemy.maxHealth <= 0.35 ? 0xd88372 : enemy.enemyType === 'chaser' ? 0xffc68a : 0xb4cfff
+  }
 }
 
 function createHealthBar(): HealthBar {

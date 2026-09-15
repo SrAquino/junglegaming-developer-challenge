@@ -105,14 +105,14 @@ Exit condition: one ship moves correctly, resizes correctly and leaves no active
 
 ## 6. Implement enemies, spawns and scoring
 
-- [ ] Implement Chaser pursuit, rotation, collision damage and a visible explosion on self-destruction at player impact.
-- [ ] Implement Shooter approach, rotation and attacks within configured range.
-- [ ] Make both enemy types respect island collisions; verify they can approach around obstacles in the chosen arena.
-- [ ] Spawn at configured intervals in unobstructed positions sufficiently far from the player.
-- [ ] Ensure both enemy types appear during a standard match.
-- [ ] Award exactly one point per enemy destroyed by player attacks; award none for Chaser impact self-destruction.
-- [ ] Remove destroyed enemies from movement, damage, firing and collision processing immediately.
-- [ ] Test both behaviors, spawn timing, safe spawn positions and nonduplicated scoring.
+- [x] Implement Chaser pursuit, rotation, collision damage and a visible explosion on self-destruction at player impact.
+- [x] Implement Shooter approach, rotation and attacks within configured range.
+- [x] Make both enemy types respect island collisions; verify they can approach around obstacles in the chosen arena.
+- [x] Spawn at configured intervals in unobstructed positions sufficiently far from the player.
+- [x] Ensure both enemy types appear during a standard match.
+- [x] Award exactly one point per enemy destroyed by player attacks; award none for Chaser impact self-destruction.
+- [x] Remove destroyed enemies from movement, damage, firing and collision processing immediately.
+- [x] Test both behaviors, spawn timing, safe spawn positions and nonduplicated scoring.
 
 Exit condition: a complete combat encounter works with both enemy types and all three weapons.
 

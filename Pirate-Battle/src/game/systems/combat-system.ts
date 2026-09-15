@@ -4,6 +4,7 @@ import type { GameSystem } from './game-system.ts'
 export const combatSystem: GameSystem = {
   update(_deltaMs, { world }) {
     for (const projectile of world.projectiles) {
+      if (world.player.health <= 0) break
       if (!projectile.active) continue
       const target = projectile.owner === 'player'
         ? world.enemies.find((enemy) => enemy.active && collides(projectile, enemy))

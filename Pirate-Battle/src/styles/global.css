@@ -116,13 +116,16 @@ textarea {
 }
 
 .touch-controls {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  max-width: 54rem;
+  justify-self: center;
   gap: 0.75rem;
 }
 
 .touch-control {
-  min-width: 7.5rem;
+  min-width: 0;
   min-height: 3rem;
   border: 1px solid #78cad2;
   border-radius: 0.5rem;
@@ -133,6 +136,12 @@ textarea {
 
 .touch-control:active {
   background: #16728b;
+}
+
+@media (min-width: 900px) {
+  .touch-controls {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 600px) {

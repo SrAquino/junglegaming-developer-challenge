@@ -28,6 +28,7 @@ export interface EnemyEntity extends ShipEntity {
   kind: 'enemy'
   enemyType: EnemyType
   lastAttackAtMs: number
+  waypoints?: Vector2[]
 }
 
 export interface ProjectileEntity extends BaseEntity {
@@ -50,6 +51,7 @@ export interface GameWorldState {
   matchId: string
   elapsedMs: number
   spawnElapsedMs: number
+  spawnedEnemyCount: number
   player: PlayerEntity
   enemies: EnemyEntity[]
   projectiles: ProjectileEntity[]

@@ -37,3 +37,9 @@ The arena uses a 1600×900 logical coordinate system. Pixi scales and centers th
 ## Combat
 
 `weapon-system.ts` creates typed front and broadside projectiles from the configuration, while `projectile-system.ts` advances and expires them. `combat-system.ts` applies a projectile hit once, removes it immediately and awards one point only when a player shot destroys an enemy. `effect-system.ts` expires muzzle, impact and explosion feedback. Pixi renders projectile sprites, transient effects and health bars independently from simulation.
+
+## Enemies and spawning
+
+`enemy-spawn-system.ts` consumes active simulation time and tries bounded random positions that are inside the arena, outside the island and other ships, and at least the configured safe distance from the player. The first two successful spawns are a Chaser and Shooter so a default match always demonstrates both behaviors; subsequent spawns use the configured weights.
+
+`enemy-behavior-system.ts` rotates and advances both types using elapsed simulation time. Chasers explode on contact, damage the player once and award no score. Shooters stop near their configured preferred distance and fire only with direct line of sight, inside attack range and after cooldown. When the central island blocks a direct route, `enemy-navigation.ts` selects the shorter sequence of clearance points around its perimeter. This arena-specific route is intentionally simpler than general pathfinding and matches the single blocking island.

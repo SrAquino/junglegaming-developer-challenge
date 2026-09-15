@@ -6,6 +6,7 @@ export function createInitialWorld(matchId: string, config: GameConfigSnapshot):
     matchId,
     elapsedMs: 0,
     spawnElapsedMs: 0,
+    spawnedEnemyCount: 0,
     player: {
       id: 'player',
       kind: 'player',
