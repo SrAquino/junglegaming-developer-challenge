@@ -50,7 +50,7 @@ The task assignments above are project-specific judgments. Official model roles,
 - [x] Add scripts for development, build, preview, lint and type checking (Playwright will be added with its dependency and test setup).
 - [x] Separate simulation, rendering, input, React UI, API contracts, mocks and tests into clear modules.
 - [x] Add initial README.md and ARCHITECTURE.md; update them as decisions are made.
-- [ ] Integrate the existing supplied assets into the build and retain their source and license information; document any additions or conversions.
+- [x] Integrate the existing supplied assets into the build and retain their source and license information; document any additions or conversions.
 - [x] Configure Chromium desktop and mobile Playwright projects, isolated state, HTML reports and traces on failure.
 - [ ] Prepare an initial build for the user's early Vercel deployment; verify that opening and refreshing the public URL works after publication.
 
@@ -58,14 +58,14 @@ Exit condition: a clean checkout installs, builds and displays the application l
 
 ## 2. Learn PixiJS through the first playable scene
 
-- [ ] Understand only the initial essentials: Application, Container, Sprite, Assets, ticker and resource destruction.
-- [ ] Mount a PixiJS canvas inside React; load and display one supplied ship sprite.
-- [ ] Implement visible asset loading, failure feedback and retry before combat starts.
-- [ ] Reuse loaded textures and define ownership and cleanup of shared resources.
-- [ ] Move and rotate the sprite using elapsed simulation time, not pixels per frame.
-- [ ] Resize the canvas with device pixel density support, preserving arena proportions and input coordinates.
-- [ ] Verify mount, unmount and remount under React Strict Mode without duplicate canvases, tickers or listeners.
-- [ ] Add asset loading/retry and repeated navigation checks to Playwright.
+- [x] Understand only the initial essentials: Application, Container, Sprite, Assets, ticker and resource destruction.
+- [x] Mount a PixiJS canvas inside React; load and display one supplied ship sprite.
+- [x] Implement visible asset loading, failure feedback and retry before combat starts.
+- [x] Reuse loaded textures and define ownership and cleanup of shared resources.
+- [x] Move and rotate the sprite using elapsed simulation time, not pixels per frame.
+- [x] Resize the canvas with device pixel density support, preserving arena proportions and input coordinates.
+- [x] Verify mount, unmount and remount under React Strict Mode without duplicate canvases, tickers or listeners.
+- [x] Add asset loading/retry and repeated navigation checks to Playwright.
 
 Exit condition: one ship moves correctly, resizes correctly and leaves no active game loop after exiting.
 

@@ -1,5 +1,4 @@
 export interface GameRenderer {
-  render(): void
-  resize(width: number, height: number, devicePixelRatio: number): void
+  mount(host: HTMLElement): Promise<void>
   destroy(): void
 }
