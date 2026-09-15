@@ -33,3 +33,7 @@ The lifecycle accepts `idle → playing → paused → playing → ended`. A sin
 The arena uses a 1600×900 logical coordinate system. Pixi scales and centers that coordinate system inside the responsive canvas, preserving proportions while `Application` handles device pixel density. Water is rendered by Pixi and the central island combines a blocking circular shape with supplied tile artwork.
 
 `playerMovementSystem` runs in the fixed simulation loop. It applies rotation and forward velocity from the immutable input snapshot, then constrains the ship to arena edges and rejects a movement that intersects the island. `BrowserGameInput` listens only while `GameCanvas` is mounted, merges keyboard and touch holds so controls can be used together, and clears all held actions on release, cancellation, blur, visibility change and cleanup.
+
+## Combat
+
+`weapon-system.ts` creates typed front and broadside projectiles from the configuration, while `projectile-system.ts` advances and expires them. `combat-system.ts` applies a projectile hit once, removes it immediately and awards one point only when a player shot destroys an enemy. `effect-system.ts` expires muzzle, impact and explosion feedback. Pixi renders projectile sprites, transient effects and health bars independently from simulation.

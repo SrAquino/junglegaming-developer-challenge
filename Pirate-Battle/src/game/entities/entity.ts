@@ -21,6 +21,7 @@ export interface ShipEntity extends BaseEntity {
 export interface PlayerEntity extends ShipEntity {
   kind: 'player'
   score: number
+  weaponReadyAtMs: Record<'front' | 'leftBroadside' | 'rightBroadside', number>
 }
 
 export interface EnemyEntity extends ShipEntity {

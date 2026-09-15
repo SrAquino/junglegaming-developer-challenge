@@ -194,6 +194,14 @@ export class GameSession {
     })
   }
 
+  public getWorldForRendering(): Readonly<Pick<GameWorldState, 'enemies' | 'projectiles' | 'effects'>> {
+    return Object.freeze({
+      enemies: this.world?.enemies ?? [],
+      projectiles: this.world?.projectiles ?? [],
+      effects: this.world?.effects ?? [],
+    })
+  }
+
   public subscribeHud(listener: HudListener): () => void {
     this.hudListeners.add(listener)
     listener(this.getHudSnapshot())

@@ -20,6 +20,7 @@ export function createInitialWorld(matchId: string, config: GameConfigSnapshot):
       maxHealth: config.player.maxHealth,
       collisionRadius: config.player.collisionRadius,
       score: 0,
+      weaponReadyAtMs: { front: 0, leftBroadside: 0, rightBroadside: 0 },
     },
     enemies: [],
     projectiles: [],

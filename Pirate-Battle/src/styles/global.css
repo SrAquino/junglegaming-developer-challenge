@@ -66,7 +66,7 @@ textarea {
 .game-screen {
   display: grid;
   height: 100svh;
-  grid-template-rows: minmax(0, 1fr) auto auto auto;
+  grid-template-rows: minmax(0, 1fr) auto auto auto auto;
   gap: 1rem;
   padding: 1rem;
 }

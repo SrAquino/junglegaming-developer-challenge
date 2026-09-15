@@ -77,3 +77,25 @@ test('moves the ship with a held touch control and keeps the canvas on resize', 
   await expect(page.locator('canvas')).toBeVisible()
   await expect(page.locator('canvas')).toHaveCount(1)
 })
+
+test('fires while sailing with keyboard and touch controls', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Play' }).click()
+  const arena = page.locator('.game-canvas')
+  await expect(arena).toHaveAttribute('data-projectile-count', '0')
+  const initialY = Number(await arena.getAttribute('data-player-y'))
+
+  await page.keyboard.down('ArrowUp')
+  await page.keyboard.press('f')
+  await page.waitForTimeout(100)
+  await page.keyboard.up('ArrowUp')
+  expect(Number(await arena.getAttribute('data-player-y'))).toBeLessThan(initialY)
+  expect(Number(await arena.getAttribute('data-projectile-count'))).toBeGreaterThan(0)
+
+  const broadsideControl = page.getByRole('button', { name: 'Fire left broadside' })
+  await broadsideControl.hover()
+  await page.mouse.down()
+  await page.waitForTimeout(100)
+  await page.mouse.up()
+  await expect.poll(async () => Number(await arena.getAttribute('data-projectile-count'))).toBeGreaterThan(0)
+})

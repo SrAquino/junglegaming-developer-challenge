@@ -93,15 +93,15 @@ Exit condition: one ship moves correctly, resizes correctly and leaves no active
 
 ## 5. Implement weapons and damage
 
-- [ ] Add one frontal projectile and separate left/right broadside commands with three parallel projectiles per shot.
-- [ ] Support movement and firing simultaneously on keyboard and touch.
-- [ ] Enforce each weapon's cooldown and each projectile's direction, speed, damage and range or lifetime.
-- [ ] Block projectiles with islands; remove projectiles on impact, expiry or leaving the arena.
-- [ ] Restrict player shots to enemies and enemy shots to the player.
-- [ ] Apply damage only once per projectile, including overlapping targets or collisions in the same update.
-- [ ] Display health above player and enemy ships through PixiJS.
-- [ ] Add firing, impact, destruction and health-dependent deterioration feedback.
-- [ ] Test frontal/lateral attacks, cooldowns, obstacle blocking and damage through real game controls.
+- [x] Add one frontal projectile and separate left/right broadside commands with three parallel projectiles per shot.
+- [x] Support movement and firing simultaneously on keyboard and touch.
+- [x] Enforce each weapon's cooldown and each projectile's direction, speed, damage and range or lifetime.
+- [x] Block projectiles with islands; remove projectiles on impact, expiry or leaving the arena.
+- [x] Restrict player shots to enemies and enemy shots to the player.
+- [x] Apply damage only once per projectile, including overlapping targets or collisions in the same update.
+- [x] Display health above player and enemy ships through PixiJS.
+- [x] Add firing, impact, destruction and health-dependent deterioration feedback.
+- [x] Test frontal/lateral attacks, cooldowns, obstacle blocking and damage through real game controls.
 
 ## 6. Implement enemies, spawns and scoring
 

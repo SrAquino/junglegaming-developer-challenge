@@ -72,10 +72,14 @@ export function GameCanvas({ onExit }: GameCanvasProps) {
       <p className="game-instructions">
         Keyboard: W or ↑ to sail, A/D or ←/→ to turn. Mobile: landscape is supported and recommended.
       </p>
+      <p className="game-instructions">Fire: F ahead, Q left broadside, E right broadside.</p>
       <div aria-label="Touch movement controls" className="touch-controls" role="group">
         <TouchControl action="turnLeft" inputRef={inputRef} label="Turn left" />
         <TouchControl action="forward" inputRef={inputRef} label="Sail forward" />
         <TouchControl action="turnRight" inputRef={inputRef} label="Turn right" />
+        <TouchControl action="fireLeft" inputRef={inputRef} label="Fire left broadside" />
+        <TouchControl action="fireFront" inputRef={inputRef} label="Fire front" />
+        <TouchControl action="fireRight" inputRef={inputRef} label="Fire right broadside" />
       </div>
       <button className="exit-button" onClick={onExit} type="button">
         Back to menu

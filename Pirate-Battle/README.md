@@ -34,6 +34,6 @@ Movement, rotation, health, collision sizes, spawn distribution, damage, project
 - Sail forward: `W` or `↑`
 - Turn left: `A` or `←`
 - Turn right: `D` or `→`
-- Future weapon bindings: `F` for front fire, `Q` for left broadside and `E` for right broadside
+- Fire ahead: `F`; fire left broadside: `Q`; fire right broadside: `E`
 
 Mobile supports portrait and landscape layouts. Landscape is recommended during gameplay because it provides more room for the arena and simultaneous touch controls. Touch buttons use pointer capture and clear their held state on release, cancel, blur, visibility change or leaving gameplay.
