@@ -1,4 +1,4 @@
-import type { GameConfig } from '../game/config/game-config.ts'
+import type { GameConfigSnapshot } from '../game/config/game-config.ts'
 import type { MatchEndReason } from '../game/types/game.ts'
 
 export interface PageRequest {
@@ -20,7 +20,7 @@ export interface MatchRecord {
   score: number
   activeDurationMs: number
   endReason: Exclude<MatchEndReason, 'abandoned'>
-  configuration: GameConfig
+  configuration: GameConfigSnapshot
 }
 
 export interface RankingEntry {

@@ -1,0 +1,28 @@
+import type { GameConfigSnapshot } from '../config/game-config.ts'
+import type { GameWorldState } from '../entities/entity.ts'
+
+export function createInitialWorld(matchId: string, config: GameConfigSnapshot): GameWorldState {
+  return {
+    matchId,
+    elapsedMs: 0,
+    spawnElapsedMs: 0,
+    player: {
+      id: 'player',
+      kind: 'player',
+      active: true,
+      position: {
+        x: config.arena.width / 2,
+        y: config.arena.height / 2,
+      },
+      velocity: { x: 0, y: 0 },
+      rotation: 0,
+      health: config.player.maxHealth,
+      maxHealth: config.player.maxHealth,
+      collisionRadius: config.player.collisionRadius,
+      score: 0,
+    },
+    enemies: [],
+    projectiles: [],
+    effects: [],
+  }
+}

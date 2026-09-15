@@ -71,15 +71,15 @@ Exit condition: one ship moves correctly, resizes correctly and leaves no active
 
 ## 3. Define the simulation and configuration
 
-- [ ] Define typed entities, vectors, player input, game states and result data.
-- [ ] Centralize duration, spawn interval/distribution, health, movement/rotation speeds, damage, projectile properties, weapon cooldowns and Shooter range.
-- [ ] Define and document positive minimum/maximum spawn intervals and gameplay defaults.
-- [ ] Create an immutable configuration snapshot for each new match.
-- [ ] Use a time-based simulation with a controlled timestep and bounded catch-up work; verify equivalent movement, combat and spawn timing under different render frame rates.
-- [ ] Add seeded randomness and a test clock that advances the real simulation.
-- [ ] Provide test observations without bypassing actual input, combat, collision or rendering rules.
-- [ ] Keep continuous combat state outside React; publish HUD snapshots and lifecycle events at a controlled rate.
-- [ ] Define start, playing, paused and ended transitions and a single guarded match-ending operation.
+- [x] Define typed entities, vectors, player input, game states and result data.
+- [x] Centralize duration, spawn interval/distribution, health, movement/rotation speeds, damage, projectile properties, weapon cooldowns and Shooter range.
+- [x] Define and document positive minimum/maximum spawn intervals and gameplay defaults.
+- [x] Create an immutable configuration snapshot for each new match.
+- [x] Use a time-based simulation with a controlled timestep and bounded catch-up work; verify equivalent movement, combat and spawn timing under different render frame rates.
+- [x] Add seeded randomness and a test clock that advances the real simulation.
+- [x] Provide test observations without bypassing actual input, combat, collision or rendering rules.
+- [x] Keep continuous combat state outside React; publish HUD snapshots and lifecycle events at a controlled rate.
+- [x] Define start, playing, paused and ended transitions and a single guarded match-ending operation.
 
 ## 4. Implement arena, movement and controls
 
