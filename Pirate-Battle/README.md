@@ -16,5 +16,9 @@ npm run dev
 - `npm run typecheck` runs strict TypeScript checking without building.
 - `npm run lint` runs the linter.
 - `npm run preview` previews the production build.
+- `npm run test:e2e` runs Playwright in Chromium desktop and mobile projects.
+- `npm run test:e2e:ui` opens the Playwright UI runner.
+- `npm run test:e2e:report` opens the latest HTML report.
+- `npm run test:e2e:update` updates approved visual snapshots.
 
-Gameplay, API mocking and end-to-end test commands will be documented as they are added.
+Playwright creates a fresh browser context for each test. The test setup also clears local and session storage before each navigation. HTML reports are written to `playwright-report/`, while traces, screenshots and videos from failures are written to `test-results/`.

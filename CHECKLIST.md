@@ -51,7 +51,7 @@ The task assignments above are project-specific judgments. Official model roles,
 - [x] Separate simulation, rendering, input, React UI, API contracts, mocks and tests into clear modules.
 - [x] Add initial README.md and ARCHITECTURE.md; update them as decisions are made.
 - [ ] Integrate the existing supplied assets into the build and retain their source and license information; document any additions or conversions.
-- [ ] Configure Chromium desktop and mobile Playwright projects, isolated state, HTML reports and traces on failure.
+- [x] Configure Chromium desktop and mobile Playwright projects, isolated state, HTML reports and traces on failure.
 - [ ] Prepare an initial build for the user's early Vercel deployment; verify that opening and refreshing the public URL works after publication.
 
 Exit condition: a clean checkout installs, builds and displays the application locally and publicly.
