@@ -27,3 +27,9 @@ Each render tick contributes elapsed time to `FixedTimestepLoop`. The loop advan
 React consumers subscribe to immutable HUD snapshots published at most every 100 ms, plus lifecycle boundaries. Tests and diagnostics use read-only observations of positions, entity counts and timing; they cannot mutate the world or skip gameplay systems.
 
 The lifecycle accepts `idle → playing → paused → playing → ended`. A single guarded end operation creates results only for timeout or player destruction. Abandonment ends the session without a match result.
+
+## Arena and input
+
+The arena uses a 1600×900 logical coordinate system. Pixi scales and centers that coordinate system inside the responsive canvas, preserving proportions while `Application` handles device pixel density. Water is rendered by Pixi and the central island combines a blocking circular shape with supplied tile artwork.
+
+`playerMovementSystem` runs in the fixed simulation loop. It applies rotation and forward velocity from the immutable input snapshot, then constrains the ship to arena edges and rejects a movement that intersects the island. `BrowserGameInput` listens only while `GameCanvas` is mounted, merges keyboard and touch holds so controls can be used together, and clears all held actions on release, cancellation, blur, visibility change and cleanup.

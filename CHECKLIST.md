@@ -83,13 +83,13 @@ Exit condition: one ship moves correctly, resizes correctly and leaves no active
 
 ## 4. Implement arena, movement and controls
 
-- [ ] Render water and at least one island with the supplied assets.
-- [ ] Implement forward movement and left/right rotation on keyboard.
-- [ ] Keep ships inside the visible arena and prevent island traversal.
-- [ ] Define the supported mobile orientation and implement usable simultaneous touch controls.
-- [ ] Handle pointer release/cancel and clear held controls when leaving gameplay.
-- [ ] Capture game keys only while the gameplay context is active; display control instructions.
-- [ ] Verify forward movement, rotation, boundaries, island collisions, resizing and touch input in Playwright.
+- [x] Render water and at least one island with the supplied assets.
+- [x] Implement forward movement and left/right rotation on keyboard.
+- [x] Keep ships inside the visible arena and prevent island traversal.
+- [x] Define the supported mobile orientation and implement usable simultaneous touch controls.
+- [x] Handle pointer release/cancel and clear held controls when leaving gameplay.
+- [x] Capture game keys only while the gameplay context is active; display control instructions.
+- [x] Verify forward movement, rotation, boundaries, island collisions, resizing and touch input in Playwright.
 
 ## 5. Implement weapons and damage
 

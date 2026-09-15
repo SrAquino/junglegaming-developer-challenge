@@ -65,19 +65,20 @@ textarea {
 
 .game-screen {
   display: grid;
-  min-height: 100svh;
-  grid-template-rows: 1fr auto;
+  height: 100svh;
+  grid-template-rows: minmax(0, 1fr) auto auto auto;
   gap: 1rem;
   padding: 1rem;
 }
 
 .game-canvas {
   min-height: inherit;
+  touch-action: none;
 }
 
 .game-canvas-shell {
   position: relative;
-  min-height: 20rem;
+  min-height: 0;
   overflow: hidden;
   border: 2px solid #1b6374;
   border-radius: 0.75rem;
@@ -107,4 +108,45 @@ textarea {
   padding: 0.7rem 1rem;
   color: inherit;
   background: transparent;
+}
+
+.game-instructions {
+  margin: 0;
+  text-align: center;
+}
+
+.touch-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.touch-control {
+  min-width: 7.5rem;
+  min-height: 3rem;
+  border: 1px solid #78cad2;
+  border-radius: 0.5rem;
+  color: inherit;
+  background: #0b415c;
+  touch-action: none;
+}
+
+.touch-control:active {
+  background: #16728b;
+}
+
+@media (max-width: 600px) {
+  .game-screen {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .game-canvas-shell {
+    min-height: 14rem;
+  }
+
+  .touch-control {
+    min-width: 0;
+    flex: 1;
+  }
 }

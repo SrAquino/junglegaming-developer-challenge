@@ -28,6 +28,7 @@ export interface SimulationObservation {
   score: number
   playerHealth: number
   playerPosition: Readonly<Vector2>
+  playerRotation: number
   enemyCount: number
   projectileCount: number
   effectCount: number
@@ -183,6 +184,7 @@ export class GameSession {
         x: this.world?.player.position.x ?? 0,
         y: this.world?.player.position.y ?? 0,
       }),
+      playerRotation: this.world?.player.rotation ?? 0,
       enemyCount: this.world?.enemies.length ?? 0,
       projectileCount: this.world?.projectiles.length ?? 0,
       effectCount: this.world?.effects.length ?? 0,

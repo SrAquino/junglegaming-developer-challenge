@@ -11,11 +11,11 @@ export function createInitialWorld(matchId: string, config: GameConfigSnapshot):
       kind: 'player',
       active: true,
       position: {
-        x: config.arena.width / 2,
+        x: config.arena.width * 0.25,
         y: config.arena.height / 2,
       },
       velocity: { x: 0, y: 0 },
-      rotation: 0,
+      rotation: -Math.PI / 2,
       health: config.player.maxHealth,
       maxHealth: config.player.maxHealth,
       collisionRadius: config.player.collisionRadius,
