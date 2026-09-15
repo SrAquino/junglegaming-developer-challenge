@@ -46,7 +46,7 @@ The task assignments above are project-specific judgments. Official model roles,
 ## 1. Bootstrap the project and verification tools
 
 - [x] Create a Vite + React + TypeScript application with strict type checking.
-- [ ] Install compatible versions of PixiJS, TanStack Query, Axios, MSW and Playwright; commit the lockfile.
+- [x] Install compatible versions of PixiJS, TanStack Query, Axios, MSW and Playwright; commit the lockfile (commit `2cdc3e6`).
 - [x] Add scripts for development, build, preview, lint and type checking (Playwright will be added with its dependency and test setup).
 - [ ] Separate simulation, rendering, input, React UI, API contracts, mocks and tests into clear modules.
 - [ ] Add initial README.md and ARCHITECTURE.md; update them as decisions are made.
