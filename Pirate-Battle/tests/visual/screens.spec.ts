@@ -37,6 +37,6 @@ test('matches the match-result visual baseline', async ({ page }) => {
     localStorage.setItem('pirate-battle.last-match-result', JSON.stringify({ matchId: 'visual-result', score: 7, activeDurationMs: 12_500, endReason: 'time-expired', configuration: {} }))
   })
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: 'Battle report' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Battle complete' })).toBeVisible()
   await expect(page.locator('.panel')).toHaveScreenshot('match-result.png')
 })
