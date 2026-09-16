@@ -10,6 +10,14 @@ Execution order: 0 → 1 → 3 → 2 → 4 → 5 → 6 → 7 → 8 → 9 → 10 
 
 ## Review and model budget
 
+### Post-deployment scope update
+
+Initial deployment reported by the user: https://pirate-battle-snowy.vercel.app/. Public gameplay and source-version parity still require verification.
+
+The user requested closer alignment with all supplied samples, larger ships, visible cannonballs, richer tile-based scenery, sprite animations and supplied audio. This is now accepted scope, including audio. Complete section 14 before the final delivery audit in section 13; keep the outstanding query/recovery checks in section 9. Earlier visual and performance checks describe the previous version and must be repeated after this work.
+
+Review every asset family and record its intended use. Default/retina PNGs, atlases and vector sources can represent the same artwork: select the appropriate runtime representation and document alternatives, rather than loading duplicate copies. Samples and previews are references; interactive screens must remain real accessible UI.
+
 Audit against INSTRUCTIONS.md: all major delivery areas are covered. Explicit acceptance criteria below also cover score ordering and displayed columns, semantic match status, saving options, Chaser impact explosions, and reproducibility at different frame rates. Obstacle avoidance is a gameplay quality check; a general-purpose pathfinding system is not required. Audio is optional in the supplied instructions; visual combat feedback is required.
 
 Each checkbox inherits its section's recommendation below unless an exception is listed. These are starting recommendations based on task complexity, not guaranteed minimum effort. The user confirmed access to Astra, Sol, Terra, Luna (reported as "Lua") and GPT-5.5. Model names: Luna = GPT-5.6 Luna; Terra = GPT-5.6 Terra; Sol = GPT-5.6 Sol.
@@ -30,6 +38,7 @@ Each checkbox inherits its section's recommendation below unless an exception is
 | 11. Accessibility/E2E | Terra | Medium | Luna/Low for labels and copy; Sol/Medium for reproducible failures spanning input, simulation and rendering. |
 | 12. Performance | Terra | Medium | Luna/Low for recording measured results; Sol/High only for a demonstrated leak or bottleneck that remains unexplained. |
 | 13. Final audit | Terra | Medium | Luna/Low for documentation formatting and delivery draft; publication and sending remain user actions. |
+| 14. Visual, asset and audio completion | Terra | Medium | Each subsection below specifies its recommendation; Sol/Medium for unresolved rendering or audio lifecycle defects. |
 
 Use one bounded feature and its acceptance checks per work session. Before implementation, state the recommended model/effort; this document does not change the active model automatically. Reuse the current model when switching would add more overhead than it saves. Escalate only after identifying a concrete failing check; do not repeatedly regenerate the same solution. Use High for a specific unresolved problem, not as the default. GPT-6 Astra is a fallback for a difficult cross-system issue; Extra High, Max and Ultra are not planned defaults. Run relevant tests and keep concise evidence with each completed milestone.
 
@@ -199,6 +208,78 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 - [ ] Verify public URL access, refresh, assets, mobile gameplay, ranking/history and recovery scenarios.
 - [ ] Ensure repository access for reviewers and prepare a delivery email containing both repository and game URLs.
 - [ ] Have the user submit before the deadline and retain the delivery confirmation.
+
+## 14. Match the supplied samples and complete asset integration
+
+Execution order: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared UI, 14.4 screens, 14.5 arena, 14.6 effects, 14.7 audio, 14.8 verification. Each checkbox inherits its subsection's model/effort recommendation. Update this section only after the corresponding implementation and acceptance check pass.
+
+### 14.1 Asset inventory and visual reference — Luna / Low
+
+- [x] Create an asset usage map covering `png/default`, `png/retina`, `spritesheet`, `tilesheet`, `vector`, `sounds`, `ui_scene_background.png`, the logo, samples and preview; identify runtime uses, source/reference files and duplicate resolutions.
+- [x] Map frames in `ui_sheet.json` and `ui_sheet_retina.json` to panels, buttons, icons, tabs and bars; inspect padding and stretchable regions before implementing responsive UI.
+- [x] Map the ship XML atlases and the grid described by `tilesheet/tilesheets.txt`; distinguish atlas packing from actual animation sequences.
+- [x] Compare `sample_menu.png`, `sample_options.png`, `sample_history.png`, `sample_ranking.png`, `sample_pause.png`, `sample_result.png` and `sample.png`; record layout, spacing, palette, typography and relative sprite sizes.
+
+### 14.2 Visible cannonballs and larger ships — Terra / Medium
+
+- [ ] Diagnose the reported invisible cannonballs: inspect texture loading, source dimensions, transparent padding, scale, anchor, draw order and contrast in the published and local builds.
+- [ ] Render visibly textured front and broadside cannonballs for both sides; verify all three broadside projectiles remain distinguishable on desktop and mobile, including during motion.
+- [ ] Increase player, Chaser and Shooter visual sizes using typed presentation settings; preserve distinct silhouettes and align health bars and muzzle origins with the artwork.
+- [ ] Review collision radii, island clearance, spawn distance and navigation after resizing ships; verify that visible hulls do not misleadingly overlap obstacles or targets.
+
+### 14.3 Shared nautical UI — Terra / Medium
+
+- [ ] Build reusable responsive panels and gold/wood buttons from the supplied UI atlas, with dark navy interiors and cream/gold typography matching the samples.
+- [ ] Use `ui_scene_background.png` and the supplied logo where shown in menu samples, preserving legibility at narrow viewport sizes.
+- [ ] Add consistent hover, pressed, selected, disabled and keyboard-focus states, accessible icon labels and adequate touch targets.
+- [ ] Keep text and controls in semantic React markup; use artwork for decoration and scalable frames, not screenshots of complete sample screens.
+- [ ] Move network scenario controls into a clearly discoverable secondary demo panel so they remain usable without dominating the main menu.
+
+### 14.4 Menu, logbook, options, pause and result — Terra / Medium
+
+- [ ] Recreate the menu hierarchy from `sample_menu.png`: title, primary Play/Options actions, ship illustration, control instructions and Ranking/Match History navigation.
+- [ ] Style Options after `sample_options.png` with labelled minus/plus controls and editable numeric values; retain range validation, explicit save and persistence. Sample values do not silently change gameplay defaults.
+- [ ] Build the Captain's Log layout from `sample_history.png`: date and time, points, duration in mm:ss, result badges, five-row pagination and Main Menu action; retain loading, empty, refreshing and error states.
+- [ ] Build Ranking from `sample_ranking.png`: rank, captain, points, played date/time, local-player highlight and active configuration label; extend contracts/fixtures if necessary to supply real displayed fields.
+- [ ] Match `sample_pause.png` with Resume, Options and Main Menu actions; keep the session paused while viewing options and apply gameplay changes only to the next match.
+- [ ] Match `sample_result.png` with prominent points, duration, end reason and primary actions; keep registration status and pending retry accessible.
+- [ ] Restyle the HUD and touch controls after `sample.png`, preserving semantic health/score/time and simultaneous movement/firing without covering the playable area.
+- [ ] Validate focus trapping/restoration in dialogs, keyboard tab navigation and layouts in desktop, mobile portrait and landscape after the redesign.
+
+### 14.5 Tile-based arena — Terra / Medium
+
+- [ ] Use `tiles_sheet.png` or its retina alternative with correctly mapped grid frames for textured water, coastline, sand, grass and island interiors.
+- [ ] Compose scenery closer to `sample.png` with available rocks, vegetation, docks/fortifications and nautical props; define which objects block movement and which are decorative.
+- [ ] Make collision geometry match visible coastlines and obstacles; update enemy routing and spawn clearance for the resulting arena layout.
+- [ ] Keep decorative art below gameplay sprites, preserve projectile contrast and avoid seams/texture bleeding during resizing.
+
+### 14.6 Sprite atlases and animated feedback — Terra / Medium
+
+- [ ] Load named textures from `ships_miscellaneous_sheet.xml` and its selected resolution; reuse atlas textures across ships, ship parts and effects.
+- [ ] Use suitable ship/sail damage variants and supplied fire/explosion frames for damage, muzzle flash, impact and sinking feedback, with bounded debris and water ripples where supported by the artwork.
+- [ ] Drive animation timing from match time so pause freezes combat effects; remove completed effects and prevent texture or ticker duplication across restarts.
+- [ ] Add subtle sailing/wake feedback and readable cannonball trails where appropriate; respect reduced-motion preferences for decorative effects.
+
+### 14.7 Supplied sound integration — Terra / Medium
+
+- [ ] Add an audio adapter driven by gameplay/UI events; preload reusable buffers and unlock playback through the first user interaction on desktop and mobile.
+- [ ] Use UI hover/click/open/close/back sounds and start/pause/resume/complete/game-over sounds at their corresponding transitions, once per event.
+- [ ] Use cannon-fire variants, broadside, wood-hit, water-hit, collision, explosion and sinking sounds for the corresponding real combat events; document variation selection.
+- [ ] Integrate ocean ambience and sailing loops plus score, low-health and time-warning cues; gate repeated warnings and limit overlapping voices to avoid clipping.
+- [ ] Add persisted mute and volume controls in Options; pause/suspend loops when hidden or paused and release audio resources on exit without duplicate playback on restart.
+- [ ] Handle audio loading/playback failures without blocking gameplay; verify every supplied sound has a mapped event or documented reason for exclusion.
+
+### 14.8 Updated evidence and deployment — Terra / Medium
+
+- [ ] Close the outstanding query consistency and pending-recovery tests in section 9 while preserving the redesigned logbook behavior.
+- [ ] Add visual checks for textured projectiles, enlarged ships, tiled arena and all redesigned screens; inspect desktop/mobile snapshots against the supplied samples before approving baselines.
+- [ ] Test asset-load failures, pause/resume of effects and audio, mute persistence, repeated navigation and simultaneous touch controls; check for unhandled browser errors.
+- [ ] Repeat optimized-build profiling after atlas, scenery, effects and audio changes; record frame/entity samples and investigate resource retention over five cycles in the same page without reloads.
+- [ ] Review earlier section 11/12 completion claims against retained evidence; record missing coverage and measurements instead of treating old checks as proof of the new version.
+- [ ] Update asset/source documentation, controls, audio settings and known limitations; preserve measured performance evidence and generate the final test report.
+- [ ] Have the user redeploy the reviewed commit, then verify https://pirate-battle-snowy.vercel.app/ including refresh, asset paths, MSW, logbook, mobile controls, audio and recovery flows.
+
+Exit condition: all sample screens have functional counterparts with coherent supplied artwork; ships and cannonballs are readable, tiles and sprite effects participate in gameplay, audio is controllable, and the updated build has verified evidence before final submission.
 
 ## Suggested milestones
 
