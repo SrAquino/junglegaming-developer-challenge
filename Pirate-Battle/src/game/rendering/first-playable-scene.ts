@@ -15,11 +15,11 @@ import { enemyBehaviorSystem } from '../systems/enemy-behavior-system.ts'
 import type { EnemyEntity } from '../entities/entity.ts'
 import type { Texture } from 'pixi.js'
 import {
-  cannonBallAssetUrl,
   chaserShipAssetUrl,
   shooterShipAssetUrl,
   islandRockAssetUrl,
   loadPlayerShipTexture,
+  loadCombatAtlasTextures,
   loadTexture,
   waterTileAssetUrl,
 } from './game-assets.ts'
@@ -73,10 +73,10 @@ export class FirstPlayableScene implements GameRenderer {
       return
     }
 
-    const [shipTexture, rockTexture, cannonBallTexture, chaserTexture, shooterTexture, waterTexture] = await Promise.all([
+    const [shipTexture, rockTexture, combatAtlasTextures, chaserTexture, shooterTexture, waterTexture] = await Promise.all([
       loadPlayerShipTexture(),
       loadTexture(islandRockAssetUrl),
-      loadTexture(cannonBallAssetUrl),
+      loadCombatAtlasTextures(),
       loadTexture(chaserShipAssetUrl),
       loadTexture(shooterShipAssetUrl),
       loadTexture(waterTileAssetUrl),
@@ -103,7 +103,7 @@ export class FirstPlayableScene implements GameRenderer {
     const effectLayer = new Container()
     world.addChild(projectileLayer, effectLayer)
     const projectileSprites = new Map<string, Sprite>()
-    const effectGraphics = new Map<string, Graphics>()
+    const effectSprites = new Map<string, Sprite>()
     const enemyHealthBars = new Map<string, HealthBar>()
     const enemySprites = new Map<string, Sprite>()
     const enemyLayer = new Container()
@@ -129,8 +129,8 @@ export class FirstPlayableScene implements GameRenderer {
       const simulation = this.session.getWorldForRendering()
       syncEnemies(simulation.enemies, enemySprites, enemyLayer, { chaser: chaserTexture, shooter: shooterTexture }, this.options.configuration.presentation)
       syncEnemyHealthBars(simulation.enemies, enemyHealthBars, world, 62)
-      syncProjectiles(simulation.projectiles, projectileSprites, projectileLayer, cannonBallTexture, this.options.configuration.presentation.projectileScale)
-      syncEffects(simulation.effects, effectGraphics, effectLayer)
+      syncProjectiles(simulation.projectiles, projectileSprites, projectileLayer, combatAtlasTextures.cannonBall, this.options.configuration.presentation.projectileScale)
+      syncEffects(simulation.effects, effectSprites, effectLayer, combatAtlasTextures)
       host.dataset.playerX = observation.playerPosition.x.toFixed(2)
       host.dataset.playerY = observation.playerPosition.y.toFixed(2)
       host.dataset.playerRotation = observation.playerRotation.toFixed(4)
@@ -274,26 +274,26 @@ function syncProjectiles(
 
 function syncEffects(
   effects: readonly { id: string; effectType: 'muzzle-flash' | 'impact' | 'explosion'; position: { x: number; y: number } }[],
-  graphicsById: Map<string, Graphics>,
+  spritesById: Map<string, Sprite>,
   layer: Container,
+  textures: import('./game-assets.ts').CombatAtlasTextures,
 ): void {
   const activeIds = new Set(effects.map((effect) => effect.id))
-  for (const [id, graphic] of graphicsById) {
+  for (const [id, sprite] of spritesById) {
     if (!activeIds.has(id)) {
-      graphic.destroy()
-      graphicsById.delete(id)
+      sprite.destroy()
+      spritesById.delete(id)
     }
   }
   for (const effect of effects) {
-    let graphic = graphicsById.get(effect.id)
-    if (!graphic) {
-      graphic = new Graphics()
-      const radius = effect.effectType === 'explosion' ? 28 : effect.effectType === 'impact' ? 13 : 18
-      const color = effect.effectType === 'explosion' ? 0xf06d3d : 0xffdb75
-      graphic.circle(0, 0, radius).fill({ color, alpha: 0.78 })
-      layer.addChild(graphic)
-      graphicsById.set(effect.id, graphic)
+    let sprite = spritesById.get(effect.id)
+    if (!sprite) {
+      sprite = new Sprite(effect.effectType === 'muzzle-flash' ? textures.muzzleFlash : effect.effectType === 'impact' ? textures.impact : textures.explosion)
+      sprite.anchor.set(0.5)
+      sprite.scale.set(effect.effectType === 'muzzle-flash' ? 1.15 : effect.effectType === 'impact' ? 0.48 : 0.82)
+      layer.addChild(sprite)
+      spritesById.set(effect.id, sprite)
     }
-    graphic.position.set(effect.position.x, effect.position.y)
+    sprite.position.set(effect.position.x, effect.position.y)
   }
 }
