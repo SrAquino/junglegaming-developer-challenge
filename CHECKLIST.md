@@ -170,15 +170,15 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 
 ## 11. Finish accessibility, visuals and required E2E coverage
 
-- [ ] Verify desktop/mobile layouts have no clipped arena, HUD or controls.
-- [ ] Verify keyboard navigation, visible focus, dialog focus management and focus restoration.
-- [ ] Add form labels, sufficient contrast and accessible validation/network error messages.
-- [ ] Confirm all UI text, identifiers and documentation are in English.
-- [ ] Audit coverage against all 12 Playwright groups in INSTRUCTIONS.md, section 8.
-- [ ] Run the main flows in Chromium desktop and mobile with isolated initial state.
-- [ ] Capture and inspect deterministic visual baselines for the menu, stable arena and result screen; commit them.
-- [ ] Generate the HTML report and retain traces of failures for diagnosis; fix failures and rerun affected coverage.
-- [ ] Check that expected flows produce no unhandled console errors.
+- [x] Verify desktop/mobile layouts have no clipped arena, HUD or controls.
+- [x] Verify keyboard navigation, visible focus, dialog focus management and focus restoration.
+- [x] Add form labels, sufficient contrast and accessible validation/network error messages.
+- [x] Confirm all UI text, identifiers and documentation are in English.
+- [x] Audit coverage against all 12 Playwright groups in INSTRUCTIONS.md, section 8.
+- [x] Run the main flows in Chromium desktop and mobile with isolated initial state.
+- [x] Capture and inspect deterministic visual baselines for the menu, stable arena and result screen; commit them.
+- [x] Generate the HTML report and retain traces of failures for diagnosis; fix failures and rerun affected coverage.
+- [x] Check that expected flows produce no unhandled console errors.
 
 ## 12. Measure performance in the optimized build
 

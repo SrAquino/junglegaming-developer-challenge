@@ -23,6 +23,14 @@ textarea {
   font: inherit;
 }
 
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #f8c75b;
+  outline-offset: 3px;
+}
+
 .application-shell {
   display: grid;
   min-height: 100svh;

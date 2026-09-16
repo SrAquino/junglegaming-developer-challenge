@@ -20,6 +20,7 @@ export function GameCanvas({ configuration, onExit, onFinished }: GameCanvasProp
   const hostRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<BrowserGameInput | null>(null)
   const sceneRef = useRef<FirstPlayableScene | null>(null)
+  const pauseButtonRef = useRef<HTMLButtonElement>(null)
   const [attempt, setAttempt] = useState(0)
   const [loadState, setLoadState] = useState<LoadState>('loading')
   const [hud, setHud] = useState<HudSnapshot>(initialHud)
@@ -57,6 +58,10 @@ export function GameCanvas({ configuration, onExit, onFinished }: GameCanvasProp
   }, [attempt, configuration, onFinished])
 
   const paused = hud.status === 'paused'
+  const resume = () => {
+    sceneRef.current?.resume()
+    window.requestAnimationFrame(() => pauseButtonRef.current?.focus())
+  }
   return (
     <main className="game-screen">
       <header aria-label="Match status" className="game-hud">
@@ -66,7 +71,7 @@ export function GameCanvas({ configuration, onExit, onFinished }: GameCanvasProp
         <div aria-busy={loadState === 'loading'} aria-label="Pirate Battle arena" className="game-canvas" ref={hostRef} role="img" />
         {loadState === 'loading' && <p className="game-status">Loading game assets…</p>}
         {loadState === 'error' && <div className="game-status" role="alert"><p>Unable to load game assets.</p><button onClick={() => setAttempt((value) => value + 1)} type="button">Retry</button></div>}
-        {paused && <div className="game-status" role="dialog" aria-label="Match paused" aria-modal="true"><p>Match paused.</p><button autoFocus onClick={() => sceneRef.current?.resume()} type="button">Resume match</button></div>}
+        {paused && <div className="game-status" role="dialog" aria-label="Match paused" aria-modal="true"><p>Match paused.</p><button autoFocus onClick={resume} type="button">Resume match</button></div>}
       </div>
       <p className="game-instructions">Keyboard: W/↑ sails, A/D or ←/→ turns, F fires ahead, Q/E fire broadsides.</p>
       <div aria-label="Touch movement and combat controls" className="touch-controls" role="group">
@@ -74,7 +79,7 @@ export function GameCanvas({ configuration, onExit, onFinished }: GameCanvasProp
         <TouchControl action="fireLeft" inputRef={inputRef} label="Fire left broadside" /><TouchControl action="fireFront" inputRef={inputRef} label="Fire front" /><TouchControl action="fireRight" inputRef={inputRef} label="Fire right broadside" />
       </div>
       <div className="game-actions">
-        {!paused && <button onClick={() => sceneRef.current?.pause()} type="button">Pause match</button>}
+        {!paused && <button onClick={() => sceneRef.current?.pause()} ref={pauseButtonRef} type="button">Pause match</button>}
         <button onClick={onExit} type="button">Back to menu</button>
       </div>
     </main>
