@@ -1,13 +1,13 @@
-import { Assets, Rectangle, Texture } from 'pixi.js'
+import { Assets, Rectangle, SCALE_MODES, Texture } from 'pixi.js'
 
 export const playerShipAssetUrl = '/assets/png/default/ships/ship_1.png'
-export const islandRockAssetUrl = '/assets/png/default/tiles/tile_50.png'
 export const chaserShipAssetUrl = '/assets/png/default/ships/ship_2.png'
 export const shooterShipAssetUrl = '/assets/png/default/ships/ship_3.png'
-export const waterTileAssetUrl = '/assets/png/default/tiles/tile_73.png'
+export const tilesSheetAssetUrl = '/assets/tilesheet/tiles_sheet.png'
 export const shipsMiscellaneousAtlasAssetUrl = '/assets/spritesheet/ships_miscellaneous_sheet.png'
 
 export interface CombatAtlasTextures { cannonBall: Texture; muzzleFlash: Texture; impact: Texture; explosion: Texture }
+export interface ArenaTileTextures { water: Texture; rock: Texture }
 
 export async function loadPlayerShipTexture(assetUrl = playerShipAssetUrl): Promise<Texture> {
   return Assets.load<Texture>(assetUrl)
@@ -27,6 +27,19 @@ export async function loadCombatAtlasTextures(): Promise<CombatAtlasTextures> {
   }
 }
 
+export async function loadArenaTileTextures(): Promise<ArenaTileTextures> {
+  const sheet = await Assets.load<Texture>(tilesSheetAssetUrl)
+  sheet.source.scaleMode = SCALE_MODES.NEAREST
+  return { water: tileFrame(sheet, 73, 1), rock: tileFrame(sheet, 50) }
+}
+
 function atlasFrame(atlas: Texture, label: string, x: number, y: number, width: number, height: number): Texture {
   return new Texture({ source: atlas.source, label, frame: new Rectangle(x, y, width, height) })
+}
+
+function tileFrame(sheet: Texture, tileNumber: number, inset = 0): Texture {
+  const index = tileNumber - 1
+  const tileSize = 64
+  const columns = 16
+  return new Texture({ source: sheet.source, label: `tile_${tileNumber}`, frame: new Rectangle((index % columns) * tileSize + inset, Math.floor(index / columns) * tileSize + inset, tileSize - inset * 2, tileSize - inset * 2) })
 }

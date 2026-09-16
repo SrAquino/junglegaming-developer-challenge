@@ -39,6 +39,8 @@ function addWaterTiles(container: Container, width: number, height: number, text
     for (let x = 0; x < width; x += tileSize) {
       const water = new Sprite(texture)
       water.position.set(x, y)
+      water.width = tileSize
+      water.height = tileSize
       container.addChild(water)
     }
   }

@@ -7,10 +7,10 @@ The supplied `public/assets` pack contains 234 default PNGs, 234 retina PNGs, 27
 | Ships | `ship_1` is the player and menu preview; `ship_2` and `ship_3` are enemies. | Damage variants and additional silhouettes. |
 | Ship parts | The atlas `cannon_ball.png` frame renders every projectile. | Hull, sail, flag and crew composition. |
 | Effects | Atlas fire and explosion frames render muzzle flashes, impacts and explosions. | Timed variants, fire and sinking. |
-| Tiles | `tile_73` creates repeated water and `tile_50` decorates the central island. | Coastline, vegetation, docks and props. |
+| Tiles | Named 64 by 64 frames `tile_73` and `tile_50` are sliced from `tiles_sheet.png` for water and central-island rocks. | Coastline, vegetation, docks and props. |
 | UI | Menu title/panel/buttons, touch controls, HUD icons, background and logo are used. | Additional HUD frames and tab art. |
 | Spritesheet | `ships_miscellaneous_sheet.png` loads once; selected XML frames create combat textures. | Retina selection and additional named parts. |
-| Tilesheet | The 64 by 64 tile family is used via exported tile PNGs. | Migrate scenery to sliced `tiles_sheet.png` frames when completing the full map. |
+| Tilesheet | `tiles_sheet.png` loads once and provides the water and rock frames used by the renderer. | Add coastline, sand, grass and props from mapped frames. |
 | Sounds | Match lifecycle, cannon, broadside, water/wood impact, explosion, ocean and sailing sounds are mapped. | UI, score, health, warning, collision and sinking cues. |
 | Vectors | Reference only. | Use only if a scalable presentation source is needed. |
 | Samples | Review references only. | Never render samples as product screens. |

@@ -17,11 +17,10 @@ import type { Texture } from 'pixi.js'
 import {
   chaserShipAssetUrl,
   shooterShipAssetUrl,
-  islandRockAssetUrl,
   loadPlayerShipTexture,
   loadCombatAtlasTextures,
   loadTexture,
-  waterTileAssetUrl,
+  loadArenaTileTextures,
 } from './game-assets.ts'
 import type { GameRenderer } from './game-renderer.ts'
 import { createArenaScenery } from './arena-scenery.ts'
@@ -89,13 +88,12 @@ export class FirstPlayableScene implements GameRenderer {
     this.audioUnlockHost = host
     host.addEventListener('pointerdown', this.unlockAudio, { once: true })
 
-    const [shipTexture, rockTexture, combatAtlasTextures, chaserTexture, shooterTexture, waterTexture] = await Promise.all([
+    const [shipTexture, arenaTileTextures, combatAtlasTextures, chaserTexture, shooterTexture] = await Promise.all([
       loadPlayerShipTexture(),
-      loadTexture(islandRockAssetUrl),
+      loadArenaTileTextures(),
       loadCombatAtlasTextures(),
       loadTexture(chaserShipAssetUrl),
       loadTexture(shooterShipAssetUrl),
-      loadTexture(waterTileAssetUrl),
     ])
     if (this.destroyed) {
       this.destroyApplication()
@@ -106,7 +104,7 @@ export class FirstPlayableScene implements GameRenderer {
     const world = new Container()
     application.stage.addChild(world)
 
-    world.addChild(createArenaScenery(this.options.configuration.arena.width, this.options.configuration.arena.height, centralIsland, { water: waterTexture, rock: rockTexture }))
+    world.addChild(createArenaScenery(this.options.configuration.arena.width, this.options.configuration.arena.height, centralIsland, arenaTileTextures))
 
     const ship = new Sprite(shipTexture)
     ship.anchor.set(0.5)
