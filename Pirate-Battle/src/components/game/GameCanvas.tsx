@@ -27,6 +27,7 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
   const inputRef = useRef<BrowserGameInput | null>(null)
   const sceneRef = useRef<FirstPlayableScene | null>(null)
   const pauseButtonRef = useRef<HTMLButtonElement>(null)
+  const resumeButtonRef = useRef<HTMLButtonElement>(null)
   const pauseDialogRef = useRef<HTMLDivElement>(null)
   const configurationRef = useRef(configuration)
   const audioSettingsRef = useRef(audioSettings)
@@ -38,6 +39,10 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
   const paused = hud.status === 'paused'
 
   useEffect(() => { onFinishedRef.current = onFinished }, [onFinished])
+
+  useEffect(() => {
+    if (paused && !pauseOptionsOpen) resumeButtonRef.current?.focus()
+  }, [paused, pauseOptionsOpen])
 
   useEffect(() => {
     if (!paused) return
@@ -95,6 +100,7 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
     setPauseOptionsOpen(false)
     window.requestAnimationFrame(() => pauseButtonRef.current?.focus())
   }
+  const pause = () => sceneRef.current?.pause()
   return (
     <main className="game-screen">
       <header aria-label="Match status" className="game-hud">
@@ -104,7 +110,7 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
         <div aria-busy={loadState === 'loading'} aria-label="Pirate Battle arena" className="game-canvas" ref={hostRef} role="img" />
         {loadState === 'loading' && <p className="game-status">Loading game assets…</p>}
         {loadState === 'error' && <div className="game-status" role="alert"><p>Unable to load game assets.</p><button onClick={() => setAttempt((value) => value + 1)} type="button">Retry</button></div>}
-        {paused && <div className="game-status pause-dialog" ref={pauseDialogRef} role="dialog" aria-label={pauseOptionsOpen ? 'Match options' : 'Match paused'} aria-modal="true">{pauseOptionsOpen ? <PausedOptions audioSettings={audioSettings} gameOptions={gameOptions} onBack={() => setPauseOptionsOpen(false)} onSave={onSaveOptions} /> : <><p className="eyebrow">The sea awaits</p><h2>Match paused</h2><button autoFocus onClick={resume} type="button">Resume match</button><button onClick={() => setPauseOptionsOpen(true)} type="button">Options</button><button onClick={onExit} type="button">Main menu</button></>}</div>}
+        {paused && <div className="game-status pause-dialog" ref={pauseDialogRef} role="dialog" aria-label={pauseOptionsOpen ? 'Match options' : 'Match paused'} aria-modal="true">{pauseOptionsOpen ? <PausedOptions audioSettings={audioSettings} gameOptions={gameOptions} onBack={() => setPauseOptionsOpen(false)} onSave={onSaveOptions} /> : <><p className="eyebrow">The sea awaits</p><h2>Match paused</h2><button onClick={resume} ref={resumeButtonRef} type="button">Resume match</button><button onClick={() => setPauseOptionsOpen(true)} type="button">Options</button><button onClick={onExit} type="button">Main menu</button></>}</div>}
       </div>
       <p className="game-instructions">Keyboard: W/↑ sails, A/D or ←/→ turns, F fires ahead, Q/E fire broadsides.</p>
       <div aria-label="Touch movement and combat controls" className="touch-controls" role="group">
@@ -112,7 +118,7 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
         <TouchControl action="fireLeft" inputRef={inputRef} label="Fire left broadside" /><TouchControl action="fireFront" inputRef={inputRef} label="Fire front" /><TouchControl action="fireRight" inputRef={inputRef} label="Fire right broadside" />
       </div>
       <div className="game-actions">
-        {!paused && <button onClick={() => sceneRef.current?.pause()} ref={pauseButtonRef} type="button">Pause match</button>}
+        {!paused && <button disabled={loadState !== 'ready'} onClick={pause} ref={pauseButtonRef} type="button">Pause match</button>}
         <button onClick={onExit} type="button">Back to menu</button>
       </div>
     </main>

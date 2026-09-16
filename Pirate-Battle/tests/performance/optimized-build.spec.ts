@@ -15,6 +15,7 @@ test('measures a three-minute match in the optimized build', async ({ page }, te
   await page.addInitScript(() => localStorage.setItem('pirate-battle.game-options', JSON.stringify({ sessionDurationSeconds: 180, enemySpawnIntervalSeconds: 20 })))
   await page.goto('/?performance-profile=1')
   await page.getByRole('button', { name: 'Play' }).click()
+  await expect(page.locator('.game-canvas')).toHaveAttribute('aria-busy', 'false')
   await expect(page.locator('.game-canvas')).toHaveAttribute('data-elapsed-ms', /.+/)
   await page.keyboard.down('ArrowUp')
   await page.keyboard.down('ArrowRight')
@@ -62,15 +63,16 @@ test('measures a three-minute match in the optimized build', async ({ page }, te
   await writeMeasurement('optimized-build-measurement.json', metrics)
   expect(metrics.endedEarly).toBe(false)
   expect(metrics.durationMs).toBeGreaterThanOrEqual(180_000)
-  await expect(page.getByText('Active duration: 180.0 seconds')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Battle complete' })).toBeVisible()
+  await expect(page.locator('.result-details')).toContainText('03:00')
 })
 
 test('measures heap use over five start-play-exit cycles', async ({ page }, testInfo) => {
   const session = await page.context().newCDPSession(page)
   await session.send('Performance.enable')
   const heapSizes: number[] = []
+  await page.goto('/')
   for (let cycle = 0; cycle < 5; cycle += 1) {
-    await page.goto('/')
     await page.getByRole('button', { name: 'Play' }).click()
     await expect(page.locator('canvas')).toBeVisible()
     await page.waitForTimeout(500)

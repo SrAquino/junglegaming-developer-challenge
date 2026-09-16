@@ -10,6 +10,14 @@ Execution order: 0 → 1 → 3 → 2 → 4 → 5 → 6 → 7 → 8 → 9 → 10 
 
 ## Review and model budget
 
+### Current audit and next execution order — September 16, 2026
+
+The source and browser audit of commit `24237dc` is recorded in [the review report](Pirate-Battle/docs/reviews/2026-09-16/README.md), with full-screen desktop/mobile captures and measured layout bounds. Section **15** is now the execution plan for the requested sample-like map and in-arena mobile controls. Its order supersedes the earlier section-14 sequence. Existing section numbers remain acceptance requirements; reopened boxes identify defects or missing evidence, not deleted implementation.
+
+Confirmed priorities: landscape canvas clipping, touch controls outside the arena, circular collisions under a noncircular island, broken client-side pagination, incomplete end-to-end coverage, and performance tests accidentally included in the normal 30-second test suite. Previous canvas-only visual baselines do not prove that the complete game screen matches `sample.png`.
+
+Use the existing project model budget: Terra/Medium for bounded UI, assets and test changes; Sol/Medium for shared geometry, routing and recovery. Escalate to Astra/High only for a specific unresolved failure spanning those systems. These are task-complexity estimates, not measurements of account usage.
+
 ### Post-deployment scope update
 
 Initial deployment reported by the user: https://pirate-battle-snowy.vercel.app/. Public gameplay and source-version parity still require verification.
@@ -84,7 +92,7 @@ Exit condition: one ship moves correctly, resizes correctly and leaves no active
 - [x] Centralize duration, spawn interval/distribution, health, movement/rotation speeds, damage, projectile properties, weapon cooldowns and Shooter range.
 - [x] Define and document positive minimum/maximum spawn intervals and gameplay defaults.
 - [x] Create an immutable configuration snapshot for each new match.
-- [x] Use a time-based simulation with a controlled timestep and bounded catch-up work; verify equivalent movement, combat and spawn timing under different render frame rates.
+- [ ] Use a time-based simulation with a controlled timestep and bounded catch-up work; verify equivalent movement, combat and spawn timing under different render frame rates. The clock exists; the current equivalence test uses a simplified movement system and does not establish real combat/spawn equivalence.
 - [x] Add seeded randomness and a test clock that advances the real simulation.
 - [x] Provide test observations without bypassing actual input, combat, collision or rendering rules.
 - [x] Keep continuous combat state outside React; publish HUD snapshots and lifecycle events at a controlled rate.
@@ -94,8 +102,8 @@ Exit condition: one ship moves correctly, resizes correctly and leaves no active
 
 - [x] Render water and at least one island with the supplied assets.
 - [x] Implement forward movement and left/right rotation on keyboard.
-- [x] Keep ships inside the visible arena and prevent island traversal.
-- [x] Define the supported mobile orientation and implement usable simultaneous touch controls.
+- [ ] Keep ships inside the visible arena and prevent island traversal. Revalidate against the visible tile coastline; the current blocker is still circular.
+- [ ] Define the supported mobile orientation and implement usable simultaneous touch controls. Reopened for the clipped landscape canvas and the requested left/right in-arena layout; mouse-based checks do not establish multitouch.
 - [x] Handle pointer release/cancel and clear held controls when leaving gameplay.
 - [x] Capture game keys only while the gameplay context is active; display control instructions.
 - [x] Verify forward movement, rotation, boundaries, island collisions, resizing and touch input in Playwright.
@@ -110,7 +118,7 @@ Exit condition: one ship moves correctly, resizes correctly and leaves no active
 - [x] Apply damage only once per projectile, including overlapping targets or collisions in the same update.
 - [x] Display health above player and enemy ships through PixiJS.
 - [x] Add firing, impact, destruction and health-dependent deterioration feedback.
-- [x] Test frontal/lateral attacks, cooldowns, obstacle blocking and damage through real game controls.
+- [ ] Test frontal/lateral attacks, cooldowns, obstacle blocking and damage through real game controls. System tests cover several rules, but current browser checks mainly verify projectile counts rather than resulting damage and score.
 
 ## 6. Implement enemies, spawns and scoring
 
@@ -138,14 +146,14 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 - [x] Persist the last completed result and restore its presentation after refresh.
 - [x] Reset health, time, score, entities and input when starting a new match.
 - [x] Treat refresh or exit during combat as abandonment; never submit an abandoned match.
-- [x] Test options, both end conditions, pause/blur/resume, result persistence, abandonment and clean restarts.
+- [ ] Test options, both end conditions, pause/blur/resume, result persistence, abandonment and clean restarts. Existing tests cover only part of this group: the restored result is preseeded and the unit test calls finish directly.
 
 ## 8. Implement ranking and history contracts and mocks
 
 - [x] Define typed paginated ranking/history APIs and the completed-match registration endpoint.
 - [x] Include match ID, player ID, date, score, active duration, end reason and configuration in every record.
 - [x] Persist a local player identity and use fixtures for other players.
-- [x] Sort ranking by descending score, group comparisons by the same gameplay configuration and define a deterministic tie-break rule.
+- [ ] Sort ranking by descending score, group comparisons by the same gameplay configuration and define a deterministic tie-break rule. Preserve the same date/ID tie-break and global ranks through the client adapter; it currently reorders a paginated response differently from MSW.
 - [x] Share contracts, fixtures and MSW handlers across development, tests and the published demo.
 - [x] Persist confirmed records locally so ranking and history remain consistent after refresh.
 - [x] Make registration idempotent by match ID; repeated requests return the existing record.
@@ -154,13 +162,13 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 ## 9. Integrate queries and resilient result submission
 
 - [x] Use Axios for HTTP and TanStack Query for queries and match-registration mutations.
-- [x] Implement pagination and loading, empty, error and background-refresh states for both tabs; ranking displays rank, player identity and score, while the player's history displays date, score, duration and end reason.
+- [ ] Implement pagination and loading, empty, error and background-refresh states for both tabs; ranking displays rank, player identity and score, while the player's history displays date, score, duration and end reason. Reopened: the API returns 48 ranking entries in the multiple-pages scenario, but the UI displays Page 1 of 1; both adapters slice an already paginated response and replace its total.
 - [x] Use query keys that include the relevant player, configuration and pagination parameters.
-- [x] Invalidate and refresh both tabs after successful registration and when they become visible again.
+- [ ] Invalidate and refresh both tabs after successful registration and when they become visible again. Reopened: history invalidation targets page size 10 while the panel uses 5; cover all pages for that player.
 - [ ] Prevent delayed responses from replacing data for a newer request or state.
 - [x] Persist pending submissions before sending; preserve all pending matches, including across refresh.
 - [x] Implement bounded retries, explicit retry actions and clear submission status.
-- [x] Recover a timeout after server-side registration without duplicate history or ranking entries.
+- [ ] Recover a timeout after server-side registration without duplicate history or ranking entries. Same-page handler idempotency is covered; recovery through the UI after an actual reload is still unverified.
 - [x] Allow starting another match while previous submissions remain pending.
 - [x] Keep API failures from blocking menus, options or combat.
 - [ ] Test pagination, both tabs updating, pending recovery after refresh, duplicate retries and stale responses.
@@ -169,7 +177,7 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 
 - [x] Provide a scenario selector and reset-to-initial-state action.
 - [x] Cover success, empty lists and multiple pages.
-- [x] Cover slow requests, variable latency and out-of-order responses.
+- [ ] Cover slow requests, variable latency and out-of-order responses. Existing delays differ by resource; add controlled reversed responses for the same list to prove stale-response handling.
 - [x] Cover timeout, connection errors and HTTP 4xx/5xx responses.
 - [x] Allow ranking and history queries to fail independently.
 - [x] Cover timeout after successful registration with idempotent recovery.
@@ -179,22 +187,22 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 
 ## 11. Finish accessibility, visuals and required E2E coverage
 
-- [x] Verify desktop/mobile layouts have no clipped arena, HUD or controls.
-- [x] Verify keyboard navigation, visible focus, dialog focus management and focus restoration.
+- [ ] Verify desktop/mobile layouts have no clipped arena, HUD or controls. Reopened: the 844×390 landscape capture clips a 600px-high canvas inside a roughly 125px-high shell.
+- [ ] Verify keyboard navigation, visible focus, dialog focus management and focus restoration. Revalidate the mobile failure and focus when entering/leaving pause Options.
 - [x] Add form labels, sufficient contrast and accessible validation/network error messages.
 - [x] Confirm all UI text, identifiers and documentation are in English.
-- [x] Audit coverage against all 12 Playwright groups in INSTRUCTIONS.md, section 8.
-- [x] Run the main flows in Chromium desktop and mobile with isolated initial state.
+- [ ] Audit coverage against all 12 Playwright groups in INSTRUCTIONS.md, section 8. The September 16 report distinguishes direct system/API tests from missing browser flows.
+- [ ] Run the main flows in Chromium desktop and mobile with isolated initial state. Require a green suite after the September 16 findings are resolved.
 - [x] Capture and inspect deterministic visual baselines for the menu, stable arena and result screen; commit them.
-- [x] Generate the HTML report and retain traces of failures for diagnosis; fix failures and rerun affected coverage.
+- [ ] Generate the HTML report and retain traces of failures for diagnosis; fix failures and rerun affected coverage. Current failures are retained in the local Playwright report; see section 15.0.
 - [x] Check that expected flows produce no unhandled console errors.
 
 ## 12. Measure performance in the optimized build
 
 - [x] Measure a three-minute match: frame rate, frame-interval p95 and entity counts over time, targeting 60 FPS.
 - [x] Record hardware, browser/version, resolution, pixel density, match configuration and measurement method.
-- [x] Profile memory and active resources across five start/play/exit cycles.
-- [x] Investigate sustained growth in listeners, ticker subscriptions, entities, textures or other resources.
+- [ ] Profile memory and active resources across five start/play/exit cycles. Existing heap measurements reload the page on each cycle and do not prove same-page cleanup.
+- [ ] Investigate sustained growth in listeners, ticker subscriptions, entities, textures or other resources. Retain measurements for those resources, not only heap size.
 - [x] Record real profiling evidence and observed limitations; do not replace measurements with estimates.
 
 ## 13. Audit and deliver
@@ -211,7 +219,7 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 
 ## 14. Match the supplied samples and complete asset integration
 
-Execution order: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared UI, 14.4 screens, 14.5 arena, 14.6 effects, 14.7 audio, 14.8 verification. Each checkbox inherits its subsection's model/effort recommendation. Update this section only after the corresponding implementation and acceptance check pass.
+Original grouping: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared UI, 14.4 screens, 14.5 arena, 14.6 effects, 14.7 audio, 14.8 verification. Follow section 15 for the revised execution order. Each checkbox inherits its subsection's model/effort recommendation. Update this section only after the corresponding implementation and acceptance check pass.
 
 ### 14.1 Asset inventory and visual reference — Luna / Low
 
@@ -243,15 +251,15 @@ Execution order: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared U
 - [x] Build Ranking from `sample_ranking.png`: rank, captain, points, played date/time, local-player highlight and active configuration label; extend contracts/fixtures if necessary to supply real displayed fields.
 - [x] Match `sample_pause.png` with Resume, Options and Main Menu actions; keep the session paused while viewing options and apply gameplay changes only to the next match.
 - [x] Match `sample_result.png` with prominent points, duration, end reason and primary actions; keep registration status and pending retry accessible.
-- [x] Restyle the HUD and touch controls after `sample.png`, preserving semantic health/score/time and simultaneous movement/firing without covering the playable area.
-- [x] Validate focus trapping/restoration in dialogs, keyboard tab navigation and layouts in desktop, mobile portrait and landscape after the redesign.
+- [ ] Restyle the HUD and touch controls after `sample.png`: health at top left, score/time/pause at top right, navigation at bottom left and firing at bottom right, inside the displayed game area. Keep the center clear, preserve semantics and verify simultaneous touch input.
+- [ ] Validate focus trapping/restoration in dialogs, keyboard tab navigation and layouts in desktop, mobile portrait and landscape after the redesign. Reopened by the current mobile focus failure and landscape clipping.
 
 ### 14.5 Tile-based arena — Terra / Medium
 
 - [x] Use `tiles_sheet.png` or its retina alternative with correctly mapped grid frames for textured water, coastline, sand, grass and island interiors.
-- [x] Compose scenery closer to `sample.png` with available rocks, vegetation, docks/fortifications and nautical props; define which objects block movement and which are decorative.
+- [ ] Compose scenery closer to `sample.png` with available rocks, vegetation, docks/fortifications and nautical props; define which objects block movement and which are decorative. The current single 3×3 island is only an initial asset integration; implement the multi-coast composition in section 15.3.
 - [ ] Make collision geometry match visible coastlines and obstacles; update enemy routing and spawn clearance for the resulting arena layout.
-- [x] Keep decorative art below gameplay sprites, preserve projectile contrast and avoid seams/texture bleeding during resizing.
+- [ ] Keep decorative art below gameplay sprites, preserve projectile contrast and avoid seams/texture bleeding during resizing. Revalidate on the complete redesigned screen; canvas-only snapshots miss clipping, overlays and very small mobile ships.
 
 ### 14.6 Sprite atlases and animated feedback — Terra / Medium
 
@@ -262,11 +270,11 @@ Execution order: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared U
 
 ### 14.7 Supplied sound integration — Terra / Medium
 
-- [x] Add an audio adapter driven by gameplay/UI events; preload reusable buffers and unlock playback through the first user interaction on desktop and mobile.
+- [ ] Add an audio adapter driven by gameplay/UI events; preload reusable audio resources and unlock playback through the first user interaction on desktop and mobile. Current HTMLAudio prototypes exist, but unlocking is attached only to the canvas and shot sounds are triggered by sprite creation.
 - [ ] Use UI hover/click/open/close/back sounds and start/pause/resume/complete/game-over sounds at their corresponding transitions, once per event.
 - [ ] Use cannon-fire variants, broadside, wood-hit, water-hit, collision, explosion and sinking sounds for the corresponding real combat events; document variation selection.
 - [ ] Integrate ocean ambience and sailing loops plus score, low-health and time-warning cues; gate repeated warnings and limit overlapping voices to avoid clipping.
-- [x] Add persisted mute and volume controls in Options; pause/suspend loops when hidden or paused and release audio resources on exit without duplicate playback on restart.
+- [ ] Add persisted mute and volume controls in Options; pause/suspend loops when hidden or paused and release audio resources on exit without duplicate playback on restart. Settings and loop methods exist; validate playback and track/release cloned one-shot voices as well.
 - [ ] Handle audio loading/playback failures without blocking gameplay; verify every supplied sound has a mapped event or documented reason for exclusion.
 
 ### 14.8 Updated evidence and deployment — Terra / Medium
@@ -280,6 +288,71 @@ Execution order: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared U
 - [ ] Have the user redeploy the reviewed commit, then verify https://pirate-battle-snowy.vercel.app/ including refresh, asset paths, MSW, logbook, mobile controls, audio and recovery flows.
 
 Exit condition: all sample screens have functional counterparts with coherent supplied artwork; ships and cannonballs are readable, tiles and sprite effects participate in gameplay, audio is controllable, and the updated build has verified evidence before final submission.
+
+## 15. September 16 execution plan: sample-like arena and mobile comfort
+
+Implement one step with its acceptance checks before moving on. A checked earlier integration does not waive the checks below. `sample.png` is the composition reference, not an image to place behind the game. Keep all game rules in the simulation and interactive overlays in accessible React markup.
+
+### 15.0 Establish a reliable test command — Terra / Medium
+
+- [x] Audit the source, run the existing test command, compare the sample with full-screen desktop/portrait/landscape captures, and record defects and coverage limitations in `docs/reviews/2026-09-16/`.
+
+Audit result before this repair: lint, strict types and build passed; the complete test command returned **71 passed / 3 failed**. The two performance failures were 30-second timeouts; the mobile pause/focus failure also recurred in two of three isolated repetitions. All eight existing visual comparisons passed without baseline updates, but did not detect full-screen clipping. After this repair, the functional command passed **70/70** in 3.4 minutes, and the separate optimized-build profile completed both checks.
+
+- [x] Exclude `tests/performance` from the normal Playwright configuration; keep profiling under `playwright.performance.config.ts` against an optimized build with its 210-second timeout and a separate report/output path. Do not overwrite retained performance evidence from normal E2E runs.
+- [x] Diagnose the mobile pause-dialog focus failure from the retained trace; distinguish a real focus defect from a timing race and add a deterministic assertion around the actual paused transition.
+- [x] Repair the outdated performance result-screen assertion and same-page resource-cycle method before the next profile; verify test discovery and rerun the affected checks without updating visual baselines to hide failures.
+
+### 15.1 Make the complete arena visible — Terra / Medium
+
+- [ ] Size `.game-canvas`, the Pixi renderer and `.game-canvas-shell` from the same available bounds. Observe container changes, use the match configuration for world scaling, and remove landscape clipping and the large unused portrait area.
+- [ ] Make landscape the preferred mobile play layout with a usable portrait fallback; preserve the whole arena, aspect ratio and rules through rotation. Respect dynamic browser height and display safe-area insets; an orientation lock must not be required.
+- [ ] Verify at 1440×900, 412×839, 390×844, 844×390 and 667×375: player/map visible, all four arena edges accessible, no unintended document scrolling, no stretched sprites, one canvas after rotation, and no game reset.
+
+### 15.2 Put HUD and both control clusters inside the arena — Terra / Medium
+
+- [ ] Move the navigation group to the bottom-left of the displayed world rectangle: forward above, turn-left and turn-right below. Move firing to the bottom-right: front above, left/right broadsides below. Anchor to the visible game area, including any aspect-ratio padding, rather than to an unrelated page section.
+- [ ] Use the supplied round normal/pressed/hover button art, with at least 48×48 CSS-pixel touch targets, separation between targets, safe-area padding and a clear central view. Keep controls reachable with the two thumbs in landscape and prevent the groups overlapping in portrait.
+- [ ] Place supplied health-frame/fill art at top left and counter panels for score and mm:ss time plus the pause icon at top right. Keep health/time/score semantic and keyboard accessible; move long keyboard instructions and menu exit into help/pause so they do not consume mobile combat height.
+- [ ] Route pointer events only to active buttons; use pointer capture and pointer-ID ownership. Release on up/cancel/lost capture, blur, pause, resize/orientation and exit. Make background controls inactive while loading or a dialog is open; ignore game shortcuts in form fields.
+- [ ] Verify true simultaneous touches (move+fire, turn+fire, release one while retaining the other), cancel and pause/resume. Assert button rectangles lie inside the rendered arena and do not overlap; retain full-screen HUD/control snapshots and inspect on a physical mobile device when available.
+
+### 15.3 Build the sample-inspired map and matching geometry — Sol / Medium
+
+- [ ] Define a declarative fixed map in world coordinates: a large upper-left island with fortification, a lower-center landmass and a lower-right coast joined or separated by navigable channels, following the sample's silhouette. Reserve an open central/right combat lane and safe initial positions. Do not place ships by copying their transient positions in the sample.
+- [ ] Establish one shared geometry source for land contours, blocking props, rendering bounds, collision, line of fire, routing and spawn clearance. Replace the hard-coded `centralIsland` circle throughout; simple polygons or a tile occupancy map are sufficient. Define shallow-water bands as decorative and dry land as blocking.
+- [ ] Compose connected sand/grass regions with the supplied convex/concave edge families; replace the current elliptical grass patch and visible center-tile mismatch. Add shallow-water/coast bands and tune water repetition/contrast against the sample while keeping cannonballs visible.
+- [ ] Add walls/towers, a pier that visually meets water, mixed rocks/plants and selected dinghies/cannon/wood props. Use the asset inventory for mappings and document which are decorative or blocking; avoid opaque sand-backed props floating on water.
+- [ ] Update ship movement, swept projectile obstruction, enemy line of sight, waypoints and spawning to the shared map; test narrow passages, concave coasts, corner contacts, both enemy types approaching from opposite sides and no valid spawn candidates. Make corridor clearance account for enlarged hulls.
+- [ ] Compare full arena captures with `sample.png` at the target sizes: land distribution, broad green interiors, shoreline transition, water scale, fortification readability and navigable space. Close sections 14.2/14.5 only after the geometry and visual checks pass together.
+
+### 15.4 Finish ship readability and combat artwork — Terra / Medium
+
+- [ ] Review the 24 ship sprites and sail/hull variants visually before assigning player/Chaser/Shooter identities and health stages; add real damaged artwork instead of only tint. Align visual hulls, collision clearance, health bars and muzzle origins at each supported scale.
+- [ ] Use the named ship atlas metadata (or a validated generated frame manifest) for cannonballs, fire/explosion stages and selected debris/crew/dinghy props. Map default/retina representations explicitly; do not load duplicate resolutions without need.
+- [ ] Add bounded wakes, short projectile trails, time-based impacts, damage fire and sinking feedback. Freeze combat animation on pause, clean up on restart, respect reduced-motion preferences and keep shots readable over shallow water and shore art.
+
+### 15.5 Complete usable audio — Terra / Medium
+
+- [ ] Unlock audio from Play or the first keyboard/touch control gesture; verify audibility without requiring a tap on empty water. Emit sounds from weapon/lifecycle/damage events once per event, not per rendered projectile or frame.
+- [ ] Wire the missing UI, score, low-health, time-warning and collision cues; actually trigger the mapped sinking sound and select supplied fire/hit/explosion variants. Start sailing audio only while moving and gate repeated warnings.
+- [ ] Track and cap one-shot voices as well as loops; suspend/stop and release them appropriately on pause, hidden tab, result, exit and restart. Verify persisted mute/volume, rejected playback, failed WAV loads and resume after a blocked first play.
+- [ ] Give every one of the 27 WAV files an event/variant mapping or an explicit exclusion reason in the inventory. Verify with browser playback checks and a real mobile listening check; settings persistence alone is insufficient.
+
+### 15.6 Repair data flows and close challenge coverage — Sol / Medium
+
+- [ ] Fix ranking/history double pagination: preserve server `total`, global rank and tie-break ordering while handling locally confirmed records consistently. Verify at least two UI pages in both tabs, back/next, refresh and configuration changes; the multiple-pages scenario must show all records.
+- [ ] Reproduce overlapping requests for the same list/configuration and controlled reversed completion; handle cancellation/stale responses through the Axios/Query boundary. The current out-of-order scenario only delays different resources and does not establish same-list ordering.
+- [ ] Complete browser flows for real timeout/death endings, post-end inactivity, abandonment without registration, one-shot damage/scoring and clean restarts. Use seeded real simulation and actual controls, not preseeded results or direct `finish()` calls as substitutes.
+- [ ] Verify completed-match registration updates both tabs, multiple pending matches survive actual reloads, play continues during failure, and timeout-after-registration retries remain unique across reloads. Correct server/mock persistence and client reconciliation if these checks fail.
+- [ ] Extend pause/Options focus trapping/restoration, true multitouch, asset-failure/retry, hidden-tab handling, audio and effects tests; compare real movement/combat/spawn results across frame rates. Update the 12-group coverage matrix with specific browser tests and retained evidence.
+
+### 15.7 Final evidence and delivery — Terra / Medium; documentation cleanup: Luna / Low
+
+- [ ] Inspect all supplied menu/history/ranking/options/pause/result samples against functional screens; add missing populated/empty/error screenshots and fix malformed loading/refresh text. Keep samples, previews, vectors and unused variants documented as references/alternatives rather than forcing all files into gameplay.
+- [ ] Run lint, strict types, production build and the separated desktop/mobile E2E+visual suite. Review intentional full-screen visual changes before accepting baselines; retain the HTML report, traces and commit under test.
+- [ ] Repeat the 180-second optimized-build profile and five start/play/exit cycles without navigation reloads after the map/audio work. Measure FPS, p95, entities and retained resources; document environment and limitations. Prior evidence recorded 38 FPS and predates this redesign.
+- [ ] Update README, ARCHITECTURE, the asset inventory and known limitations; verify a clean checkout. Have the user publish the final commit and then verify public refresh, MSW, assets, mobile controls, audio and registration recovery before delivery.
 
 ## Suggested milestones
 

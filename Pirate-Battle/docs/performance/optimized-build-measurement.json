@@ -1,9 +1,9 @@
 {
-  "durationMs": 180012.900000003,
-  "frameRate": 37.952835602336755,
-  "frameIntervalP95Ms": 33.400000000001455,
-  "maximumEnemies": 4,
+  "durationMs": 180010.39999999703,
+  "frameRate": 34.697995226943014,
+  "frameIntervalP95Ms": 33.40000000000873,
+  "maximumEnemies": 5,
   "maximumProjectiles": 4,
-  "maximumEffects": 3,
+  "maximumEffects": 2,
   "endedEarly": false
 }

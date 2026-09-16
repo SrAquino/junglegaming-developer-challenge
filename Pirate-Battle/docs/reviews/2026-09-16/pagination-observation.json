@@ -1,0 +1,10 @@
+{
+  "api": {
+    "total": 48,
+    "count": 5,
+    "page": 1,
+    "pageSize": 5
+  },
+  "ui": "120 SECOND BATTLES · 4 SECOND SPAWN INTERVAL\n\nRANK\nCAPTAIN\nPOINTS\nPLAYED\n01\nAnne Bonny\n26\n01 SEPT, 09:00\n02\nAnne Bonny\n25\n02 SEPT, 09:00\n03\nAnne Bonny\n24\n03 SEPT, 09:00\n04\nBlackbeard\n24\n01 SEPT, 09:00\n05\nBlackbeard\n23\n02 SEPT, 09:00\nPrevious page\nPage 1 of 1\nNext page",
+  "nextDisabled": true
+}

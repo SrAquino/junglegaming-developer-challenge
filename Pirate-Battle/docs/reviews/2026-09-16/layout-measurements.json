@@ -1,0 +1,242 @@
+[
+  {
+    "name": "desktop",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "canvas": {
+      "x": 18,
+      "y": 74.375,
+      "width": 1404,
+      "height": 600,
+      "bottom": 674.375
+    },
+    "arenaShell": {
+      "x": 16,
+      "y": 72.375,
+      "width": 1408,
+      "height": 634.625,
+      "bottom": 707
+    },
+    "controls": {
+      "x": 288,
+      "y": 760,
+      "width": 864,
+      "height": 60,
+      "bottom": 820
+    },
+    "hud": {
+      "x": 16,
+      "y": 16,
+      "width": 1408,
+      "height": 40.375,
+      "bottom": 56.375
+    },
+    "scrollHeight": 900,
+    "buttons": [
+      {
+        "label": "Turn left",
+        "x": 288,
+        "y": 760,
+        "width": 134,
+        "height": 60
+      },
+      {
+        "label": "Sail forward",
+        "x": 434,
+        "y": 760,
+        "width": 134,
+        "height": 60
+      },
+      {
+        "label": "Turn right",
+        "x": 580,
+        "y": 760,
+        "width": 134,
+        "height": 60
+      },
+      {
+        "label": "Fire left broadside",
+        "x": 726,
+        "y": 760,
+        "width": 134,
+        "height": 60
+      },
+      {
+        "label": "Fire front",
+        "x": 872,
+        "y": 760,
+        "width": 134,
+        "height": 60
+      },
+      {
+        "label": "Fire right broadside",
+        "x": 1018,
+        "y": 760,
+        "width": 134,
+        "height": 60
+      }
+    ]
+  },
+  {
+    "name": "mobile-portrait",
+    "viewport": {
+      "width": 412,
+      "height": 839
+    },
+    "canvas": {
+      "x": 10,
+      "y": 110.75,
+      "width": 392,
+      "height": 224,
+      "bottom": 334.75
+    },
+    "arenaShell": {
+      "x": 8,
+      "y": 108.75,
+      "width": 396,
+      "height": 478.25,
+      "bottom": 587
+    },
+    "controls": {
+      "x": 8,
+      "y": 643,
+      "width": 396,
+      "height": 132,
+      "bottom": 775
+    },
+    "hud": {
+      "x": 8,
+      "y": 8,
+      "width": 396,
+      "height": 92.75,
+      "bottom": 100.75
+    },
+    "scrollHeight": 839,
+    "buttons": [
+      {
+        "label": "Turn left",
+        "x": 8,
+        "y": 643,
+        "width": 124,
+        "height": 60
+      },
+      {
+        "label": "Sail forward",
+        "x": 144,
+        "y": 643,
+        "width": 124,
+        "height": 60
+      },
+      {
+        "label": "Turn right",
+        "x": 280,
+        "y": 643,
+        "width": 124,
+        "height": 60
+      },
+      {
+        "label": "Fire left broadside",
+        "x": 8,
+        "y": 715,
+        "width": 124,
+        "height": 60
+      },
+      {
+        "label": "Fire front",
+        "x": 144,
+        "y": 715,
+        "width": 124,
+        "height": 60
+      },
+      {
+        "label": "Fire right broadside",
+        "x": 280,
+        "y": 715,
+        "width": 124,
+        "height": 60
+      }
+    ]
+  },
+  {
+    "name": "mobile-landscape",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "canvas": {
+      "x": 18,
+      "y": 74.375,
+      "width": 808,
+      "height": 600,
+      "bottom": 674.375
+    },
+    "arenaShell": {
+      "x": 16,
+      "y": 72.375,
+      "width": 812,
+      "height": 124.625,
+      "bottom": 197
+    },
+    "controls": {
+      "x": 16,
+      "y": 250,
+      "width": 812,
+      "height": 60,
+      "bottom": 310
+    },
+    "hud": {
+      "x": 16,
+      "y": 16,
+      "width": 812,
+      "height": 40.375,
+      "bottom": 56.375
+    },
+    "scrollHeight": 390,
+    "buttons": [
+      {
+        "label": "Turn left",
+        "x": 16,
+        "y": 250,
+        "width": 125.328125,
+        "height": 60
+      },
+      {
+        "label": "Sail forward",
+        "x": 153.328125,
+        "y": 250,
+        "width": 125.328125,
+        "height": 60
+      },
+      {
+        "label": "Turn right",
+        "x": 290.65625,
+        "y": 250,
+        "width": 125.34375,
+        "height": 60
+      },
+      {
+        "label": "Fire left broadside",
+        "x": 428,
+        "y": 250,
+        "width": 125.328125,
+        "height": 60
+      },
+      {
+        "label": "Fire front",
+        "x": 565.328125,
+        "y": 250,
+        "width": 125.328125,
+        "height": 60
+      },
+      {
+        "label": "Fire right broadside",
+        "x": 702.65625,
+        "y": 250,
+        "width": 125.34375,
+        "height": 60
+      }
+    ]
+  }
+]
