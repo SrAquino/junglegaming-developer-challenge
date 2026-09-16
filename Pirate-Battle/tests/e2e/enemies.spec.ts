@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { centralIsland } from '../../src/game/config/arena-layout.ts'
+import { circleIntersectsLand } from '../../src/game/config/arena-geometry.ts'
 import { defaultGameConfig } from '../../src/game/config/game-config.ts'
 import { createInitialWorld } from '../../src/game/core/create-world.ts'
 import { SeededRandom } from '../../src/game/core/random-source.ts'
@@ -34,19 +34,19 @@ test('spawns at the configured interval with both types and safe positions', () 
   expect(simulation.world.enemies.slice(0, 2).map((ship) => ship.enemyType)).toEqual(['chaser', 'shooter'])
   for (const ship of simulation.world.enemies) {
     expect(Math.hypot(ship.position.x - simulation.world.player.position.x, ship.position.y - simulation.world.player.position.y)).toBeGreaterThanOrEqual(defaultGameConfig.spawn.minimumDistanceFromPlayer)
-    expect(Math.hypot(ship.position.x - centralIsland.center.x, ship.position.y - centralIsland.center.y)).toBeGreaterThan(centralIsland.radius + ship.collisionRadius)
+    expect(circleIntersectsLand(ship.position, ship.collisionRadius)).toBe(false)
   }
 })
 
 for (const enemyType of ['chaser', 'shooter'] as const) {
-  test(`${enemyType} rotates and approaches around the island without entering it`, () => {
+  test(`${enemyType} routes around the north-west coast without entering land`, () => {
     const simulation = context()
-    const ship = enemy(enemyType, 1_350, 450)
+    const ship = enemy(enemyType, 1_350, 300)
     simulation.world.enemies.push(ship)
     for (let step = 0; step < 1_000; step += 1) {
       simulation.world.elapsedMs += 20
       enemyBehaviorSystem.update(20, simulation)
-      expect(Math.hypot(ship.position.x - centralIsland.center.x, ship.position.y - centralIsland.center.y)).toBeGreaterThanOrEqual(centralIsland.radius + ship.collisionRadius)
+      expect(circleIntersectsLand(ship.position, ship.collisionRadius)).toBe(false)
       if (!ship.active) break
     }
     expect(ship.position.x).toBeLessThan(800)
@@ -65,15 +65,15 @@ for (const enemyType of ['chaser', 'shooter'] as const) {
   })
 }
 
-test('Shooter respects range and cooldown and cannot attack through the island', () => {
+test('Shooter respects range and cooldown and cannot attack through land', () => {
   const simulation = context()
-  const ship = enemy('shooter', 1_350, 450)
+  const ship = enemy('shooter', 1_350, 300)
   simulation.world.enemies.push(ship)
   simulation.world.elapsedMs = 5_000
   enemyBehaviorSystem.update(0, simulation)
   expect(simulation.world.projectiles).toHaveLength(0)
   ship.position = { x: 700, y: 450 }
-  ship.rotation = Math.PI
+  ship.rotation = Math.atan2(simulation.world.player.position.y - ship.position.y, simulation.world.player.position.x - ship.position.x)
   enemyBehaviorSystem.update(0, simulation)
   expect(simulation.world.projectiles).toHaveLength(1)
   enemyBehaviorSystem.update(0, simulation)
@@ -85,7 +85,7 @@ test('Shooter respects range and cooldown and cannot attack through the island',
 
 test('destroyed ships cannot fire or damage, and repeated hits score once', () => {
   const simulation = context()
-  const ship = enemy('shooter', 400, 410)
+  const ship = enemy('shooter', simulation.world.player.position.x, simulation.world.player.position.y - 44)
   ship.health = 20
   simulation.world.enemies.push(ship)
   weaponSystem.update(0, { ...simulation, input: { ...emptyPlayerInput, fireFront: true } })

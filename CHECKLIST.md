@@ -103,7 +103,7 @@ Exit condition: one ship moves correctly, resizes correctly and leaves no active
 - [x] Render water and at least one island with the supplied assets.
 - [x] Implement forward movement and left/right rotation on keyboard.
 - [ ] Keep ships inside the visible arena and prevent island traversal. Revalidate against the visible tile coastline; the current blocker is still circular.
-- [ ] Define the supported mobile orientation and implement usable simultaneous touch controls. Reopened for the clipped landscape canvas and the requested left/right in-arena layout; mouse-based checks do not establish multitouch.
+- [x] Define the supported mobile orientation and implement usable simultaneous touch controls. Landscape is preferred with a complete portrait fallback; automated pointer-ID checks and the user's September 16 physical-device check confirm simultaneous controls.
 - [x] Handle pointer release/cancel and clear held controls when leaving gameplay.
 - [x] Capture game keys only while the gameplay context is active; display control instructions.
 - [x] Verify forward movement, rotation, boundaries, island collisions, resizing and touch input in Playwright.
@@ -251,14 +251,14 @@ Original grouping: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared
 - [x] Build Ranking from `sample_ranking.png`: rank, captain, points, played date/time, local-player highlight and active configuration label; extend contracts/fixtures if necessary to supply real displayed fields.
 - [x] Match `sample_pause.png` with Resume, Options and Main Menu actions; keep the session paused while viewing options and apply gameplay changes only to the next match.
 - [x] Match `sample_result.png` with prominent points, duration, end reason and primary actions; keep registration status and pending retry accessible.
-- [ ] Restyle the HUD and touch controls after `sample.png`: health at top left, score/time/pause at top right, navigation at bottom left and firing at bottom right, inside the displayed game area. Keep the center clear, preserve semantics and verify simultaneous touch input.
+- [x] Restyle the HUD and touch controls after `sample.png`: health at top left, score/time/pause at top right, navigation at bottom left and firing at bottom right, inside the displayed game area. Keep the center clear, preserve semantics and verify simultaneous touch input.
 - [ ] Validate focus trapping/restoration in dialogs, keyboard tab navigation and layouts in desktop, mobile portrait and landscape after the redesign. Reopened by the current mobile focus failure and landscape clipping.
 
 ### 14.5 Tile-based arena — Terra / Medium
 
 - [x] Use `tiles_sheet.png` or its retina alternative with correctly mapped grid frames for textured water, coastline, sand, grass and island interiors.
 - [ ] Compose scenery closer to `sample.png` with available rocks, vegetation, docks/fortifications and nautical props; define which objects block movement and which are decorative. The current single 3×3 island is only an initial asset integration; implement the multi-coast composition in section 15.3.
-- [ ] Make collision geometry match visible coastlines and obstacles; update enemy routing and spawn clearance for the resulting arena layout.
+- [x] Make collision geometry match visible coastlines and obstacles; update enemy routing and spawn clearance for the resulting arena layout.
 - [ ] Keep decorative art below gameplay sprites, preserve projectile contrast and avoid seams/texture bleeding during resizing. Revalidate on the complete redesigned screen; canvas-only snapshots miss clipping, overlays and very small mobile ships.
 
 ### 14.6 Sprite atlases and animated feedback — Terra / Medium
@@ -315,12 +315,12 @@ Audit result before this repair: lint, strict types and build passed; the comple
 - [x] Use the supplied round normal/pressed/hover button art, with at least 48×48 CSS-pixel touch targets, separation between targets, safe-area padding and a clear central view. Keep controls reachable with the two thumbs in landscape and prevent the groups overlapping in portrait.
 - [x] Place supplied health-frame/fill art at top left and counter panels for score and mm:ss time plus the pause icon at top right. Keep health/time/score semantic and keyboard accessible; move long keyboard instructions and menu exit into help/pause so they do not consume mobile combat height.
 - [x] Route pointer events only to active buttons; use pointer capture and pointer-ID ownership. Release on up/cancel/lost capture, blur, pause, resize/orientation and exit. Make background controls inactive while loading or a dialog is open; ignore game shortcuts in form fields.
-- [ ] Verify true simultaneous touches (move+fire, turn+fire, release one while retaining the other), cancel and pause/resume. Assert button rectangles lie inside the rendered arena and do not overlap; retain full-screen HUD/control snapshots and inspect on a physical mobile device when available.
+- [x] Verify true simultaneous touches (move+fire, turn+fire, release one while retaining the other), cancel and pause/resume. Assert button rectangles lie inside the rendered arena and do not overlap; retain full-screen HUD/control snapshots and inspect on a physical mobile device when available. Automated pointer-ID/layout coverage passes and the user confirmed simultaneous touch behavior on a physical device on September 16.
 
 ### 15.3 Build the sample-inspired map and matching geometry — Sol / Medium
 
-- [ ] Define a declarative fixed map in world coordinates: a large upper-left island with fortification, a lower-center landmass and a lower-right coast joined or separated by navigable channels, following the sample's silhouette. Reserve an open central/right combat lane and safe initial positions. Do not place ships by copying their transient positions in the sample.
-- [ ] Establish one shared geometry source for land contours, blocking props, rendering bounds, collision, line of fire, routing and spawn clearance. Replace the hard-coded `centralIsland` circle throughout; simple polygons or a tile occupancy map are sufficient. Define shallow-water bands as decorative and dry land as blocking.
+- [x] Define a declarative fixed map in world coordinates: a large upper-left island with fortification, a lower-center landmass and a lower-right coast joined or separated by navigable channels, following the sample's silhouette. Reserve an open central/right combat lane and safe initial positions. Do not place ships by copying their transient positions in the sample.
+- [x] Establish one shared geometry source for land contours, blocking props, rendering bounds, collision, line of fire, routing and spawn clearance. Replace the hard-coded `centralIsland` circle throughout; simple polygons or a tile occupancy map are sufficient. Define shallow-water bands as decorative and dry land as blocking.
 - [ ] Compose connected sand/grass regions with the supplied convex/concave edge families; replace the current elliptical grass patch and visible center-tile mismatch. Add shallow-water/coast bands and tune water repetition/contrast against the sample while keeping cannonballs visible.
 - [ ] Add walls/towers, a pier that visually meets water, mixed rocks/plants and selected dinghies/cannon/wood props. Use the asset inventory for mappings and document which are decorative or blocking; avoid opaque sand-backed props floating on water.
 - [ ] Update ship movement, swept projectile obstruction, enemy line of sight, waypoints and spawning to the shared map; test narrow passages, concave coasts, corner contacts, both enemy types approaching from opposite sides and no valid spawn candidates. Make corridor clearance account for enlarged hulls.

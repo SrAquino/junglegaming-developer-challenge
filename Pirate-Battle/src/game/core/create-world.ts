@@ -13,7 +13,7 @@ export function createInitialWorld(matchId: string, config: GameConfigSnapshot):
       active: true,
       position: {
         x: config.arena.width * 0.25,
-        y: config.arena.height / 2,
+        y: config.arena.height * 0.58,
       },
       velocity: { x: 0, y: 0 },
       rotation: -Math.PI / 2,

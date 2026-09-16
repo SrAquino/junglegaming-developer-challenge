@@ -1,5 +1,4 @@
 import { Application, Container, Graphics, Sprite } from 'pixi.js'
-import { centralIsland } from '../config/arena-layout.ts'
 import type { GameConfigSnapshot } from '../config/game-config.ts'
 import { GameSession } from '../core/game-session.ts'
 import type { HudSnapshot, MatchResult } from '../types/game.ts'
@@ -103,7 +102,7 @@ export class FirstPlayableScene implements GameRenderer {
     const world = new Container()
     application.stage.addChild(world)
 
-    world.addChild(createArenaScenery(this.options.configuration.arena.width, this.options.configuration.arena.height, centralIsland, arenaTileTextures))
+    world.addChild(createArenaScenery(this.options.configuration.arena.width, this.options.configuration.arena.height, arenaTileTextures))
 
     const ship = new Sprite(shipTexture)
     ship.anchor.set(0.5)

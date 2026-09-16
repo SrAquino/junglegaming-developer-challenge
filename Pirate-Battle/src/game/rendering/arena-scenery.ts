@@ -1,66 +1,51 @@
 import { Container, Graphics, Sprite, TilingSprite, type Texture } from 'pixi.js'
-import { centralIslandDecorations, type CircularObstacle } from '../config/arena-layout.ts'
+import { arenaDecorations, arenaLandmasses } from '../config/arena-layout.ts'
+import type { ArenaTileTextures } from './game-assets.ts'
+import type { Vector2 } from '../types/vector.ts'
 
-interface ArenaSceneryTextures {
-  water: Texture
-  sand: Texture
-  grass: Texture
-  coastline: readonly [Texture, Texture, Texture, Texture, Texture, Texture, Texture, Texture]
-  rock: Texture
-  vegetation: readonly [Texture, Texture, Texture]
-  pier: Texture
-}
-
-export function createArenaScenery(width: number, height: number, island: Readonly<CircularObstacle>, textures: ArenaSceneryTextures): Container {
+export function createArenaScenery(width: number, height: number, textures: ArenaTileTextures): Container {
   const scenery = new Container()
   scenery.label = 'arena-scenery'
   addWaterTiles(scenery, width, height, textures.water)
 
-  const islandContainer = new Container()
-  islandContainer.label = 'central-island'
-  islandContainer.position.set(island.center.x, island.center.y)
-  islandContainer.addChild(createCoastline(textures, island.radius))
-
-  const grass = new TilingSprite({ texture: textures.grass, width: 108, height: 78 })
-  grass.label = 'island-grass'
-  grass.position.set(-54, -44)
-  const grassMask = new Graphics().ellipse(0, -5, 54, 39).fill({ color: 0xffffff })
-  grass.mask = grassMask
-  islandContainer.addChild(grass, grassMask)
-
-  for (const decoration of centralIslandDecorations.filter((item) => item.kind === 'pier')) {
-    islandContainer.addChild(createDecorationSprite(textures.pier, decoration.position.x, decoration.position.y, decoration.scale, decoration.rotation))
+  for (const landmass of arenaLandmasses) {
+    const island = new Container()
+    island.label = landmass.id
+    island.addChild(createCoastGlow(landmass.coast), createTiledPolygon(textures.sand, landmass.coast, width, height, `${landmass.id}-sand`))
+    island.addChild(createTiledPolygon(textures.grass, landmass.grass, width, height, `${landmass.id}-grass`))
+    scenery.addChild(island)
   }
 
-  for (const decoration of centralIslandDecorations.filter((item) => item.kind === 'vegetation')) {
-    const texture = textures.vegetation[decoration.variant ?? 0]
-    islandContainer.addChild(createDecorationSprite(texture, decoration.position.x, decoration.position.y, decoration.scale, decoration.rotation))
+  const props = new Container()
+  props.label = 'arena-props'
+  for (const decoration of arenaDecorations) {
+    props.addChild(createDecorationSprite(textureForDecoration(textures, decoration.kind, decoration.variant), decoration.position.x, decoration.position.y, decoration.scale, decoration.rotation))
   }
-  for (const decoration of centralIslandDecorations.filter((item) => item.kind === 'rock')) {
-    const rock = new Sprite(textures.rock)
-    rock.anchor.set(0.5)
-    rock.scale.set(decoration.scale)
-    rock.position.set(decoration.position.x, decoration.position.y)
-    islandContainer.addChild(rock)
-  }
-  scenery.addChild(islandContainer)
+  scenery.addChild(props)
   return scenery
 }
 
-function createCoastline(textures: ArenaSceneryTextures, radius: number): Container {
-  const coast = new Container()
-  coast.label = 'island-coastline'
-  const [northWest, north, northEast, west, east, southWest, south, southEast] = textures.coastline
-  const frames = [northWest, north, northEast, west, textures.sand, east, southWest, south, southEast]
-  const nativeTileSize = 64
-  for (let index = 0; index < frames.length; index += 1) {
-    const tile = new Sprite(frames[index])
-    tile.position.set((index % 3) * nativeTileSize, Math.floor(index / 3) * nativeTileSize)
-    coast.addChild(tile)
-  }
-  coast.position.set(-radius, -radius)
-  coast.scale.set((radius * 2) / (nativeTileSize * 3))
-  return coast
+function createTiledPolygon(texture: Texture, points: readonly Readonly<Vector2>[], width: number, height: number, label: string): Container {
+  const layer = new Container()
+  layer.label = label
+  const tiles = new TilingSprite({ texture, width, height })
+  const mask = new Graphics().poly(flatten(points)).fill({ color: 0xffffff })
+  tiles.mask = mask
+  layer.addChild(tiles, mask)
+  return layer
+}
+
+function createCoastGlow(points: readonly Readonly<Vector2>[]): Graphics {
+  return new Graphics().poly(flatten(points), true).stroke({ color: 0x8ee5ed, width: 52, alpha: 0.28 })
+}
+
+function textureForDecoration(textures: ArenaTileTextures, kind: string, variant = 0): Texture {
+  if (kind === 'pier') return textures.pier
+  if (kind === 'vegetation') return textures.vegetation[variant]
+  if (kind === 'rock') return textures.rock[variant]
+  if (kind === 'tower') return textures.fortification[0]
+  if (kind === 'wall') return textures.fortification[1]
+  return textures.pier
 }
 
 function createDecorationSprite(texture: Texture, x: number, y: number, scale: number, rotation = 0): Sprite {
@@ -70,6 +55,10 @@ function createDecorationSprite(texture: Texture, x: number, y: number, scale: n
   sprite.scale.set(scale)
   sprite.rotation = rotation
   return sprite
+}
+
+function flatten(points: readonly Readonly<Vector2>[]): number[] {
+  return points.flatMap((point) => [point.x, point.y])
 }
 
 function addWaterTiles(container: Container, width: number, height: number, texture: Texture): void {

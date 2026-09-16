@@ -12,9 +12,10 @@ export interface ArenaTileTextures {
   sand: Texture
   grass: Texture
   coastline: readonly [Texture, Texture, Texture, Texture, Texture, Texture, Texture, Texture]
-  rock: Texture
+  rock: readonly [Texture, Texture, Texture]
   vegetation: readonly [Texture, Texture, Texture]
   pier: Texture
+  fortification: readonly [Texture, Texture]
 }
 
 export async function loadPlayerShipTexture(assetUrl = playerShipAssetUrl): Promise<Texture> {
@@ -61,9 +62,10 @@ export async function loadArenaTileTextures(): Promise<ArenaTileTextures> {
     sand,
     grass,
     coastline,
-    rock: tileFrame(sheet, 50),
+    rock: [tileFrame(sheet, 49), tileFrame(sheet, 50), tileFrame(sheet, 51)],
     vegetation: [plantA, plantB, plantC],
     pier,
+    fortification: [tileFrame(sheet, 13), tileFrame(sheet, 15)],
   }
 }
 

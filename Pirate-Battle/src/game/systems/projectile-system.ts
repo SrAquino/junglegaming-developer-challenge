@@ -1,4 +1,4 @@
-import { centralIsland } from '../config/arena-layout.ts'
+import { segmentIntersectsLand } from '../config/arena-geometry.ts'
 import type { EffectEntity } from '../entities/entity.ts'
 import type { GameSystem } from './game-system.ts'
 
@@ -9,20 +9,17 @@ export const projectileSystem: GameSystem = {
       if (!projectile.active) continue
       const dx = projectile.velocity.x * deltaSeconds
       const dy = projectile.velocity.y * deltaSeconds
+      const previousPosition = { ...projectile.position }
       projectile.position.x += dx
       projectile.position.y += dy
       projectile.distanceTravelled += Math.hypot(dx, dy)
       projectile.remainingLifetimeMs -= deltaMs
-      const islandDistance = Math.hypot(
-        projectile.position.x - centralIsland.center.x,
-        projectile.position.y - centralIsland.center.y,
-      )
       const outsideArena =
         projectile.position.x < 0 || projectile.position.x > config.arena.width || projectile.position.y < 0 || projectile.position.y > config.arena.height
       if (
         projectile.distanceTravelled >= projectile.maximumRange ||
         projectile.remainingLifetimeMs <= 0 ||
-        islandDistance <= centralIsland.radius ||
+        segmentIntersectsLand(previousPosition, projectile.position) ||
         outsideArena
       ) {
         deactivateProjectile(projectile, world.effects)

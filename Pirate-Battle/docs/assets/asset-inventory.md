@@ -10,9 +10,9 @@ Reviewed against source commit `24237dc` and `sample.png` on September 16, 2026.
 | Ship parts | The atlas `cannon_ball.png` frame renders every projectile. | Hull, sail, flag and crew composition. |
 | Effects | `fire_1`, `explosion_1` and `explosion_2` atlas frames render static, short-lived effects. | Timed variants using the five supplied effect images, sustained damage fire and sinking; wakes/trails/ripples may use bounded procedural rendering. |
 | Tiles | Named 64 by 64 frames `tile_73` and `tile_50` are sliced from `tiles_sheet.png` for water and rocks. Direct exports `tile_1`–`3`, `17`, `19`, `33`–`35`, `39`, `68`, `70`–`72` and `60` compose the coastline, interior, vegetation and pier. | Fortifications and additional props. |
-| UI | Menu title/panel/buttons, six touch icons and normal/pressed buttons, HUD icons, background and logo are used. Controls and HUD are currently outside the canvas. | `health_frame`, green/amber/red fills, `enemy_health_frame` and fills, `counter_panel`, round hover state and pause/settings/home icons as appropriate. Place gameplay controls inside the arena. |
+| UI | Menu title/panel/buttons, six touch icons and all round button states, HUD health/counter frames, background and logo are used. HUD and 64px touch controls are overlaid inside the arena. | Consider amber/red HUD fills for health thresholds and settings/home icons where they improve navigation. |
 | Spritesheet | `ships_miscellaneous_sheet.png` is loaded through the shared asset cache; four frames are manually hard-coded in `game-assets.ts`. XML is not parsed at runtime. | Validate named frame mappings against XML or generate a manifest; add selected damage/prop frames and a measured resolution policy. |
-| Tilesheet | `tiles_sheet.png` loads once and provides shared water and rock textures; mapped direct PNG exports compose a three-by-three coastline plus sand and grass interiors without atlas-edge bleeding. | Add resolution-aware selection if profiling shows that retina screens need sharper scenery. |
+| Tilesheet | `tiles_sheet.png` loads once and provides shared water, three rock variants and fortification frames. Supplied sand and grass textures are masked to three shared polygonal land contours. | Replace straight polygon edges with the matching convex/concave coast families and add resolution-aware selection if profiling supports it. |
 | Sounds | 13 source names are mapped, including sinking; 14 are unmapped. The sinking source has no playback call. | Correct unlock/event/cleanup behavior, then wire UI, score, health, warning, collision, sinking and combat variants; details below. |
 | Vectors | Reference only. | Use only if a scalable presentation source is needed. |
 | Samples | Review references only. | Never render samples as product screens. |
@@ -20,7 +20,7 @@ Reviewed against source commit `24237dc` and `sample.png` on September 16, 2026.
 ## Important mappings
 
 - `tilesheets.txt` defines 64 by 64 tiles with no margin.
-- `png/default/tiles` contains the same grid as standalone PNG files. The arena maps coast corners and edges `1`–`3`, `17`, `19`, `33`–`35`, grass `39`, sand `68`, plants `70`–`72` and pier `60`; matching retina files remain available for a later resolution-selection pass.
+- `png/default/tiles` contains the same grid as standalone PNG files. The arena currently maps fortification frames `13` and `15`, grass `39`, rocks `49`–`51`, pier/gate `60`, sand `68`, and plants `70`–`72`; matching retina files remain available for a later resolution-selection pass.
 - `ships_miscellaneous_sheet.xml` defines `cannon_ball.png` as a 10 by 10 frame and names the fire/explosion frames used by the renderer.
 - `ui_sheet.json` and its retina counterpart document stretchable UI components; direct PNG exports are used for responsive panels and buttons.
 - The ship atlas is a named frame map, not an animation timeline. Frame choices must be driven by gameplay time and cleaned up with the Pixi scene.

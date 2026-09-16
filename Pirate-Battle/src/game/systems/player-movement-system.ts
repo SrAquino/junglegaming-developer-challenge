@@ -1,5 +1,4 @@
-import { centralIsland } from '../config/arena-layout.ts'
-import type { CircularObstacle } from '../config/arena-layout.ts'
+import { circleIntersectsLand } from '../config/arena-geometry.ts'
 import type { GameSystem } from './game-system.ts'
 
 export const playerMovementSystem: GameSystem = {
@@ -22,7 +21,7 @@ export const playerMovementSystem: GameSystem = {
     player.position.y += player.velocity.y * deltaSeconds
     constrainToArena(player.position, player.collisionRadius, config.arena.width, config.arena.height)
 
-    if (intersectsCircle(player.position, player.collisionRadius, centralIsland)) {
+    if (circleIntersectsLand(player.position, player.collisionRadius)) {
       player.position.x = previousPosition.x
       player.position.y = previousPosition.y
     }
@@ -37,15 +36,4 @@ function constrainToArena(
 ): void {
   position.x = Math.max(radius, Math.min(arenaWidth - radius, position.x))
   position.y = Math.max(radius, Math.min(arenaHeight - radius, position.y))
-}
-
-function intersectsCircle(
-  position: { x: number; y: number },
-  radius: number,
-  obstacle: Readonly<CircularObstacle>,
-): boolean {
-  const dx = position.x - obstacle.center.x
-  const dy = position.y - obstacle.center.y
-  const minimumDistance = radius + obstacle.radius
-  return dx * dx + dy * dy < minimumDistance * minimumDistance
 }

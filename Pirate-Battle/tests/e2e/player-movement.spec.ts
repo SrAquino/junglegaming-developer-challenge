@@ -1,12 +1,11 @@
 import { expect, test } from '@playwright/test'
-import { centralIsland } from '../../src/game/config/arena-layout.ts'
 import { defaultGameConfig } from '../../src/game/config/game-config.ts'
 import { createInitialWorld } from '../../src/game/core/create-world.ts'
 import { BrowserRandom } from '../../src/game/core/random-source.ts'
 import { playerMovementSystem } from '../../src/game/systems/player-movement-system.ts'
 import { emptyPlayerInput } from '../../src/game/types/game.ts'
 
-test('moves, turns, stays inside the arena and cannot enter the central island', () => {
+test('moves, turns, stays inside the arena and cannot cross a visible coastline', () => {
   const world = createInitialWorld('test-match', defaultGameConfig)
   const startingPosition = { ...world.player.position }
   const startingRotation = world.player.rotation
@@ -26,10 +25,8 @@ test('moves, turns, stays inside the arena and cannot enter the central island',
   playerMovementSystem.update(1_000, { ...context, input: { ...emptyPlayerInput, forward: true } })
   expect(world.player.position.x).toBe(world.player.collisionRadius)
 
-  const safeDistance = centralIsland.radius + world.player.collisionRadius + 1
-  world.player.position.x = centralIsland.center.x - safeDistance
-  world.player.position.y = centralIsland.center.y
-  world.player.rotation = 0
+  world.player.position = { x: 400, y: 450 }
+  world.player.rotation = -Math.PI / 2
   const beforeIslandCollision = { ...world.player.position }
   playerMovementSystem.update(1_000, { ...context, input: { ...emptyPlayerInput, forward: true } })
   expect(world.player.position).toEqual(beforeIslandCollision)

@@ -28,7 +28,7 @@ test('fires front and broadside weapons with their configured cooldowns', () => 
   expect(world.projectiles).toHaveLength(5)
 })
 
-test('projectiles damage enemies once and disappear when hitting the island', () => {
+test('projectiles damage enemies once', () => {
   const world = createInitialWorld('combat-test', defaultGameConfig)
   const context = {
     config: defaultGameConfig,
@@ -36,6 +36,7 @@ test('projectiles damage enemies once and disappear when hitting the island', ()
     input: { ...emptyPlayerInput, fireFront: true },
     random: new BrowserRandom(),
   }
+  world.player.position = { x: 900, y: 500 }
   const enemy = {
     id: 'target',
     kind: 'enemy' as const,
@@ -58,4 +59,21 @@ test('projectiles damage enemies once and disappear when hitting the island', ()
   expect(world.player.score).toBe(1)
   expect(world.projectiles).toHaveLength(0)
   expect(world.effects.some((effect) => effect.effectType === 'explosion')).toBe(true)
+})
+
+test('a swept projectile stops at the coastline instead of tunnelling through land', () => {
+  const world = createInitialWorld('coast-test', defaultGameConfig)
+  world.projectiles.push({
+    id: 'coast-shot', kind: 'projectile', active: true, owner: 'player',
+    position: { x: 400, y: 470 }, rotation: -Math.PI / 2, velocity: { x: 0, y: -800 },
+    damage: 20, distanceTravelled: 0, maximumRange: 900, remainingLifetimeMs: 2_000,
+  })
+  projectileSystem.update(200, {
+    config: defaultGameConfig,
+    world,
+    input: emptyPlayerInput,
+    random: new BrowserRandom(),
+  })
+  expect(world.projectiles).toHaveLength(0)
+  expect(world.effects.at(-1)?.effectType).toBe('impact-water')
 })

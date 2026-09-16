@@ -1,4 +1,3 @@
-import { centralIsland } from '../config/arena-layout.ts'
 import type { GameSystem } from './game-system.ts'
 import { navigationTarget, pathIsClear } from './enemy-navigation.ts'
 
@@ -14,13 +13,13 @@ export const enemyBehaviorSystem: GameSystem = {
       enemy.rotation += Math.max(-maxTurn, Math.min(maxTurn, angleDifference))
       const playerDistance = Math.hypot(world.player.position.x - enemy.position.x, world.player.position.y - enemy.position.y)
       const shouldMove = enemy.enemyType === 'chaser' || playerDistance > config.enemies.shooter.preferredDistance
-        || !pathIsClear(enemy.position, world.player.position, centralIsland.radius + enemy.collisionRadius)
+        || !pathIsClear(enemy.position, world.player.position, enemy.collisionRadius)
       enemy.velocity = shouldMove ? { x: Math.cos(enemy.rotation) * balance.moveSpeed, y: Math.sin(enemy.rotation) * balance.moveSpeed } : { x: 0, y: 0 }
       const next = {
         x: Math.max(enemy.collisionRadius, Math.min(config.arena.width - enemy.collisionRadius, enemy.position.x + enemy.velocity.x * deltaMs / 1_000)),
         y: Math.max(enemy.collisionRadius, Math.min(config.arena.height - enemy.collisionRadius, enemy.position.y + enemy.velocity.y * deltaMs / 1_000)),
       }
-      if (pathIsClear(enemy.position, next, centralIsland.radius + enemy.collisionRadius)) enemy.position = next
+      if (pathIsClear(enemy.position, next, enemy.collisionRadius)) enemy.position = next
       const distance = Math.hypot(world.player.position.x - enemy.position.x, world.player.position.y - enemy.position.y)
       if (enemy.enemyType === 'chaser' && distance <= enemy.collisionRadius + world.player.collisionRadius) {
         enemy.active = false
@@ -32,7 +31,7 @@ export const enemyBehaviorSystem: GameSystem = {
         const aim = Math.atan2(world.player.position.y - enemy.position.y, world.player.position.x - enemy.position.x)
         const aimDifference = Math.atan2(Math.sin(aim - enemy.rotation), Math.cos(aim - enemy.rotation))
         if (distance > shooter.attackRange || Math.abs(aimDifference) > 0.15
-          || !pathIsClear(enemy.position, world.player.position, centralIsland.radius)
+          || !pathIsClear(enemy.position, world.player.position)
           || world.elapsedMs - enemy.lastAttackAtMs < shooter.weapon.cooldownMs) continue
         enemy.lastAttackAtMs = world.elapsedMs
         const projectile = shooter.weapon.projectile

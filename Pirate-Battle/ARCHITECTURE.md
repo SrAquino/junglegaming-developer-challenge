@@ -30,9 +30,9 @@ The lifecycle accepts `idle → playing → paused → playing → ended`. A sin
 
 ## Arena and input
 
-The arena uses a logical coordinate system from each immutable match configuration. Pixi scales and centers that configured world inside a responsive canvas, preserving proportions while `Application` handles device pixel density. The canvas host fills the bordered arena shell; portrait uses a 16:9 shell and wider views use all available space with contained world scaling. Water is rendered by Pixi and the central island combines a blocking circular shape with supplied tile artwork.
+The arena uses a logical coordinate system from each immutable match configuration. Pixi scales and centers that configured world inside a responsive canvas, preserving proportions while `Application` handles device pixel density. The canvas host fills the bordered arena shell; portrait uses a 16:9 shell and wider views use all available space with contained world scaling. `arena-layout.ts` declares three sample-inspired landmasses, grass regions, navigation points and props. `arena-geometry.ts` applies those exact coast polygons to movement, swept projectiles, line of sight and spawning, while Pixi masks the supplied sand and grass textures to the same contours.
 
-`playerMovementSystem` runs in the fixed simulation loop. It applies rotation and forward velocity from the immutable input snapshot, then constrains the ship to arena edges and rejects a movement that intersects the island. `BrowserGameInput` listens only while `GameCanvas` is mounted, merges keyboard and touch holds so controls can be used together, and clears all held actions on release, cancellation, blur, visibility change and cleanup.
+`playerMovementSystem` runs in the fixed simulation loop. It applies rotation and forward velocity from the immutable input snapshot, then constrains the ship to arena edges and rejects a movement that intersects a coastline. `BrowserGameInput` listens only while `GameCanvas` is mounted, tracks touch actions by pointer ID so two controls remain independent, and clears all held actions on release, cancellation, lost capture, blur, visibility change, resize and cleanup.
 
 ## Combat
 
@@ -40,9 +40,9 @@ The arena uses a logical coordinate system from each immutable match configurati
 
 ## Enemies and spawning
 
-`enemy-spawn-system.ts` consumes active simulation time and tries bounded random positions that are inside the arena, outside the island and other ships, and at least the configured safe distance from the player. The first two successful spawns are a Chaser and Shooter so a default match always demonstrates both behaviors; subsequent spawns use the configured weights.
+`enemy-spawn-system.ts` consumes active simulation time and tries bounded random positions that are inside the arena, clear of every coast and other ships, and at least the configured safe distance from the player. The first two successful spawns are a Chaser and Shooter so a default match always demonstrates both behaviors; subsequent spawns use the configured weights.
 
-`enemy-behavior-system.ts` rotates and advances both types using elapsed simulation time. Chasers explode on contact, damage the player once and award no score. Shooters stop near their configured preferred distance and fire only with direct line of sight, inside attack range and after cooldown. When the central island blocks a direct route, `enemy-navigation.ts` selects the shorter sequence of clearance points around its perimeter. This arena-specific route is intentionally simpler than general pathfinding and matches the single blocking island.
+`enemy-behavior-system.ts` rotates and advances both types using elapsed simulation time. Chasers explode on contact, damage the player once and award no score. Shooters stop near their configured preferred distance and fire only with direct line of sight, inside attack range and after cooldown. When land blocks a direct route, `enemy-navigation.ts` runs a small visibility graph over the map's declared channel waypoints and respects each hull's clearance.
 
 ## Match lifecycle and UI
 

@@ -1,4 +1,4 @@
-import { centralIsland } from '../config/arena-layout.ts'
+import { circleIntersectsLand } from '../config/arena-geometry.ts'
 import type { EnemyType } from '../entities/entity.ts'
 import type { GameSystem } from './game-system.ts'
 
@@ -19,7 +19,7 @@ export const enemySpawnSystem: GameSystem = {
         y: radius + random.next() * (config.arena.height - radius * 2),
       }
       if (Math.hypot(position.x - world.player.position.x, position.y - world.player.position.y) < config.spawn.minimumDistanceFromPlayer) continue
-      if (Math.hypot(position.x - centralIsland.center.x, position.y - centralIsland.center.y) <= centralIsland.radius + radius) continue
+      if (circleIntersectsLand(position, radius)) continue
       if (world.enemies.some((enemy) => Math.hypot(position.x - enemy.position.x, position.y - enemy.position.y) < radius + enemy.collisionRadius)) continue
       world.spawnedEnemyCount += 1
       world.enemies.push({
