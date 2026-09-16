@@ -26,11 +26,13 @@ import {
 import type { GameRenderer } from './game-renderer.ts'
 import { createArenaScenery } from './arena-scenery.ts'
 import { GameAudio } from '../audio/game-audio.ts'
+import type { AudioSettings } from '../../storage/audio-settings.ts'
 
 const MAX_DEVICE_PIXEL_RATIO = 2
 
 export interface PlayableSceneOptions {
   configuration: GameConfigSnapshot
+  audioSettings: AudioSettings
   onHud?: (snapshot: Readonly<HudSnapshot>) => void
   onFinished?: (result: Readonly<MatchResult>) => void
 }
@@ -45,6 +47,7 @@ export class FirstPlayableScene implements GameRenderer {
   public constructor(input: GameInput, options: PlayableSceneOptions) {
     this.input = input
     this.options = options
+    this.audio = new GameAudio(options.audioSettings)
     this.session = new GameSession({ systems: [playerMovementSystem, enemySpawnSystem, weaponSystem, projectileSystem, combatSystem, enemyBehaviorSystem, effectSystem] })
     this.unsubscribeHud = this.session.subscribeHud((snapshot) => this.options.onHud?.(snapshot))
     this.unsubscribeLifecycle = this.session.subscribeLifecycle((event) => {
@@ -64,7 +67,7 @@ export class FirstPlayableScene implements GameRenderer {
   private readonly options: PlayableSceneOptions
   private readonly unsubscribeHud: () => void
   private readonly unsubscribeLifecycle: () => void
-  private readonly audio = new GameAudio()
+  private readonly audio: GameAudio
   private audioUnlockHost: HTMLElement | null = null
 
   public async mount(host: HTMLElement): Promise<void> {

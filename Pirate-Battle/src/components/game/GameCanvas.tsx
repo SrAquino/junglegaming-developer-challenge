@@ -5,18 +5,20 @@ import { BrowserGameInput } from '../../game/input/browser-game-input.ts'
 import type { InputAction } from '../../game/input/browser-game-input.ts'
 import { FirstPlayableScene } from '../../game/rendering/first-playable-scene.ts'
 import type { HudSnapshot, MatchResult } from '../../game/types/game.ts'
+import type { AudioSettings } from '../../storage/audio-settings.ts'
 
 type LoadState = 'loading' | 'ready' | 'error'
 
 interface GameCanvasProps {
   configuration: GameConfigSnapshot
+  audioSettings: AudioSettings
   onExit: () => void
   onFinished: (result: MatchResult) => void
 }
 
 const initialHud: HudSnapshot = { status: 'playing', score: 0, remainingSeconds: 0, playerHealth: 0, playerMaxHealth: 0 }
 
-export function GameCanvas({ configuration, onExit, onFinished }: GameCanvasProps) {
+export function GameCanvas({ audioSettings, configuration, onExit, onFinished }: GameCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<BrowserGameInput | null>(null)
   const sceneRef = useRef<FirstPlayableScene | null>(null)
@@ -32,6 +34,7 @@ export function GameCanvas({ configuration, onExit, onFinished }: GameCanvasProp
     inputRef.current = input
     let cancelled = false
     const scene = new FirstPlayableScene(input, {
+      audioSettings,
       configuration,
       onHud: (snapshot) => { if (!cancelled) setHud(snapshot) },
       onFinished: (result) => { if (!cancelled) onFinished(result) },
@@ -55,7 +58,7 @@ export function GameCanvas({ configuration, onExit, onFinished }: GameCanvasProp
       sceneRef.current = null
       inputRef.current = null
     }
-  }, [attempt, configuration, onFinished])
+  }, [attempt, audioSettings, configuration, onFinished])
 
   const paused = hud.status === 'paused'
   const resume = () => {

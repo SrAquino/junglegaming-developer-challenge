@@ -21,6 +21,19 @@ test('saves validated options and restores them after refresh', async ({ page })
   await expect(restored.getByLabel('Enemy spawn time')).toHaveValue('6')
 })
 
+test('persists muted audio and volume choices for the next match', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Options' }).click()
+  const volume = page.getByLabel('Sound volume')
+  await volume.press('Home')
+  for (let step = 0; step < 5; step += 1) await volume.press('ArrowRight')
+  await page.getByLabel('Mute sound').check()
+  await page.getByRole('button', { name: 'Save options' }).click()
+  await page.getByRole('button', { name: 'Options' }).click()
+  await expect(page.getByLabel('Mute sound')).toBeChecked()
+  await expect(page.getByLabel('Sound volume')).toHaveValue('0.25')
+})
+
 test('pauses without advancing and resumes only from an explicit action', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('button', { name: 'Play' }).click()

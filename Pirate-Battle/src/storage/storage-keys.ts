@@ -4,4 +4,5 @@ export const storageKeys = {
   pendingMatches: 'pirate-battle.pending-matches',
   playerId: 'pirate-battle.player-id',
   confirmedMatches: 'pirate-battle.confirmed-match-records',
+  audioSettings: 'pirate-battle.audio-settings',
 } as const

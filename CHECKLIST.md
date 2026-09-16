@@ -262,11 +262,11 @@ Execution order: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared U
 
 ### 14.7 Supplied sound integration — Terra / Medium
 
-- [ ] Add an audio adapter driven by gameplay/UI events; preload reusable buffers and unlock playback through the first user interaction on desktop and mobile.
+- [x] Add an audio adapter driven by gameplay/UI events; preload reusable buffers and unlock playback through the first user interaction on desktop and mobile.
 - [ ] Use UI hover/click/open/close/back sounds and start/pause/resume/complete/game-over sounds at their corresponding transitions, once per event.
 - [ ] Use cannon-fire variants, broadside, wood-hit, water-hit, collision, explosion and sinking sounds for the corresponding real combat events; document variation selection.
 - [ ] Integrate ocean ambience and sailing loops plus score, low-health and time-warning cues; gate repeated warnings and limit overlapping voices to avoid clipping.
-- [ ] Add persisted mute and volume controls in Options; pause/suspend loops when hidden or paused and release audio resources on exit without duplicate playback on restart.
+- [x] Add persisted mute and volume controls in Options; pause/suspend loops when hidden or paused and release audio resources on exit without duplicate playback on restart.
 - [ ] Handle audio loading/playback failures without blocking gameplay; verify every supplied sound has a mapped event or documented reason for exclusion.
 
 ### 14.8 Updated evidence and deployment — Terra / Medium

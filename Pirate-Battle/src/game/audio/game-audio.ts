@@ -8,13 +8,17 @@ const soundSources: Readonly<Record<GameSound, string>> = Object.freeze({
 
 const loopSounds = new Set<GameSound>(['oceanLoop', 'sailingLoop'])
 
+interface GameAudioOptions { muted: boolean; volume: number }
+
 export class GameAudio {
   private readonly prototypes = new Map<GameSound, HTMLAudioElement>()
   private readonly loops = new Map<GameSound, HTMLAudioElement>()
   private readonly lastPlayedAt = new Map<GameSound, number>()
+  private readonly options: Readonly<GameAudioOptions>
   private unlocked = false
 
-  public constructor() {
+  public constructor(options: Readonly<GameAudioOptions> = { muted: false, volume: 0.65 }) {
+    this.options = options
     for (const [sound, fileName] of Object.entries(soundSources) as [GameSound, string][]) {
       const audio = new Audio(`/assets/sounds/${fileName}`)
       audio.preload = 'auto'
@@ -25,23 +29,23 @@ export class GameAudio {
   public unlock(): void { this.unlocked = true }
 
   public play(sound: GameSound): void {
-    if (!this.unlocked || loopSounds.has(sound) || !this.canPlay(sound)) return
+    if (this.options.muted || !this.unlocked || loopSounds.has(sound) || !this.canPlay(sound)) return
     const source = this.prototypes.get(sound)
     if (!source) return
     const instance = source.cloneNode() as HTMLAudioElement
-    instance.volume = sound === 'explosion' ? 0.45 : 0.35
+    instance.volume = this.options.volume * (sound === 'explosion' ? 0.45 : 0.35)
     void instance.play().catch(() => undefined)
   }
 
   public startLoops(): void {
-    if (!this.unlocked) return
+    if (this.options.muted || !this.unlocked) return
     for (const sound of loopSounds) {
       if (this.loops.has(sound)) continue
       const source = this.prototypes.get(sound)
       if (!source) continue
       const loop = source.cloneNode() as HTMLAudioElement
       loop.loop = true
-      loop.volume = sound === 'oceanLoop' ? 0.12 : 0.08
+      loop.volume = this.options.volume * (sound === 'oceanLoop' ? 0.12 : 0.08)
       this.loops.set(sound, loop)
       void loop.play().catch(() => undefined)
     }
