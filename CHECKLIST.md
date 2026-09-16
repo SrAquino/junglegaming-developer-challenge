@@ -229,10 +229,10 @@ Execution order: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared U
 
 ### 14.3 Shared nautical UI — Terra / Medium
 
-- [ ] Build reusable responsive panels and gold/wood buttons from the supplied UI atlas, with dark navy interiors and cream/gold typography matching the samples.
-- [ ] Use `ui_scene_background.png` and the supplied logo where shown in menu samples, preserving legibility at narrow viewport sizes.
-- [ ] Add consistent hover, pressed, selected, disabled and keyboard-focus states, accessible icon labels and adequate touch targets.
-- [ ] Keep text and controls in semantic React markup; use artwork for decoration and scalable frames, not screenshots of complete sample screens.
+- [x] Build reusable responsive panels and gold/wood buttons from the supplied UI atlas, with dark navy interiors and cream/gold typography matching the samples.
+- [x] Use `ui_scene_background.png` and the supplied logo where shown in menu samples, preserving legibility at narrow viewport sizes.
+- [x] Add consistent hover, pressed, selected, disabled and keyboard-focus states, accessible icon labels and adequate touch targets.
+- [x] Keep text and controls in semantic React markup; use artwork for decoration and scalable frames, not screenshots of complete sample screens.
 - [ ] Move network scenario controls into a clearly discoverable secondary demo panel so they remain usable without dominating the main menu.
 
 ### 14.4 Menu, logbook, options, pause and result — Terra / Medium

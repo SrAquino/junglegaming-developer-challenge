@@ -1,7 +1,7 @@
 :root {
-  color: #f4ead2;
-  background: #061d2d;
-  font-family: Inter, system-ui, sans-serif;
+  color: #fff0c4;
+  background: #0b718d;
+  font-family: "Trebuchet MS", Inter, system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -37,36 +37,58 @@ textarea:focus-visible {
   place-content: center;
   padding: 2rem;
   text-align: center;
+  background: linear-gradient(#07324899, #07324899), url('/assets/ui_scene_background.png') center / cover fixed;
 }
 
 .main-menu {
-  max-width: 34rem;
+  width: min(100%, 42rem);
 }
 
 .eyebrow {
-  color: #78cad2;
+  color: #f8dd9c;
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.main-menu h1 {
-  margin: 0.5rem 0;
-  font-size: clamp(3rem, 10vw, 5.5rem);
+.game-title-art {
+  width: min(100%, 25rem);
+  justify-self: center;
+  filter: drop-shadow(0 0.25rem 0 #0a1c2d);
+}
+
+.jungle-logo {
+  width: 7rem;
+  justify-self: end;
+  margin-top: 0.25rem;
 }
 
 .primary-button {
-  margin-top: 2rem;
-  border: 0;
-  border-radius: 0.5rem;
-  padding: 0.8rem 2rem;
-  color: #061d2d;
-  background: #f8c75b;
-  font-weight: 800;
+  min-width: 12rem;
 }
 
-.primary-button:disabled {
+button {
+  min-height: 3rem;
+  border: 0;
+  padding: 0.65rem 1.5rem 0.85rem;
+  color: #2b1b10;
+  background: url('/assets/png/default/ui/menu/button_primary_normal.png') center / 100% 100% no-repeat;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px #ffe4a0;
+}
+
+button:hover:not(:disabled) {
+  background-image: url('/assets/png/default/ui/menu/button_primary_hover.png');
+}
+
+button:active:not(:disabled) {
+  background-image: url('/assets/png/default/ui/menu/button_primary_pressed.png');
+  transform: translateY(1px);
+}
+
+button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -74,11 +96,11 @@ textarea:focus-visible {
 .panel {
   display: grid;
   gap: 1rem;
-  width: min(100%, 32rem);
-  padding: 2rem;
-  border: 1px solid #1b6374;
-  border-radius: 0.75rem;
-  background: #07324a;
+  width: min(100%, 48rem);
+  min-height: 28rem;
+  padding: clamp(3rem, 8vw, 5rem) clamp(2rem, 8vw, 6rem);
+  background: url('/assets/png/default/ui/menu/panel_menu.png') center / 100% 100% no-repeat;
+  text-shadow: 0 2px #0a1c2d;
 }
 
 .panel label {
@@ -88,11 +110,11 @@ textarea:focus-visible {
 }
 
 .panel input {
-  border: 1px solid #78cad2;
+  border: 2px solid #b97b28;
   border-radius: 0.4rem;
   padding: 0.6rem;
   color: inherit;
-  background: #061d2d;
+  background: #102a3d;
 }
 
 .menu-actions,
@@ -113,8 +135,7 @@ textarea:focus-visible {
 }
 
 .menu-tabs button[aria-selected='true'] {
-  color: #061d2d;
-  background: #f8c75b;
+  background-image: url('/assets/png/default/ui/menu/button_primary_pressed.png');
 }
 
 .data-list {
@@ -130,8 +151,9 @@ textarea:focus-visible {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.65rem;
-  border: 1px solid #1b6374;
+  border: 1px solid #26495c;
   border-radius: 0.4rem;
+  background: #0b2435cc;
 }
 
 .scenario-panel {
@@ -140,15 +162,6 @@ textarea:focus-visible {
   margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid #1b6374;
-}
-
-.menu-actions button,
-.game-actions button {
-  border: 1px solid #78cad2;
-  border-radius: 0.5rem;
-  padding: 0.7rem 1rem;
-  color: inherit;
-  background: #0b415c;
 }
 
 .game-screen {
@@ -185,7 +198,8 @@ textarea:focus-visible {
   place-content: center;
   gap: 1rem;
   margin: 0;
-  background: #07324a;
+  color: #fff0c4;
+  background: #07324ae8;
   text-align: center;
 }
 
@@ -208,15 +222,26 @@ textarea:focus-visible {
 .touch-control {
   min-width: 0;
   min-height: 3rem;
-  border: 1px solid #78cad2;
-  border-radius: 0.5rem;
-  color: inherit;
-  background: #0b415c;
+  min-height: 3.75rem;
+  border: 0;
+  color: #2b1b10;
+  background: url('/assets/png/default/ui/controls/button_round_normal.png') center / contain no-repeat;
   touch-action: none;
 }
 
 .touch-control:active {
-  background: #16728b;
+  background-image: url('/assets/png/default/ui/controls/button_round_pressed.png');
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @media (min-width: 900px) {
@@ -226,6 +251,15 @@ textarea:focus-visible {
 }
 
 @media (max-width: 600px) {
+  .application-shell {
+    padding: 1rem;
+  }
+
+  .panel {
+    min-height: 0;
+    padding: 3rem 1.5rem;
+  }
+
   .game-screen {
     gap: 0.5rem;
     padding: 0.5rem;

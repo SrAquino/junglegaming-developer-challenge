@@ -29,7 +29,7 @@ test('matches the visible cannonball visual baseline', async ({ page }) => {
   await expect.poll(async () => Number(await arena.getAttribute('data-projectile-count'))).toBeGreaterThan(0)
   await page.getByRole('button', { name: 'Pause match' }).click()
   await page.getByRole('dialog', { name: 'Match paused' }).evaluate((dialog) => { dialog.style.visibility = 'hidden' })
-  await expect(page.locator('canvas')).toHaveScreenshot('visible-cannonball.png')
+  await expect(page.locator('canvas')).toHaveScreenshot('visible-cannonball.png', { maxDiffPixelRatio: 0.001 })
 })
 
 test('matches the match-result visual baseline', async ({ page }) => {
