@@ -126,6 +126,14 @@ textarea {
   border-radius: 0.4rem;
 }
 
+.scenario-panel {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #1b6374;
+}
+
 .menu-actions button,
 .game-actions button {
   border: 1px solid #78cad2;

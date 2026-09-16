@@ -57,3 +57,7 @@ MSW starts before React renders in development and the published build. Its work
 ## Query and submission flow
 
 Ranking and history tabs use Axios request functions through TanStack Query. Query keys include the configuration grouping, player and pagination values, while focus revalidation keeps visible tabs current. A completed match is written to pending local storage before its mutation begins. Successful registrations remove that entry, persist the confirmed record and invalidate both data sets. Failed entries remain available for bounded automatic retries after refresh or an explicit retry from the result screen.
+
+## Reproducible network scenarios
+
+The main-menu scenario control stores a named scenario in local storage and dispatches a browser event so active ranking and history queries refetch. The Axios client sends that scenario in a request header; MSW then applies deterministic fixture data, delay or failure behavior. The mock reset endpoint restores fixture state, and the browser reset also removes confirmed and pending local records. A registration can deliberately fail after the server has accepted it; retrying the same match ID verifies idempotent recovery.

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchRanking } from '../../api/ranking.ts'
 import { queryKeys } from '../../api/queries/query-keys.ts'
@@ -9,6 +9,7 @@ export function RankingPanel({ configurationKey }: RankingPanelProps) {
   const [page, setPage] = useState(1)
   const pageSize = 5
   const query = useQuery({ queryKey: queryKeys.ranking(configurationKey, page, pageSize), queryFn: () => fetchRanking(page, pageSize, configurationKey), placeholderData: (previous) => previous })
+  useEffect(() => { const refresh = () => void query.refetch(); window.addEventListener('pirate-network-scenario-change', refresh); return () => window.removeEventListener('pirate-network-scenario-change', refresh) }, [query])
   if (query.isPending) return <p>Loading ranking…</p>
   if (query.isError) return <section role="alert"><p>Unable to load ranking.</p><button onClick={() => query.refetch()} type="button">Retry ranking</button></section>
   if (!query.data || query.data.total === 0) return <p>No ranking entries for this configuration yet.</p>

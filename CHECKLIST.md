@@ -158,14 +158,14 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 
 ## 10. Complete reproducible failure scenarios
 
-- [ ] Provide a scenario selector and reset-to-initial-state action.
-- [ ] Cover success, empty lists and multiple pages.
-- [ ] Cover slow requests, variable latency and out-of-order responses.
-- [ ] Cover timeout, connection errors and HTTP 4xx/5xx responses.
-- [ ] Allow ranking and history queries to fail independently.
-- [ ] Cover timeout after successful registration with idempotent recovery.
-- [ ] Cover unavailability at match end followed by recovery and registration.
-- [ ] Control latency and randomness in tests; document how to reproduce each scenario.
+- [x] Provide a scenario selector and reset-to-initial-state action.
+- [x] Cover success, empty lists and multiple pages.
+- [x] Cover slow requests, variable latency and out-of-order responses.
+- [x] Cover timeout, connection errors and HTTP 4xx/5xx responses.
+- [x] Allow ranking and history queries to fail independently.
+- [x] Cover timeout after successful registration with idempotent recovery.
+- [x] Cover unavailability at match end followed by recovery and registration.
+- [x] Control latency and randomness in tests; document how to reproduce each scenario.
 - [ ] Verify scenarios and persistence in the public production build.
 
 ## 11. Finish accessibility, visuals and required E2E coverage

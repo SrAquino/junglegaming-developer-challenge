@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchMatchHistory } from '../../api/match-history.ts'
 import { queryKeys } from '../../api/queries/query-keys.ts'
@@ -10,6 +10,7 @@ export function MatchHistoryPanel({ playerId }: MatchHistoryPanelProps) {
   const [page, setPage] = useState(1)
   const pageSize = 5
   const query = useQuery({ queryKey: queryKeys.matchHistory(playerId, page, pageSize), queryFn: () => fetchMatchHistory(playerId, page, pageSize), placeholderData: (previous) => previous })
+  useEffect(() => { const refresh = () => void query.refetch(); window.addEventListener('pirate-network-scenario-change', refresh); return () => window.removeEventListener('pirate-network-scenario-change', refresh) }, [query])
   if (query.isPending) return <p>Loading match history…</p>
   if (query.isError) return <section role="alert"><p>Unable to load match history.</p><button onClick={() => query.refetch()} type="button">Retry history</button></section>
   if (!query.data || query.data.total === 0) return <p>No completed matches yet.</p>
