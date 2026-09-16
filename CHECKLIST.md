@@ -249,9 +249,9 @@ Execution order: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared U
 ### 14.5 Tile-based arena — Terra / Medium
 
 - [ ] Use `tiles_sheet.png` or its retina alternative with correctly mapped grid frames for textured water, coastline, sand, grass and island interiors.
-- [ ] Compose scenery closer to `sample.png` with available rocks, vegetation, docks/fortifications and nautical props; define which objects block movement and which are decorative.
+- [x] Compose scenery closer to `sample.png` with available rocks, vegetation, docks/fortifications and nautical props; define which objects block movement and which are decorative.
 - [ ] Make collision geometry match visible coastlines and obstacles; update enemy routing and spawn clearance for the resulting arena layout.
-- [ ] Keep decorative art below gameplay sprites, preserve projectile contrast and avoid seams/texture bleeding during resizing.
+- [x] Keep decorative art below gameplay sprites, preserve projectile contrast and avoid seams/texture bleeding during resizing.
 
 ### 14.6 Sprite atlases and animated feedback — Terra / Medium
 

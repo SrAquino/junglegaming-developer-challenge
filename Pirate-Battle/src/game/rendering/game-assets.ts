@@ -7,7 +7,13 @@ export const tilesSheetAssetUrl = '/assets/tilesheet/tiles_sheet.png'
 export const shipsMiscellaneousAtlasAssetUrl = '/assets/spritesheet/ships_miscellaneous_sheet.png'
 
 export interface CombatAtlasTextures { cannonBall: Texture; muzzleFlash: Texture; impact: Texture; explosion: Texture }
-export interface ArenaTileTextures { water: Texture; rock: Texture }
+export interface ArenaTileTextures {
+  water: Texture
+  sand: Texture
+  rock: Texture
+  vegetation: readonly [Texture, Texture, Texture]
+  pier: Texture
+}
 
 export async function loadPlayerShipTexture(assetUrl = playerShipAssetUrl): Promise<Texture> {
   return Assets.load<Texture>(assetUrl)
@@ -28,9 +34,26 @@ export async function loadCombatAtlasTextures(): Promise<CombatAtlasTextures> {
 }
 
 export async function loadArenaTileTextures(): Promise<ArenaTileTextures> {
-  const sheet = await Assets.load<Texture>(tilesSheetAssetUrl)
+  const [sheet, sand, plantA, plantB, plantC, pier] = await Promise.all([
+    Assets.load<Texture>(tilesSheetAssetUrl),
+    loadTexture(tileAssetUrl(68)),
+    loadTexture(tileAssetUrl(70)),
+    loadTexture(tileAssetUrl(71)),
+    loadTexture(tileAssetUrl(72)),
+    loadTexture(tileAssetUrl(60)),
+  ])
   sheet.source.scaleMode = SCALE_MODES.NEAREST
-  return { water: tileFrame(sheet, 73, 1), rock: tileFrame(sheet, 50) }
+  return {
+    water: tileFrame(sheet, 73, 1),
+    sand,
+    rock: tileFrame(sheet, 50),
+    vegetation: [plantA, plantB, plantC],
+    pier,
+  }
+}
+
+function tileAssetUrl(tileNumber: number): string {
+  return `/assets/png/default/tiles/tile_${tileNumber}.png`
 }
 
 function atlasFrame(atlas: Texture, label: string, x: number, y: number, width: number, height: number): Texture {
