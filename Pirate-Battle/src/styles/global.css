@@ -63,10 +63,52 @@ textarea {
   opacity: 0.6;
 }
 
+.panel {
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 32rem);
+  padding: 2rem;
+  border: 1px solid #1b6374;
+  border-radius: 0.75rem;
+  background: #07324a;
+}
+
+.panel label {
+  display: grid;
+  gap: 0.4rem;
+  text-align: left;
+}
+
+.panel input {
+  border: 1px solid #78cad2;
+  border-radius: 0.4rem;
+  padding: 0.6rem;
+  color: inherit;
+  background: #061d2d;
+}
+
+.menu-actions,
+.game-actions,
+.game-hud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.menu-actions button,
+.game-actions button {
+  border: 1px solid #78cad2;
+  border-radius: 0.5rem;
+  padding: 0.7rem 1rem;
+  color: inherit;
+  background: #0b415c;
+}
+
 .game-screen {
   display: grid;
   height: 100svh;
-  grid-template-rows: minmax(0, 1fr) auto auto auto auto;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto;
   gap: 1rem;
   padding: 1rem;
 }
@@ -101,14 +143,7 @@ textarea {
   text-align: center;
 }
 
-.exit-button {
-  justify-self: center;
-  border: 1px solid #78cad2;
-  border-radius: 0.5rem;
-  padding: 0.7rem 1rem;
-  color: inherit;
-  background: transparent;
-}
+.game-hud { align-items: center; font-weight: 700; }
 
 .game-instructions {
   margin: 0;

@@ -1,7 +1,9 @@
 import { Application, Container, Graphics, Sprite } from 'pixi.js'
 import { centralIsland } from '../config/arena-layout.ts'
 import { defaultGameConfig } from '../config/game-config.ts'
+import type { GameConfigSnapshot } from '../config/game-config.ts'
 import { GameSession } from '../core/game-session.ts'
+import type { HudSnapshot, MatchResult } from '../types/game.ts'
 import type { GameInput } from '../input/game-input.ts'
 import { playerMovementSystem } from '../systems/player-movement-system.ts'
 import { weaponSystem } from '../systems/weapon-system.ts'
@@ -24,6 +26,12 @@ import type { GameRenderer } from './game-renderer.ts'
 
 const MAX_DEVICE_PIXEL_RATIO = 2
 
+export interface PlayableSceneOptions {
+  configuration: GameConfigSnapshot
+  onHud?: (snapshot: Readonly<HudSnapshot>) => void
+  onFinished?: (result: Readonly<MatchResult>) => void
+}
+
 export class FirstPlayableScene implements GameRenderer {
   private application: Application | null = null
   private initialization: Promise<void> | null = null
@@ -31,12 +39,20 @@ export class FirstPlayableScene implements GameRenderer {
   private destroyed = false
   private didDestroy = false
 
-  public constructor(input: GameInput) {
+  public constructor(input: GameInput, options: PlayableSceneOptions) {
     this.input = input
+    this.options = options
     this.session = new GameSession({ systems: [playerMovementSystem, enemySpawnSystem, weaponSystem, projectileSystem, combatSystem, enemyBehaviorSystem, effectSystem] })
+    this.unsubscribeHud = this.session.subscribeHud((snapshot) => this.options.onHud?.(snapshot))
+    this.unsubscribeLifecycle = this.session.subscribeLifecycle((event) => {
+      if (event.type === 'ended' && event.result) this.options.onFinished?.(event.result)
+    })
   }
 
   private readonly input: GameInput
+  private readonly options: PlayableSceneOptions
+  private readonly unsubscribeHud: () => void
+  private readonly unsubscribeLifecycle: () => void
 
   public async mount(host: HTMLElement): Promise<void> {
     const application = new Application()
@@ -104,7 +120,7 @@ export class FirstPlayableScene implements GameRenderer {
     const enemyLayer = new Container()
     world.addChildAt(enemyLayer, 2)
 
-    this.session.start(defaultGameConfig)
+    this.session.start(this.options.configuration)
     application.ticker.add(() => {
       this.session.tick(this.input.getSnapshot())
       const observation = this.session.observe()
@@ -140,6 +156,8 @@ export class FirstPlayableScene implements GameRenderer {
   public destroy(): void {
     this.destroyed = true
     this.session.destroy()
+    this.unsubscribeHud()
+    this.unsubscribeLifecycle()
     if (this.initialization) {
       void this.initialization.then(
         () => this.destroyApplication(),
@@ -150,6 +168,10 @@ export class FirstPlayableScene implements GameRenderer {
 
     this.destroyApplication()
   }
+
+  public pause(): boolean { return this.session.pause() }
+
+  public resume(): boolean { return this.session.resume() }
 
   private destroyApplication(): void {
     if (this.didDestroy) {

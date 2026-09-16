@@ -119,17 +119,17 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 ## 7. Complete match lifecycle and screens
 
 - [ ] Build the menu with Play, Options, Ranking, Match History and instructions.
-- [ ] Implement Game session time (60–180 seconds) and Enemy spawn time with validation, explicit saving and refresh persistence; changes apply only to new matches.
-- [ ] Show score, remaining time and match status in semantic HTML, with score and time in the HUD; avoid announcements every frame.
-- [ ] Implement manual pause and automatic pause on blur or hidden tab.
-- [ ] Suspend simulation, clock, cooldowns and spawns during pause; resume only after explicit player action.
-- [ ] Clear stale input and reset frame timing on pause/resume to prevent accumulated movement or firing.
-- [ ] End on timeout or zero player health; stop movement, attacks, damage, spawns and scoring.
-- [ ] Show score, active duration, end reason, submission status, Play Again and Main Menu on the result screen.
-- [ ] Persist the last completed result and restore its presentation after refresh.
-- [ ] Reset health, time, score, entities and input when starting a new match.
-- [ ] Treat refresh or exit during combat as abandonment; never submit an abandoned match.
-- [ ] Test options, both end conditions, pause/blur/resume, result persistence, abandonment and clean restarts.
+- [x] Implement Game session time (60–180 seconds) and Enemy spawn time with validation, explicit saving and refresh persistence; changes apply only to new matches.
+- [x] Show score, remaining time and match status in semantic HTML, with score and time in the HUD; avoid announcements every frame.
+- [x] Implement manual pause and automatic pause on blur or hidden tab.
+- [x] Suspend simulation, clock, cooldowns and spawns during pause; resume only after explicit player action.
+- [x] Clear stale input and reset frame timing on pause/resume to prevent accumulated movement or firing.
+- [x] End on timeout or zero player health; stop movement, attacks, damage, spawns and scoring.
+- [x] Show score, active duration, end reason, submission status, Play Again and Main Menu on the result screen.
+- [x] Persist the last completed result and restore its presentation after refresh.
+- [x] Reset health, time, score, entities and input when starting a new match.
+- [x] Treat refresh or exit during combat as abandonment; never submit an abandoned match.
+- [x] Test options, both end conditions, pause/blur/resume, result persistence, abandonment and clean restarts.
 
 ## 8. Implement ranking and history contracts and mocks
 

@@ -43,3 +43,7 @@ The arena uses a 1600×900 logical coordinate system. Pixi scales and centers th
 `enemy-spawn-system.ts` consumes active simulation time and tries bounded random positions that are inside the arena, outside the island and other ships, and at least the configured safe distance from the player. The first two successful spawns are a Chaser and Shooter so a default match always demonstrates both behaviors; subsequent spawns use the configured weights.
 
 `enemy-behavior-system.ts` rotates and advances both types using elapsed simulation time. Chasers explode on contact, damage the player once and award no score. Shooters stop near their configured preferred distance and fire only with direct line of sight, inside attack range and after cooldown. When the central island blocks a direct route, `enemy-navigation.ts` selects the shorter sequence of clearance points around its perimeter. This arena-specific route is intentionally simpler than general pathfinding and matches the single blocking island.
+
+## Match lifecycle and UI
+
+`GameSession` owns continuous match state. Its throttled HUD subscription drives React's semantic score, time and hull display without React renders for every Pixi frame. `GameCanvas` pauses the session on an explicit action, blur or hidden tab; resuming requires the pause dialog. Session lifecycle events persist completed results locally, while leaving combat abandons the session without a result. Options are validated and persisted separately, then converted to an immutable configuration snapshot when a new match begins.
