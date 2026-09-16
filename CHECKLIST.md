@@ -222,9 +222,9 @@ Execution order: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared U
 
 ### 14.2 Visible cannonballs and larger ships — Terra / Medium
 
-- [ ] Diagnose the reported invisible cannonballs: inspect texture loading, source dimensions, transparent padding, scale, anchor, draw order and contrast in the published and local builds.
-- [ ] Render visibly textured front and broadside cannonballs for both sides; verify all three broadside projectiles remain distinguishable on desktop and mobile, including during motion.
-- [ ] Increase player, Chaser and Shooter visual sizes using typed presentation settings; preserve distinct silhouettes and align health bars and muzzle origins with the artwork.
+- [x] Diagnose the reported invisible cannonballs: inspect texture loading, source dimensions, transparent padding, scale, anchor, draw order and contrast in the published and local builds.
+- [x] Render visibly textured front and broadside cannonballs for both sides; verify all three broadside projectiles remain distinguishable on desktop and mobile, including during motion.
+- [x] Increase player, Chaser and Shooter visual sizes using typed presentation settings; preserve distinct silhouettes and align health bars and muzzle origins with the artwork.
 - [ ] Review collision radii, island clearance, spawn distance and navigation after resizing ships; verify that visible hulls do not misleadingly overlap obstacles or targets.
 
 ### 14.3 Shared nautical UI — Terra / Medium

@@ -20,6 +20,18 @@ test('matches the stable paused arena visual baseline', async ({ page }) => {
   await expect(page.locator('canvas')).toHaveScreenshot('stable-arena.png')
 })
 
+test('matches the visible cannonball visual baseline', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Play' }).click()
+  const arena = page.locator('.game-canvas')
+  await expect(arena).toHaveAttribute('data-projectile-count', '0')
+  await page.keyboard.press('f')
+  await expect.poll(async () => Number(await arena.getAttribute('data-projectile-count'))).toBeGreaterThan(0)
+  await page.getByRole('button', { name: 'Pause match' }).click()
+  await page.getByRole('dialog', { name: 'Match paused' }).evaluate((dialog) => { dialog.style.visibility = 'hidden' })
+  await expect(page.locator('canvas')).toHaveScreenshot('visible-cannonball.png')
+})
+
 test('matches the match-result visual baseline', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('pirate-battle.last-match-result', JSON.stringify({ matchId: 'visual-result', score: 7, activeDurationMs: 12_500, endReason: 'time-expired', configuration: {} }))

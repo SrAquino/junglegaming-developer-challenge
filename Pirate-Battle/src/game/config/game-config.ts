@@ -50,6 +50,12 @@ export interface GameConfig {
     minimumDistanceFromPlayer: number
     placementAttempts: number
   }
+  presentation: {
+    playerShipScale: number
+    chaserShipScale: number
+    shooterShipScale: number
+    projectileScale: number
+  }
   player: ShipConfig
   enemies: {
     chaser: ShipConfig & {
@@ -103,6 +109,12 @@ export const defaultGameConfig: GameConfigSnapshot = deepFreeze({
   spawn: {
     minimumDistanceFromPlayer: 420,
     placementAttempts: 24,
+  },
+  presentation: {
+    playerShipScale: 1.1,
+    chaserShipScale: 0.95,
+    shooterShipScale: 0.95,
+    projectileScale: 2.2,
   },
   player: {
     maxHealth: 100,

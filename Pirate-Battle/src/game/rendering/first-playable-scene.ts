@@ -105,7 +105,7 @@ export class FirstPlayableScene implements GameRenderer {
 
     const ship = new Sprite(shipTexture)
     ship.anchor.set(0.5)
-    ship.scale.set(0.72)
+    ship.scale.set(this.options.configuration.presentation.playerShipScale)
     world.addChild(ship)
 
     const playerHealthBar = createHealthBar()
@@ -136,11 +136,11 @@ export class FirstPlayableScene implements GameRenderer {
       ship.position.set(observation.playerPosition.x, observation.playerPosition.y)
       ship.rotation = observation.playerRotation + Math.PI / 2
       ship.tint = observation.playerHealth <= 35 ? 0xd88372 : 0xffffff
-      updateHealthBar(playerHealthBar, observation.playerPosition.x, observation.playerPosition.y, observation.playerHealth, defaultGameConfig.player.maxHealth)
+      updateHealthBar(playerHealthBar, observation.playerPosition.x, observation.playerPosition.y, observation.playerHealth, defaultGameConfig.player.maxHealth, 72)
       const simulation = this.session.getWorldForRendering()
-      syncEnemies(simulation.enemies, enemySprites, enemyLayer, { chaser: chaserTexture, shooter: shooterTexture })
-      syncEnemyHealthBars(simulation.enemies, enemyHealthBars, world)
-      syncProjectiles(simulation.projectiles, projectileSprites, projectileLayer, cannonBallTexture)
+      syncEnemies(simulation.enemies, enemySprites, enemyLayer, { chaser: chaserTexture, shooter: shooterTexture }, this.options.configuration.presentation)
+      syncEnemyHealthBars(simulation.enemies, enemyHealthBars, world, 62)
+      syncProjectiles(simulation.projectiles, projectileSprites, projectileLayer, cannonBallTexture, this.options.configuration.presentation.projectileScale)
       syncEffects(simulation.effects, effectGraphics, effectLayer)
       host.dataset.playerX = observation.playerPosition.x.toFixed(2)
       host.dataset.playerY = observation.playerPosition.y.toFixed(2)
@@ -190,7 +190,13 @@ interface HealthBar {
   fill: Graphics
 }
 
-function syncEnemies(enemies: readonly EnemyEntity[], sprites: Map<string, Sprite>, layer: Container, textures: Record<'chaser' | 'shooter', Texture>): void {
+function syncEnemies(
+  enemies: readonly EnemyEntity[],
+  sprites: Map<string, Sprite>,
+  layer: Container,
+  textures: Record<'chaser' | 'shooter', Texture>,
+  presentation: GameConfigSnapshot['presentation'],
+): void {
   const activeIds = new Set(enemies.map((enemy) => enemy.id))
   for (const [id, sprite] of sprites) {
     if (!activeIds.has(id)) { sprite.destroy(); sprites.delete(id) }
@@ -200,7 +206,7 @@ function syncEnemies(enemies: readonly EnemyEntity[], sprites: Map<string, Sprit
     if (!sprite) {
       sprite = new Sprite(textures[enemy.enemyType])
       sprite.anchor.set(0.5)
-      sprite.scale.set(0.65)
+      sprite.scale.set(enemy.enemyType === 'chaser' ? presentation.chaserShipScale : presentation.shooterShipScale)
       layer.addChild(sprite)
       sprites.set(enemy.id, sprite)
     }
@@ -218,16 +224,17 @@ function createHealthBar(): HealthBar {
   return { container: healthBar, fill: foreground }
 }
 
-function updateHealthBar(bar: HealthBar, x: number, y: number, health: number, maxHealth: number): void {
+function updateHealthBar(bar: HealthBar, x: number, y: number, health: number, maxHealth: number, verticalOffset: number): void {
   const ratio = Math.max(0, Math.min(1, health / maxHealth))
   bar.fill.clear().roundRect(-23, -2, 46 * ratio, 4, 2).fill({ color: ratio > 0.35 ? 0x65d18b : 0xe58b6b })
-  bar.container.position.set(x, y - 52)
+  bar.container.position.set(x, y - verticalOffset)
 }
 
 function syncEnemyHealthBars(
   enemies: readonly { id: string; position: { x: number; y: number }; health: number; maxHealth: number }[],
   bars: Map<string, HealthBar>,
   world: Container,
+  verticalOffset: number,
 ): void {
   const activeIds = new Set(enemies.map((enemy) => enemy.id))
   for (const [id, bar] of bars) {
@@ -243,7 +250,7 @@ function syncEnemyHealthBars(
       world.addChild(bar.container)
       bars.set(enemy.id, bar)
     }
-    updateHealthBar(bar, enemy.position.x, enemy.position.y, enemy.health, enemy.maxHealth)
+    updateHealthBar(bar, enemy.position.x, enemy.position.y, enemy.health, enemy.maxHealth, verticalOffset)
   }
 }
 
@@ -252,6 +259,7 @@ function syncProjectiles(
   sprites: Map<string, Sprite>,
   layer: Container,
   texture: import('pixi.js').Texture,
+  presentationScale: number,
 ): void {
   const activeIds = new Set(projectiles.map((projectile) => projectile.id))
   for (const [id, sprite] of sprites) {
@@ -265,7 +273,8 @@ function syncProjectiles(
     if (!sprite) {
       sprite = new Sprite(texture)
       sprite.anchor.set(0.5)
-      sprite.scale.set(0.35)
+      sprite.scale.set(presentationScale)
+      sprite.zIndex = 1
       layer.addChild(sprite)
       sprites.set(projectile.id, sprite)
     }
