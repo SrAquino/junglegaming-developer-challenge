@@ -21,8 +21,10 @@ import {
   islandRockAssetUrl,
   loadPlayerShipTexture,
   loadTexture,
+  waterTileAssetUrl,
 } from './game-assets.ts'
 import type { GameRenderer } from './game-renderer.ts'
+import { createArenaScenery } from './arena-scenery.ts'
 
 const MAX_DEVICE_PIXEL_RATIO = 2
 
@@ -71,12 +73,13 @@ export class FirstPlayableScene implements GameRenderer {
       return
     }
 
-    const [shipTexture, rockTexture, cannonBallTexture, chaserTexture, shooterTexture] = await Promise.all([
+    const [shipTexture, rockTexture, cannonBallTexture, chaserTexture, shooterTexture, waterTexture] = await Promise.all([
       loadPlayerShipTexture(),
       loadTexture(islandRockAssetUrl),
       loadTexture(cannonBallAssetUrl),
       loadTexture(chaserShipAssetUrl),
       loadTexture(shooterShipAssetUrl),
+      loadTexture(waterTileAssetUrl),
     ])
     if (this.destroyed) {
       this.destroyApplication()
@@ -87,21 +90,7 @@ export class FirstPlayableScene implements GameRenderer {
     const world = new Container()
     application.stage.addChild(world)
 
-    const water = new Graphics()
-    water.rect(0, 0, defaultGameConfig.arena.width, defaultGameConfig.arena.height).fill({ color: 0x0b6985 })
-    world.addChild(water)
-
-    const island = new Container()
-    island.position.set(centralIsland.center.x, centralIsland.center.y)
-    const sand = new Graphics()
-    sand.circle(0, 0, centralIsland.radius).fill({ color: 0xe7c36e }).stroke({ color: 0xb6843f, width: 9 })
-    island.addChild(sand)
-    const rock = new Sprite(rockTexture)
-    rock.anchor.set(0.5)
-    rock.scale.set(1.6)
-    rock.position.set(-45, -20)
-    island.addChild(rock)
-    world.addChild(island)
+    world.addChild(createArenaScenery(this.options.configuration.arena.width, this.options.configuration.arena.height, centralIsland, { water: waterTexture, rock: rockTexture }))
 
     const ship = new Sprite(shipTexture)
     ship.anchor.set(0.5)
