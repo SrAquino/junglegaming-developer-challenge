@@ -244,7 +244,7 @@ Execution order: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared U
 - [x] Match `sample_pause.png` with Resume, Options and Main Menu actions; keep the session paused while viewing options and apply gameplay changes only to the next match.
 - [x] Match `sample_result.png` with prominent points, duration, end reason and primary actions; keep registration status and pending retry accessible.
 - [x] Restyle the HUD and touch controls after `sample.png`, preserving semantic health/score/time and simultaneous movement/firing without covering the playable area.
-- [ ] Validate focus trapping/restoration in dialogs, keyboard tab navigation and layouts in desktop, mobile portrait and landscape after the redesign.
+- [x] Validate focus trapping/restoration in dialogs, keyboard tab navigation and layouts in desktop, mobile portrait and landscape after the redesign.
 
 ### 14.5 Tile-based arena — Terra / Medium
 

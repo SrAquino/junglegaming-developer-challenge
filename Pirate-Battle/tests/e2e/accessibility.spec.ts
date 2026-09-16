@@ -19,8 +19,27 @@ test('supports keyboard navigation, visible focus and pause-dialog focus restora
   await expect(page.getByRole('img', { name: 'Pirate Battle arena' })).toBeVisible()
   await page.getByRole('button', { name: 'Pause match' }).click()
   await expect(page.getByRole('dialog', { name: 'Match paused' }).getByRole('button', { name: 'Resume match' })).toBeFocused()
+  await page.keyboard.press('Shift+Tab')
+  await expect(page.getByRole('dialog', { name: 'Match paused' }).getByRole('button', { name: 'Main menu' })).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('dialog', { name: 'Match paused' }).getByRole('button', { name: 'Resume match' })).toBeFocused()
   await page.getByRole('button', { name: 'Resume match' }).click()
   await expect(page.getByRole('button', { name: 'Pause match' })).toBeFocused()
+})
+
+test('keeps the game controls and arena within a landscape mobile viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 844, height: 390 })
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Play' }).click()
+  const bounds = await page.locator('.game-canvas-shell').evaluate((element) => {
+    const box = element.getBoundingClientRect()
+    return { top: box.top, bottom: box.bottom, height: box.height, viewportHeight: window.innerHeight }
+  })
+  expect(bounds.height).toBeGreaterThan(100)
+  expect(bounds.top).toBeGreaterThanOrEqual(0)
+  expect(bounds.bottom).toBeLessThanOrEqual(bounds.viewportHeight)
+  await expect(page.getByRole('button', { name: 'Fire right broadside' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Pause match' })).toBeVisible()
 })
 
 test('exposes labels and accessible validation and network errors', async ({ page }) => {

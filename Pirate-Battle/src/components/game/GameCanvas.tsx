@@ -27,6 +27,7 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
   const inputRef = useRef<BrowserGameInput | null>(null)
   const sceneRef = useRef<FirstPlayableScene | null>(null)
   const pauseButtonRef = useRef<HTMLButtonElement>(null)
+  const pauseDialogRef = useRef<HTMLDivElement>(null)
   const configurationRef = useRef(configuration)
   const audioSettingsRef = useRef(audioSettings)
   const onFinishedRef = useRef(onFinished)
@@ -34,8 +35,27 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
   const [loadState, setLoadState] = useState<LoadState>('loading')
   const [hud, setHud] = useState<HudSnapshot>(initialHud)
   const [pauseOptionsOpen, setPauseOptionsOpen] = useState(false)
+  const paused = hud.status === 'paused'
 
   useEffect(() => { onFinishedRef.current = onFinished }, [onFinished])
+
+  useEffect(() => {
+    if (!paused) return
+    const dialog = pauseDialogRef.current
+    if (!dialog) return
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), select:not(:disabled), [tabindex]:not([tabindex="-1"])'))
+      if (!focusable.length) return
+      const first = focusable[0]
+      const last = focusable.at(-1)
+      if (!last) return
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
+    }
+    dialog.addEventListener('keydown', trapFocus)
+    return () => dialog.removeEventListener('keydown', trapFocus)
+  }, [paused, pauseOptionsOpen])
 
   useEffect(() => {
     const host = hostRef.current
@@ -70,7 +90,6 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
     }
   }, [attempt])
 
-  const paused = hud.status === 'paused'
   const resume = () => {
     sceneRef.current?.resume()
     setPauseOptionsOpen(false)
@@ -85,7 +104,7 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
         <div aria-busy={loadState === 'loading'} aria-label="Pirate Battle arena" className="game-canvas" ref={hostRef} role="img" />
         {loadState === 'loading' && <p className="game-status">Loading game assets…</p>}
         {loadState === 'error' && <div className="game-status" role="alert"><p>Unable to load game assets.</p><button onClick={() => setAttempt((value) => value + 1)} type="button">Retry</button></div>}
-        {paused && <div className="game-status pause-dialog" role="dialog" aria-label={pauseOptionsOpen ? 'Match options' : 'Match paused'} aria-modal="true">{pauseOptionsOpen ? <PausedOptions audioSettings={audioSettings} gameOptions={gameOptions} onBack={() => setPauseOptionsOpen(false)} onSave={onSaveOptions} /> : <><p className="eyebrow">The sea awaits</p><h2>Match paused</h2><button autoFocus onClick={resume} type="button">Resume match</button><button onClick={() => setPauseOptionsOpen(true)} type="button">Options</button><button onClick={onExit} type="button">Main menu</button></>}</div>}
+        {paused && <div className="game-status pause-dialog" ref={pauseDialogRef} role="dialog" aria-label={pauseOptionsOpen ? 'Match options' : 'Match paused'} aria-modal="true">{pauseOptionsOpen ? <PausedOptions audioSettings={audioSettings} gameOptions={gameOptions} onBack={() => setPauseOptionsOpen(false)} onSave={onSaveOptions} /> : <><p className="eyebrow">The sea awaits</p><h2>Match paused</h2><button autoFocus onClick={resume} type="button">Resume match</button><button onClick={() => setPauseOptionsOpen(true)} type="button">Options</button><button onClick={onExit} type="button">Main menu</button></>}</div>}
       </div>
       <p className="game-instructions">Keyboard: W/↑ sails, A/D or ←/→ turns, F fires ahead, Q/E fire broadsides.</p>
       <div aria-label="Touch movement and combat controls" className="touch-controls" role="group">
