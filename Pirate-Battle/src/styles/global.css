@@ -341,6 +341,7 @@ button:disabled {
   grid-template-rows: auto minmax(0, 1fr) auto auto auto;
   gap: 1rem;
   padding: 1rem;
+  background: #073248;
 }
 
 .game-canvas {
@@ -374,7 +375,27 @@ button:disabled {
   text-align: center;
 }
 
-.game-hud { align-items: center; font-weight: 700; }
+.game-hud {
+  align-items: center;
+  font-weight: 800;
+}
+
+.game-hud span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #a06a29;
+  border-radius: 0.45rem;
+  background: #0b2435e8;
+}
+
+.game-hud img {
+  width: 1.5rem;
+  height: 1.5rem;
+  object-fit: contain;
+}
 
 .game-instructions {
   margin: 0;
@@ -399,6 +420,25 @@ button:disabled {
   background: url('/assets/png/default/ui/controls/button_round_normal.png') center / contain no-repeat;
   touch-action: none;
 }
+
+.touch-control img {
+  width: 1.55rem;
+  height: 1.55rem;
+  object-fit: contain;
+}
+
+.pause-dialog {
+  width: min(90%, 30rem);
+  min-height: 0;
+  inset: 50% auto auto 50%;
+  padding: 3.5rem 4rem;
+  transform: translate(-50%, -50%);
+  background: url('/assets/png/default/ui/menu/panel_menu.png') center / 100% 100% no-repeat;
+  text-shadow: 0 2px #0a1c2d;
+}
+
+.pause-dialog h2,
+.pause-dialog p { margin: 0; }
 
 .touch-control:active {
   background-image: url('/assets/png/default/ui/controls/button_round_pressed.png');

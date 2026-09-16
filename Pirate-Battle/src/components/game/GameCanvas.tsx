@@ -65,13 +65,13 @@ export function GameCanvas({ configuration, onExit, onFinished }: GameCanvasProp
   return (
     <main className="game-screen">
       <header aria-label="Match status" className="game-hud">
-        <span>Score: {hud.score}</span><span>Time: {hud.remainingSeconds}s</span><span>Hull: {hud.playerHealth}/{hud.playerMaxHealth}</span>
+        <span><img alt="" src="/assets/png/default/ui/hud/icon_score.png" />Score: {hud.score}</span><span><img alt="" src="/assets/png/default/ui/hud/icon_time.png" />Time: {hud.remainingSeconds}s</span><span><img alt="" src="/assets/png/default/ui/hud/icon_heart.png" />Hull: {hud.playerHealth}/{hud.playerMaxHealth}</span>
       </header>
       <div className="game-canvas-shell">
         <div aria-busy={loadState === 'loading'} aria-label="Pirate Battle arena" className="game-canvas" ref={hostRef} role="img" />
         {loadState === 'loading' && <p className="game-status">Loading game assets…</p>}
         {loadState === 'error' && <div className="game-status" role="alert"><p>Unable to load game assets.</p><button onClick={() => setAttempt((value) => value + 1)} type="button">Retry</button></div>}
-        {paused && <div className="game-status" role="dialog" aria-label="Match paused" aria-modal="true"><p>Match paused.</p><button autoFocus onClick={resume} type="button">Resume match</button></div>}
+        {paused && <div className="game-status pause-dialog" role="dialog" aria-label="Match paused" aria-modal="true"><p className="eyebrow">The sea awaits</p><h2>Match paused</h2><button autoFocus onClick={resume} type="button">Resume match</button><button onClick={onExit} type="button">Main menu</button></div>}
       </div>
       <p className="game-instructions">Keyboard: W/↑ sails, A/D or ←/→ turns, F fires ahead, Q/E fire broadsides.</p>
       <div aria-label="Touch movement and combat controls" className="touch-controls" role="group">
@@ -88,10 +88,12 @@ export function GameCanvas({ configuration, onExit, onFinished }: GameCanvasProp
 
 interface TouchControlProps { action: InputAction; inputRef: RefObject<BrowserGameInput | null>; label: string }
 
+const controlIcons: Readonly<Record<InputAction, string>> = Object.freeze({ turnLeft: 'icon_turn_left.png', forward: 'icon_forward.png', turnRight: 'icon_turn_right.png', fireLeft: 'icon_fire_left.png', fireFront: 'icon_fire_front.png', fireRight: 'icon_fire_right.png' })
+
 function TouchControl({ action, inputRef, label }: TouchControlProps) {
   const release = () => inputRef.current?.setTouchAction(action, false)
-  return <button className="touch-control" onPointerCancel={release} onPointerDown={(event) => {
+  return <button aria-label={label} className="touch-control" onPointerCancel={release} onPointerDown={(event) => {
     event.currentTarget.setPointerCapture(event.pointerId)
     inputRef.current?.setTouchAction(action, true)
-  }} onPointerLeave={release} onPointerUp={release} type="button">{label}</button>
+  }} onPointerLeave={release} onPointerUp={release} type="button"><img alt="" src={`/assets/png/default/ui/controls/${controlIcons[action]}`} /></button>
 }
