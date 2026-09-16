@@ -37,15 +37,30 @@ test('keeps the game controls and arena within a landscape mobile viewport', asy
   await page.setViewportSize({ width: 844, height: 390 })
   await page.goto('/')
   await page.getByRole('button', { name: 'Play' }).click()
-  const bounds = await page.locator('.game-canvas-shell').evaluate((element) => {
-    const box = element.getBoundingClientRect()
-    return { top: box.top, bottom: box.bottom, height: box.height, viewportHeight: window.innerHeight }
-  })
-  expect(bounds.height).toBeGreaterThan(100)
-  expect(bounds.top).toBeGreaterThanOrEqual(0)
-  expect(bounds.bottom).toBeLessThanOrEqual(bounds.viewportHeight)
+  await expectArenaToFit(page)
   await expect(page.getByRole('button', { name: 'Fire right broadside' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Pause match' })).toBeVisible()
+})
+
+test('resizes one complete arena across the supported desktop and mobile viewports', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Play' }).click()
+  const arena = page.getByRole('img', { name: 'Pirate Battle arena' })
+  await expect(arena).toHaveAttribute('aria-busy', 'false')
+  const matchId = await arena.getAttribute('data-match-id')
+  expect(matchId).not.toBe('')
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 412, height: 839 },
+    { width: 390, height: 844 },
+    { width: 844, height: 390 },
+    { width: 667, height: 375 },
+  ]) {
+    await page.setViewportSize(viewport)
+    await expectArenaToFit(page)
+    await expect(page.locator('canvas')).toHaveCount(1)
+    await expect(arena).toHaveAttribute('data-match-id', matchId ?? '')
+  }
 })
 
 test('exposes labels and accessible validation and network errors', async ({ page }) => {
@@ -76,3 +91,32 @@ test('runs the menu and gameplay flow without unhandled browser errors', async (
   await page.getByRole('button', { name: 'Back to menu' }).click()
   expect(errors).toEqual([])
 })
+
+async function expectArenaToFit(page: import('@playwright/test').Page): Promise<void> {
+  const arena = page.getByRole('img', { name: 'Pirate Battle arena' })
+  await expect(arena).toHaveAttribute('aria-busy', 'false')
+  await expect(arena).toHaveAttribute('data-world-scale', /.+/)
+  const bounds = await page.evaluate(() => {
+    const shell = document.querySelector<HTMLElement>('.game-canvas-shell')?.getBoundingClientRect()
+    const canvas = document.querySelector('canvas')?.getBoundingClientRect()
+    const host = document.querySelector<HTMLElement>('.game-canvas')
+    if (!shell || !canvas || !host) throw new Error('Arena bounds are unavailable.')
+    return {
+      viewport: { width: window.innerWidth, height: window.innerHeight },
+      shell: { left: shell.left, top: shell.top, right: shell.right, bottom: shell.bottom },
+      canvas: { left: canvas.left, top: canvas.top, right: canvas.right, bottom: canvas.bottom, width: canvas.width, height: canvas.height },
+      world: { width: Number(host.dataset.worldWidth), height: Number(host.dataset.worldHeight) },
+      scrollHeight: document.documentElement.scrollHeight,
+    }
+  })
+  expect(bounds.canvas.width).toBeGreaterThan(0)
+  expect(bounds.canvas.height).toBeGreaterThan(0)
+  expect(bounds.canvas.left).toBeGreaterThanOrEqual(bounds.shell.left)
+  expect(bounds.canvas.top).toBeGreaterThanOrEqual(bounds.shell.top)
+  expect(bounds.canvas.right).toBeLessThanOrEqual(bounds.shell.right)
+  expect(bounds.canvas.bottom).toBeLessThanOrEqual(bounds.shell.bottom)
+  expect(bounds.world.width).toBeLessThanOrEqual(bounds.canvas.width + 0.01)
+  expect(bounds.world.height).toBeLessThanOrEqual(bounds.canvas.height + 0.01)
+  expect(bounds.world.width / bounds.world.height).toBeCloseTo(16 / 9, 2)
+  expect(bounds.scrollHeight).toBeLessThanOrEqual(bounds.viewport.height)
+}

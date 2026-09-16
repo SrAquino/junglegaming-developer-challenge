@@ -40,6 +40,12 @@ Full-screen captures were taken in fresh browser contexts after a real Play/Paus
 
 Exact CSS-pixel bounds: [layout-measurements.json](layout-measurements.json). Screenshots use the emulated device pixel ratio, so PNG dimensions differ from CSS dimensions. The existing landscape test checks only the shell bounds and button visibility, not the canvas or the world inside it. The stable-arena visual test screenshots the canvas alone and therefore cannot prove full-screen visibility or control placement.
 
+### Canvas sizing repair
+
+The initial clipping is fixed. `.game-canvas` now fills `.game-canvas-shell`, which is the same element observed by Pixi's `resizeTo`; the old inherited minimum height allowed the renderer to retain an unrelated 600px canvas height. The renderer now uses the active match arena dimensions rather than global defaults when it calculates contained-world scale. On portrait widths the shell itself uses 16:9, so the world no longer sits in a tall bordered area with blank bands.
+
+The repaired accessibility check covers 1440×900, 412×839, 390×844, 844×390 and 667×375. For every size it asserts canvas bounds are inside the shell, world dimensions are contained and retain 16:9, document height does not exceed the viewport, exactly one canvas remains, and the same match ID persists through resize. It passed in both desktop and mobile Chromium projects. The mobile stable-arena and visible-cannonball visual baselines were intentionally updated after visual inspection.
+
 Implementation target: a correctly sized complete world, landscape-first mobile presentation with portrait fallback, and two triangular button groups inside its lower corners. Use at least 48px touch targets, safe-area padding and a clear center. Anchor to the displayed world rectangle rather than empty aspect-ratio padding. Add whole-screen snapshots and true simultaneous pointer/touch tests before calling this done.
 
 ## Data and lifecycle findings

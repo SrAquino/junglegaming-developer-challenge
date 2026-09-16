@@ -305,9 +305,9 @@ Audit result before this repair: lint, strict types and build passed; the comple
 
 ### 15.1 Make the complete arena visible — Terra / Medium
 
-- [ ] Size `.game-canvas`, the Pixi renderer and `.game-canvas-shell` from the same available bounds. Observe container changes, use the match configuration for world scaling, and remove landscape clipping and the large unused portrait area.
-- [ ] Make landscape the preferred mobile play layout with a usable portrait fallback; preserve the whole arena, aspect ratio and rules through rotation. Respect dynamic browser height and display safe-area insets; an orientation lock must not be required.
-- [ ] Verify at 1440×900, 412×839, 390×844, 844×390 and 667×375: player/map visible, all four arena edges accessible, no unintended document scrolling, no stretched sprites, one canvas after rotation, and no game reset.
+- [x] Size `.game-canvas`, the Pixi renderer and `.game-canvas-shell` from the same available bounds. Observe container changes, use the match configuration for world scaling, and remove landscape clipping and the large unused portrait area.
+- [x] Make landscape the preferred mobile play layout with a usable portrait fallback; preserve the whole arena, aspect ratio and rules through rotation. Respect dynamic browser height and display safe-area insets; an orientation lock must not be required.
+- [x] Verify at 1440×900, 412×839, 390×844, 844×390 and 667×375: player/map visible, all four arena edges accessible, no unintended document scrolling, no stretched sprites, one canvas after rotation, and no game reset.
 
 ### 15.2 Put HUD and both control clusters inside the arena — Terra / Medium
 

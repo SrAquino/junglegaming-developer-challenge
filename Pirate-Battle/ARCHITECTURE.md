@@ -30,7 +30,7 @@ The lifecycle accepts `idle → playing → paused → playing → ended`. A sin
 
 ## Arena and input
 
-The arena uses a 1600×900 logical coordinate system. Pixi scales and centers that coordinate system inside the responsive canvas, preserving proportions while `Application` handles device pixel density. Water is rendered by Pixi and the central island combines a blocking circular shape with supplied tile artwork.
+The arena uses a logical coordinate system from each immutable match configuration. Pixi scales and centers that configured world inside a responsive canvas, preserving proportions while `Application` handles device pixel density. The canvas host fills the bordered arena shell; portrait uses a 16:9 shell and wider views use all available space with contained world scaling. Water is rendered by Pixi and the central island combines a blocking circular shape with supplied tile artwork.
 
 `playerMovementSystem` runs in the fixed simulation loop. It applies rotation and forward velocity from the immutable input snapshot, then constrains the ship to arena edges and rejects a movement that intersects the island. `BrowserGameInput` listens only while `GameCanvas` is mounted, merges keyboard and touch holds so controls can be used together, and clears all held actions on release, cancellation, blur, visibility change and cleanup.
 

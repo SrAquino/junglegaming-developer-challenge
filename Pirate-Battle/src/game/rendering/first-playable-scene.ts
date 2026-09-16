@@ -1,6 +1,5 @@
 import { Application, Container, Graphics, Sprite } from 'pixi.js'
 import { centralIsland } from '../config/arena-layout.ts'
-import { defaultGameConfig } from '../config/game-config.ts'
 import type { GameConfigSnapshot } from '../config/game-config.ts'
 import { GameSession } from '../core/game-session.ts'
 import type { HudSnapshot, MatchResult } from '../types/game.ts'
@@ -127,19 +126,20 @@ export class FirstPlayableScene implements GameRenderer {
     application.ticker.add(() => {
       this.session.tick(this.input.getSnapshot())
       const observation = this.session.observe()
+      const { arena, player } = this.options.configuration
       const scale = Math.min(
-        application.screen.width / defaultGameConfig.arena.width,
-        application.screen.height / defaultGameConfig.arena.height,
+        application.screen.width / arena.width,
+        application.screen.height / arena.height,
       )
       world.scale.set(scale)
       world.position.set(
-        (application.screen.width - defaultGameConfig.arena.width * scale) / 2,
-        (application.screen.height - defaultGameConfig.arena.height * scale) / 2,
+        (application.screen.width - arena.width * scale) / 2,
+        (application.screen.height - arena.height * scale) / 2,
       )
       ship.position.set(observation.playerPosition.x, observation.playerPosition.y)
       ship.rotation = observation.playerRotation + Math.PI / 2
       ship.tint = observation.playerHealth <= 35 ? 0xd88372 : 0xffffff
-      updateHealthBar(playerHealthBar, observation.playerPosition.x, observation.playerPosition.y, observation.playerHealth, defaultGameConfig.player.maxHealth, 72)
+      updateHealthBar(playerHealthBar, observation.playerPosition.x, observation.playerPosition.y, observation.playerHealth, player.maxHealth, 72)
       const simulation = this.session.getWorldForRendering()
       syncEnemies(simulation.enemies, enemySprites, enemyLayer, { chaser: chaserTexture, shooter: shooterTexture }, this.options.configuration.presentation)
       syncEnemyHealthBars(simulation.enemies, enemyHealthBars, world, 62)
@@ -154,6 +154,10 @@ export class FirstPlayableScene implements GameRenderer {
       host.dataset.score = String(observation.score)
       host.dataset.playerHealth = String(observation.playerHealth)
       host.dataset.elapsedMs = observation.elapsedMs.toFixed(2)
+      host.dataset.matchId = observation.matchId ?? ''
+      host.dataset.worldScale = scale.toFixed(5)
+      host.dataset.worldWidth = (arena.width * scale).toFixed(2)
+      host.dataset.worldHeight = (arena.height * scale).toFixed(2)
     })
   }
 
