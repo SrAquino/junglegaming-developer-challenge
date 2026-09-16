@@ -40,7 +40,7 @@ function deactivateProjectile(
   effects.push({
     id: `impact-${projectile.position.x.toFixed(1)}-${projectile.position.y.toFixed(1)}-${effects.length}`,
     kind: 'effect',
-    effectType: 'impact',
+    effectType: 'impact-water',
     active: true,
     position: { ...projectile.position },
     rotation: 0,

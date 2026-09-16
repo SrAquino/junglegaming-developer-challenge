@@ -37,7 +37,7 @@ function createImpactEffect(effects: EffectEntity[], projectile: ProjectileEntit
   effects.push({
     id: `hit-${projectile.id}`,
     kind: 'effect',
-    effectType: 'impact',
+    effectType: 'impact-wood',
     active: true,
     position: { ...projectile.position },
     rotation: projectile.rotation,

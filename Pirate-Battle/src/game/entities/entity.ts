@@ -43,7 +43,7 @@ export interface ProjectileEntity extends BaseEntity {
 
 export interface EffectEntity extends BaseEntity {
   kind: 'effect'
-  effectType: 'muzzle-flash' | 'impact' | 'explosion'
+  effectType: 'muzzle-flash' | 'impact-water' | 'impact-wood' | 'explosion'
   remainingLifetimeMs: number
 }
 
