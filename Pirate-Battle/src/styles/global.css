@@ -348,9 +348,12 @@ button:disabled {
   display: grid;
   gap: 0.5rem;
   margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid #1b6374;
+  color: #d7e6ed;
+  text-align: left;
 }
+
+.scenario-panel summary { cursor: pointer; color: #b9cbd5; font-size: 0.85rem; font-weight: 800; }
+.scenario-controls { display: grid; gap: 0.5rem; padding-top: 0.75rem; }
 
 .game-screen {
   display: grid;

@@ -37,6 +37,7 @@ test('changes scenarios from the menu and recovers ranking data after an error',
   await page.goto('/')
   await page.waitForFunction(() => navigator.serviceWorker.controller !== null)
   await expect(page.getByRole('region', { name: 'Ranking' })).toContainText('Anne Bonny')
+  await page.getByText('Network demo controls').click()
   await page.getByLabel('Network scenario').selectOption('ranking-error')
   await expect(page.getByRole('alert')).toContainText('Unable to load ranking.')
   await page.getByLabel('Network scenario').selectOption('success')

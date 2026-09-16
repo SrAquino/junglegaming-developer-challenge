@@ -33,6 +33,7 @@ test('exposes labels and accessible validation and network errors', async ({ pag
   await expect(page.getByRole('alert')).toContainText('Session time must be')
 
   await page.getByRole('button', { name: 'Back to menu' }).click()
+  await page.getByText('Network demo controls').click()
   await page.getByLabel('Network scenario').selectOption('ranking-error')
   await expect(page.getByRole('alert')).toContainText('Unable to load ranking.')
 })
