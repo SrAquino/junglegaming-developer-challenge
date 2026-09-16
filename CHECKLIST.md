@@ -133,14 +133,14 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 
 ## 8. Implement ranking and history contracts and mocks
 
-- [ ] Define typed paginated ranking/history APIs and the completed-match registration endpoint.
-- [ ] Include match ID, player ID, date, score, active duration, end reason and configuration in every record.
-- [ ] Persist a local player identity and use fixtures for other players.
-- [ ] Sort ranking by descending score, group comparisons by the same gameplay configuration and define a deterministic tie-break rule.
-- [ ] Share contracts, fixtures and MSW handlers across development, tests and the published demo.
-- [ ] Persist confirmed records locally so ranking and history remain consistent after refresh.
-- [ ] Make registration idempotent by match ID; repeated requests return the existing record.
-- [ ] Initialize MSW in the published build and verify the worker is served at the correct path.
+- [x] Define typed paginated ranking/history APIs and the completed-match registration endpoint.
+- [x] Include match ID, player ID, date, score, active duration, end reason and configuration in every record.
+- [x] Persist a local player identity and use fixtures for other players.
+- [x] Sort ranking by descending score, group comparisons by the same gameplay configuration and define a deterministic tie-break rule.
+- [x] Share contracts, fixtures and MSW handlers across development, tests and the published demo.
+- [x] Persist confirmed records locally so ranking and history remain consistent after refresh.
+- [x] Make registration idempotent by match ID; repeated requests return the existing record.
+- [x] Initialize MSW in the published build and verify the worker is served at the correct path.
 
 ## 9. Integrate queries and resilient result submission
 

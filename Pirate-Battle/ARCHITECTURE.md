@@ -47,3 +47,9 @@ The arena uses a 1600×900 logical coordinate system. Pixi scales and centers th
 ## Match lifecycle and UI
 
 `GameSession` owns continuous match state. Its throttled HUD subscription drives React's semantic score, time and hull display without React renders for every Pixi frame. `GameCanvas` pauses the session on an explicit action, blur or hidden tab; resuming requires the pause dialog. Session lifecycle events persist completed results locally, while leaving combat abandons the session without a result. Options are validated and persisted separately, then converted to an immutable configuration snapshot when a new match begins.
+
+## Mock API contracts
+
+`api/contracts.ts` defines paginated ranking and history responses plus completed-match registration. Match IDs make registration idempotent. `gameplayConfigurationKey.ts` groups ranking entries by the complete gameplay balance represented in a configuration snapshot. Within a group, the mock orders entries by descending score, then ascending completion date and match ID for a deterministic tie-break.
+
+MSW starts before React renders in development and the published build. Its worker is versioned at `public/mockServiceWorker.js`, and its fixtures and handlers are shared by local development and Playwright. The local identity and confirmed registration store provide browser persistence for the query layer.

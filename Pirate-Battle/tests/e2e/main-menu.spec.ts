@@ -30,7 +30,7 @@ test('mounts one Pixi canvas and returns to the main menu', async ({ page }) => 
 
 test('shows a retry action when the ship asset fails to load', async ({ page }) => {
   await page.route('**/assets/png/default/ships/ship_1.png', (route) => route.abort())
-  await page.goto('/')
+  await page.goto('/?disable-msw=1')
   await page.getByRole('button', { name: 'Play' }).click()
 
   await expect(page.getByRole('alert')).toContainText('Unable to load game assets.')
