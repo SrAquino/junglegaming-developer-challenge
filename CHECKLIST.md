@@ -239,8 +239,8 @@ Execution order: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared U
 
 - [ ] Recreate the menu hierarchy from `sample_menu.png`: title, primary Play/Options actions, ship illustration, control instructions and Ranking/Match History navigation.
 - [x] Style Options after `sample_options.png` with labelled minus/plus controls and editable numeric values; retain range validation, explicit save and persistence. Sample values do not silently change gameplay defaults.
-- [ ] Build the Captain's Log layout from `sample_history.png`: date and time, points, duration in mm:ss, result badges, five-row pagination and Main Menu action; retain loading, empty, refreshing and error states.
-- [ ] Build Ranking from `sample_ranking.png`: rank, captain, points, played date/time, local-player highlight and active configuration label; extend contracts/fixtures if necessary to supply real displayed fields.
+- [x] Build the Captain's Log layout from `sample_history.png`: date and time, points, duration in mm:ss, result badges, five-row pagination and Main Menu action; retain loading, empty, refreshing and error states.
+- [x] Build Ranking from `sample_ranking.png`: rank, captain, points, played date/time, local-player highlight and active configuration label; extend contracts/fixtures if necessary to supply real displayed fields.
 - [ ] Match `sample_pause.png` with Resume, Options and Main Menu actions; keep the session paused while viewing options and apply gameplay changes only to the next match.
 - [x] Match `sample_result.png` with prominent points, duration, end reason and primary actions; keep registration status and pending retry accessible.
 - [ ] Restyle the HUD and touch controls after `sample.png`, preserving semantic health/score/time and simultaneous movement/firing without covering the playable area.

@@ -17,7 +17,7 @@ export const handlers: RequestHandler[] = [
     const page = positiveInteger(url.searchParams.get('page'), 1)
     const pageSize = positiveInteger(url.searchParams.get('pageSize'), 10)
     const ranking = scenario === 'empty' ? [] : recordsForScenario(scenario).filter((record) => gameplayConfigurationKey(record.configuration) === configurationKey).sort(compareRecords).map((record, index): RankingEntry => ({
-      rank: index + 1, playerId: record.playerId, playerName: fixturePlayers[record.playerId] ?? (record.playerId.startsWith('fixture-') ? record.playerId : 'Captain You'), score: record.score, matchId: record.matchId, configurationKey,
+      rank: index + 1, playerId: record.playerId, playerName: fixturePlayers[record.playerId] ?? (record.playerId.startsWith('fixture-') ? record.playerId : 'Captain You'), score: record.score, matchId: record.matchId, configurationKey, playedAt: record.playedAt,
     }))
     return HttpResponse.json(pageResponse(ranking, page, pageSize))
   }),

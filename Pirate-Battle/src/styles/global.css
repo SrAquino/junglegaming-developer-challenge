@@ -230,6 +230,81 @@ button:disabled {
   margin-top: 1.25rem;
 }
 
+.logbook {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.logbook h2 {
+  margin: 0;
+  color: #ffe2a1;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+}
+
+.logbook-caption {
+  margin: 0;
+  color: #b8c9d3;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.logbook-table {
+  display: grid;
+  gap: 0.35rem;
+  overflow-x: auto;
+  text-align: left;
+}
+
+.logbook-row {
+  display: grid;
+  grid-template-columns: minmax(3rem, 0.55fr) minmax(8rem, 1.75fr) minmax(4rem, 0.8fr) minmax(7rem, 1.2fr);
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 31rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid #193a4e;
+  border-radius: 0.4rem;
+  background: #0b2435e8;
+}
+
+.history-table .logbook-row {
+  grid-template-columns: minmax(8rem, 1.6fr) minmax(4rem, 0.75fr) minmax(5rem, 0.85fr) minmax(5.5rem, 1fr);
+}
+
+.logbook-heading {
+  min-width: 31rem;
+  padding: 0.2rem 0.8rem;
+  border: 0;
+  background: transparent;
+  color: #a8bcc7;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.logbook-row.is-local-player {
+  border-color: #a8863d;
+  background: #6f5d2d99;
+}
+
+.logbook-row small {
+  display: inline-block;
+  margin-left: 0.45rem;
+  padding: 0.08rem 0.3rem;
+  border: 1px solid #d8b555;
+  border-radius: 0.25rem;
+  color: #ffdf80;
+  font-size: 0.625rem;
+  text-transform: uppercase;
+}
+
+.result-time-up { color: #b8e6a7; font-weight: 800; text-transform: uppercase; }
+.result-defeated { color: #ffb6a4; font-weight: 800; text-transform: uppercase; }
+
 .menu-tabs button[aria-selected='true'] {
   background-image: url('/assets/png/default/ui/menu/button_primary_pressed.png');
 }

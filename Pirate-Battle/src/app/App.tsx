@@ -23,5 +23,5 @@ export default function App() {
   if (screen === 'game') return <GameCanvas configuration={configuration} onExit={() => setScreen('menu')} onFinished={finish} />
   if (screen === 'options') return <OptionsScreen onBack={() => setScreen('menu')} onSave={saveOptions} options={options} />
   if (screen === 'result' && lastResult) return <MatchResultScreen onMenu={() => setScreen('menu')} onPlayAgain={() => setScreen('game')} onRetrySubmission={submission.retryPending} result={lastResult} submissionStatus={submission.status} />
-  return <MainMenuScreen configurationKey={gameplayConfigurationKey(configuration)} hasLastResult={lastResult !== null} onLastResult={() => setScreen('result')} onOptions={() => setScreen('options')} onPlay={() => setScreen('game')} playerId={player.id} />
+  return <MainMenuScreen configurationKey={gameplayConfigurationKey(configuration)} hasLastResult={lastResult !== null} onLastResult={() => setScreen('result')} onOptions={() => setScreen('options')} onPlay={() => setScreen('game')} options={options} playerId={player.id} />
 }

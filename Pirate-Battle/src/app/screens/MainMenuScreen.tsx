@@ -3,10 +3,11 @@ import { useRef, useState } from 'react'
 import { RankingPanel } from '../../features/ranking/RankingPanel.tsx'
 import { MatchHistoryPanel } from '../../features/match-history/MatchHistoryPanel.tsx'
 import { NetworkScenarioPanel } from '../../features/network-scenarios/NetworkScenarioPanel.tsx'
+import type { GameOptions } from '../../game/config/game-config.ts'
 
-interface MainMenuScreenProps { onPlay: () => void; onOptions: () => void; onLastResult: () => void; hasLastResult: boolean; configurationKey: string; playerId: string }
+interface MainMenuScreenProps { onPlay: () => void; onOptions: () => void; onLastResult: () => void; hasLastResult: boolean; configurationKey: string; playerId: string; options: GameOptions }
 
-export function MainMenuScreen({ onPlay, onOptions, onLastResult, hasLastResult, configurationKey, playerId }: MainMenuScreenProps) {
+export function MainMenuScreen({ onPlay, onOptions, onLastResult, hasLastResult, configurationKey, playerId, options }: MainMenuScreenProps) {
   const [tab, setTab] = useState<'ranking' | 'history'>('ranking')
   const rankingTabRef = useRef<HTMLButtonElement>(null)
   const historyTabRef = useRef<HTMLButtonElement>(null)
@@ -24,7 +25,7 @@ export function MainMenuScreen({ onPlay, onOptions, onLastResult, hasLastResult,
         <p>Set sail, defeat enemy ships and claim the highest score.</p>
         <div className="menu-actions"><PrimaryButton onClick={onPlay}>Play</PrimaryButton><button onClick={onOptions} type="button">Options</button>{hasLastResult && <button onClick={onLastResult} type="button">Last match result</button>}</div>
         <div aria-label="Game data" className="menu-tabs" role="tablist"><button aria-controls="ranking-panel" aria-selected={tab === 'ranking'} onClick={() => setTab('ranking')} onKeyDown={(event) => { if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); moveTab(event.key === 'ArrowRight' ? 1 : -1) } }} ref={rankingTabRef} role="tab" tabIndex={tab === 'ranking' ? 0 : -1} type="button">Ranking</button><button aria-controls="history-panel" aria-selected={tab === 'history'} onClick={() => setTab('history')} onKeyDown={(event) => { if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); moveTab(event.key === 'ArrowRight' ? 1 : -1) } }} ref={historyTabRef} role="tab" tabIndex={tab === 'history' ? 0 : -1} type="button">Match History</button></div>
-        {tab === 'ranking' ? <div id="ranking-panel" role="tabpanel"><RankingPanel configurationKey={configurationKey} /></div> : <div id="history-panel" role="tabpanel"><MatchHistoryPanel playerId={playerId} /></div>}
+        <section className="logbook" aria-label="Captain's log"><h2>Captain's Log</h2>{tab === 'ranking' ? <div id="ranking-panel" role="tabpanel"><RankingPanel configurationKey={configurationKey} configurationLabel={`${options.sessionDurationSeconds} second battles · ${options.enemySpawnIntervalSeconds} second spawn interval`} playerId={playerId} /></div> : <div id="history-panel" role="tabpanel"><MatchHistoryPanel playerId={playerId} /></div>}</section>
         <NetworkScenarioPanel />
         <img alt="Jungle Gaming" className="jungle-logo" src="/assets/logo_jungle_gaming.svg" />
       </section>

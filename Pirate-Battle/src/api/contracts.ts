@@ -40,4 +40,5 @@ export interface RankingEntry {
   score: number
   matchId: string
   configurationKey: string
+  playedAt: string
 }
