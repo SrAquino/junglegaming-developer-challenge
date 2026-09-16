@@ -1,5 +1,5 @@
 import { Application, Container, Graphics, Sprite } from 'pixi.js'
-import type { GameConfigSnapshot } from '../config/game-config.ts'
+import { withArenaMap, type GameConfigSnapshot } from '../config/game-config.ts'
 import { GameSession } from '../core/game-session.ts'
 import type { HudSnapshot, MatchResult } from '../types/game.ts'
 import type { GameInput } from '../input/game-input.ts'
@@ -18,10 +18,10 @@ import {
   loadPlayerShipTexture,
   loadCombatAtlasTextures,
   loadTexture,
-  loadArenaTileTextures,
 } from './game-assets.ts'
 import type { GameRenderer } from './game-renderer.ts'
-import { createArenaScenery } from './arena-scenery.ts'
+import { loadTiledArenaMap } from './tiled-map-loader.ts'
+import { createTiledMapContainer } from './tiled-map-renderer.ts'
 import { GameAudio } from '../audio/game-audio.ts'
 import type { AudioSettings } from '../../storage/audio-settings.ts'
 
@@ -86,27 +86,36 @@ export class FirstPlayableScene implements GameRenderer {
     this.audioUnlockHost = host
     host.addEventListener('pointerdown', this.unlockAudio, { once: true })
 
-    const [shipTexture, arenaTileTextures, combatAtlasTextures, chaserTexture, shooterTexture] = await Promise.all([
+    const [shipTexture, tiledArena, combatAtlasTextures, chaserTexture, shooterTexture] = await Promise.all([
       loadPlayerShipTexture(),
-      loadArenaTileTextures(),
+      loadTiledArenaMap(),
       loadCombatAtlasTextures(),
       loadTexture(chaserShipAssetUrl),
       loadTexture(shooterShipAssetUrl),
     ])
+    const tiledMap = await createTiledMapContainer(tiledArena)
     if (this.destroyed) {
+      tiledMap.destroy({ children: true })
       this.destroyApplication()
       return
     }
+    const configuration = withArenaMap(this.options.configuration, tiledArena.width, tiledArena.height, tiledArena.collisionPolygons)
 
     host.replaceChildren(application.canvas)
     const world = new Container()
     application.stage.addChild(world)
 
-    world.addChild(createArenaScenery(this.options.configuration.arena.width, this.options.configuration.arena.height, arenaTileTextures))
+    world.addChild(tiledMap)
+    host.dataset.mapLoaded = 'true'
+    host.dataset.mapLayers = tiledArena.layers.map((layer) => layer.name).join(',')
+    host.dataset.mapLayerTileCounts = tiledArena.layers.map((layer) => `${layer.name}:${layer.data.filter((gid) => (gid >>> 0 & 0x1fffffff) !== 0).length}`).join(',')
+    host.dataset.collisionPolygonCount = String(tiledArena.collisionPolygons.length)
+    host.dataset.arenaWidth = String(tiledArena.width)
+    host.dataset.arenaHeight = String(tiledArena.height)
 
     const ship = new Sprite(shipTexture)
     ship.anchor.set(0.5)
-    ship.scale.set(this.options.configuration.presentation.playerShipScale)
+    ship.scale.set(configuration.presentation.playerShipScale)
     world.addChild(ship)
 
     const playerHealthBar = createHealthBar()
@@ -121,11 +130,11 @@ export class FirstPlayableScene implements GameRenderer {
     const enemyLayer = new Container()
     world.addChildAt(enemyLayer, 2)
 
-    this.session.start(this.options.configuration)
+    this.session.start(configuration)
     application.ticker.add(() => {
       this.session.tick(this.input.getSnapshot())
       const observation = this.session.observe()
-      const { arena, player } = this.options.configuration
+      const { arena, player } = configuration
       const scale = Math.min(
         application.screen.width / arena.width,
         application.screen.height / arena.height,
@@ -140,9 +149,9 @@ export class FirstPlayableScene implements GameRenderer {
       ship.tint = observation.playerHealth <= 35 ? 0xd88372 : 0xffffff
       updateHealthBar(playerHealthBar, observation.playerPosition.x, observation.playerPosition.y, observation.playerHealth, player.maxHealth, 72)
       const simulation = this.session.getWorldForRendering()
-      syncEnemies(simulation.enemies, enemySprites, enemyLayer, { chaser: chaserTexture, shooter: shooterTexture }, this.options.configuration.presentation)
+      syncEnemies(simulation.enemies, enemySprites, enemyLayer, { chaser: chaserTexture, shooter: shooterTexture }, configuration.presentation)
       syncEnemyHealthBars(simulation.enemies, enemyHealthBars, world, 62)
-      syncProjectiles(simulation.projectiles, projectileSprites, projectileLayer, combatAtlasTextures.cannonBall, this.options.configuration.presentation.projectileScale, () => this.audio.play('cannonFire'))
+      syncProjectiles(simulation.projectiles, projectileSprites, projectileLayer, combatAtlasTextures.cannonBall, configuration.presentation.projectileScale, () => this.audio.play('cannonFire'))
       syncEffects(simulation.effects, effectSprites, effectLayer, combatAtlasTextures, (effectType) => this.audio.play(effectType === 'muzzle-flash' ? 'broadside' : effectType === 'impact-water' ? 'waterHit' : effectType === 'impact-wood' ? 'woodHit' : 'explosion'))
       host.dataset.playerX = observation.playerPosition.x.toFixed(2)
       host.dataset.playerY = observation.playerPosition.y.toFixed(2)

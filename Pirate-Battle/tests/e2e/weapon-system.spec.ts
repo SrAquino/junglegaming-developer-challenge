@@ -6,6 +6,7 @@ import { combatSystem } from '../../src/game/systems/combat-system.ts'
 import { projectileSystem } from '../../src/game/systems/projectile-system.ts'
 import { weaponSystem } from '../../src/game/systems/weapon-system.ts'
 import { emptyPlayerInput } from '../../src/game/types/game.ts'
+import { tiledArenaTestConfig } from '../helpers/tiled-arena-fixture.ts'
 
 test('fires front and broadside weapons with their configured cooldowns', () => {
   const world = createInitialWorld('weapon-test', defaultGameConfig)
@@ -62,14 +63,14 @@ test('projectiles damage enemies once', () => {
 })
 
 test('a swept projectile stops at the coastline instead of tunnelling through land', () => {
-  const world = createInitialWorld('coast-test', defaultGameConfig)
+  const world = createInitialWorld('coast-test', tiledArenaTestConfig)
   world.projectiles.push({
     id: 'coast-shot', kind: 'projectile', active: true, owner: 'player',
-    position: { x: 400, y: 470 }, rotation: -Math.PI / 2, velocity: { x: 0, y: -800 },
+    position: { x: 400, y: 380 }, rotation: -Math.PI / 2, velocity: { x: 0, y: -800 },
     damage: 20, distanceTravelled: 0, maximumRange: 900, remainingLifetimeMs: 2_000,
   })
   projectileSystem.update(200, {
-    config: defaultGameConfig,
+    config: tiledArenaTestConfig,
     world,
     input: emptyPlayerInput,
     random: new BrowserRandom(),

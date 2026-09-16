@@ -39,6 +39,7 @@ export interface GameConfig {
   arena: {
     width: number
     height: number
+    collisionPolygons?: readonly (readonly Readonly<Vector2>[])[]
   }
   simulation: {
     fixedStepMs: number
@@ -98,7 +99,8 @@ export const defaultGameConfig: GameConfigSnapshot = deepFreeze({
   },
   arena: {
     width: 1_600,
-    height: 900,
+    height: 896,
+    collisionPolygons: [],
   },
   simulation: {
     fixedStepMs: 1_000 / 60,
@@ -190,6 +192,18 @@ export function createGameConfigSnapshot(
   })
 }
 
+export function withArenaMap(
+  configuration: GameConfigSnapshot,
+  width: number,
+  height: number,
+  collisionPolygons: readonly (readonly Readonly<Vector2>[])[],
+): GameConfigSnapshot {
+  return deepFreeze({
+    ...cloneConfig(configuration),
+    arena: { width, height, collisionPolygons: structuredClone(collisionPolygons) },
+  })
+}
+
 function cloneConfig(config: GameConfigSnapshot): GameConfig {
   return structuredClone(config) as GameConfig
 }
@@ -210,3 +224,4 @@ function deepFreeze<TValue>(value: TValue): DeepReadonly<TValue> {
 
   return value as DeepReadonly<TValue>
 }
+import type { Vector2 } from '../types/vector.ts'

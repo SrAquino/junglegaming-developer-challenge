@@ -1,24 +1,32 @@
-import { circleIntersectsLand, segmentIntersectsLand } from '../config/arena-geometry.ts'
-import { arenaNavigationPoints } from '../config/arena-layout.ts'
+import { circleIntersectsLand, segmentIntersectsLand, type CollisionPolygons } from '../config/arena-geometry.ts'
 import type { EnemyEntity } from '../entities/entity.ts'
 import type { Vector2 } from '../types/vector.ts'
 
-export function pathIsClear(from: Vector2, to: Vector2, clearance = 0): boolean {
-  return !segmentIntersectsLand(from, to, clearance)
+export function pathIsClear(from: Vector2, to: Vector2, polygons: CollisionPolygons, clearance = 0): boolean {
+  return !segmentIntersectsLand(from, to, polygons, clearance)
 }
 
-export function navigationTarget(enemy: EnemyEntity, target: Vector2): Vector2 {
-  if (pathIsClear(enemy.position, target, enemy.collisionRadius)) {
+export function navigationTarget(enemy: EnemyEntity, target: Vector2, polygons: CollisionPolygons): Vector2 {
+  if (pathIsClear(enemy.position, target, polygons, enemy.collisionRadius)) {
     enemy.waypoints = []
     return target
   }
   while (enemy.waypoints?.length && distance(enemy.position, enemy.waypoints[0]) < 25) enemy.waypoints.shift()
-  if (!enemy.waypoints?.length) enemy.waypoints = routeAroundLand(enemy.position, target, enemy.collisionRadius)
+  if (!enemy.waypoints?.length) enemy.waypoints = routeAroundLand(enemy.position, target, polygons, enemy.collisionRadius)
   return enemy.waypoints[0] ?? target
 }
 
-function routeAroundLand(from: Vector2, to: Vector2, clearance: number): Vector2[] {
-  const candidates = arenaNavigationPoints.filter((point) => !circleIntersectsLand(point, clearance))
+function routeAroundLand(from: Vector2, to: Vector2, polygons: CollisionPolygons, clearance: number): Vector2[] {
+  const candidates = polygons.flatMap((polygon) => {
+    const center = polygon.reduce((sum, point) => ({ x: sum.x + point.x / polygon.length, y: sum.y + point.y / polygon.length }), { x: 0, y: 0 })
+    return polygon.map((point) => {
+      const dx = point.x - center.x
+      const dy = point.y - center.y
+      const length = Math.hypot(dx, dy) || 1
+      const padding = clearance + 28
+      return { x: point.x + dx / length * padding, y: point.y + dy / length * padding }
+    })
+  }).filter((point) => !circleIntersectsLand(point, clearance, polygons))
   const nodes = [from, to, ...candidates]
   const distances = nodes.map(() => Infinity)
   const previous = nodes.map(() => -1)
@@ -33,7 +41,7 @@ function routeAroundLand(from: Vector2, to: Vector2, clearance: number): Vector2
     if (current < 0 || !Number.isFinite(distances[current]) || current === 1) break
     visited.add(current)
     for (let next = 0; next < nodes.length; next += 1) {
-      if (next === current || visited.has(next) || !pathIsClear(nodes[current], nodes[next], clearance)) continue
+      if (next === current || visited.has(next) || !pathIsClear(nodes[current], nodes[next], polygons, clearance)) continue
       const cost = distances[current] + distance(nodes[current], nodes[next])
       if (cost < distances[next]) { distances[next] = cost; previous[next] = current }
     }

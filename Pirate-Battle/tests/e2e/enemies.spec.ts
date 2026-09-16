@@ -9,9 +9,10 @@ import { enemyBehaviorSystem } from '../../src/game/systems/enemy-behavior-syste
 import { enemySpawnSystem } from '../../src/game/systems/enemy-spawn-system.ts'
 import { weaponSystem } from '../../src/game/systems/weapon-system.ts'
 import { emptyPlayerInput } from '../../src/game/types/game.ts'
+import { tiledArenaTestConfig } from '../helpers/tiled-arena-fixture.ts'
 
 function context() {
-  return { config: defaultGameConfig, world: createInitialWorld('test', defaultGameConfig), input: emptyPlayerInput, random: new SeededRandom(42) }
+  return { config: tiledArenaTestConfig, world: createInitialWorld('test', tiledArenaTestConfig), input: emptyPlayerInput, random: new SeededRandom(42) }
 }
 
 function enemy(enemyType: 'chaser' | 'shooter', x: number, y: number): EnemyEntity {
@@ -34,7 +35,7 @@ test('spawns at the configured interval with both types and safe positions', () 
   expect(simulation.world.enemies.slice(0, 2).map((ship) => ship.enemyType)).toEqual(['chaser', 'shooter'])
   for (const ship of simulation.world.enemies) {
     expect(Math.hypot(ship.position.x - simulation.world.player.position.x, ship.position.y - simulation.world.player.position.y)).toBeGreaterThanOrEqual(defaultGameConfig.spawn.minimumDistanceFromPlayer)
-    expect(circleIntersectsLand(ship.position, ship.collisionRadius)).toBe(false)
+    expect(circleIntersectsLand(ship.position, ship.collisionRadius, tiledArenaTestConfig.arena.collisionPolygons ?? [])).toBe(false)
   }
 })
 
@@ -46,7 +47,7 @@ for (const enemyType of ['chaser', 'shooter'] as const) {
     for (let step = 0; step < 1_000; step += 1) {
       simulation.world.elapsedMs += 20
       enemyBehaviorSystem.update(20, simulation)
-      expect(circleIntersectsLand(ship.position, ship.collisionRadius)).toBe(false)
+      expect(circleIntersectsLand(ship.position, ship.collisionRadius, tiledArenaTestConfig.arena.collisionPolygons ?? [])).toBe(false)
       if (!ship.active) break
     }
     expect(ship.position.x).toBeLessThan(800)

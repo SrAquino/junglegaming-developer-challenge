@@ -6,20 +6,21 @@ export const enemyBehaviorSystem: GameSystem = {
     for (const enemy of world.enemies) {
       if (!enemy.active || enemy.health <= 0 || world.player.health <= 0) continue
       const balance = config.enemies[enemy.enemyType]
-      const target = navigationTarget(enemy, world.player.position)
+      const collisionPolygons = config.arena.collisionPolygons ?? []
+      const target = navigationTarget(enemy, world.player.position, collisionPolygons)
       const desiredAngle = Math.atan2(target.y - enemy.position.y, target.x - enemy.position.x)
       const angleDifference = Math.atan2(Math.sin(desiredAngle - enemy.rotation), Math.cos(desiredAngle - enemy.rotation))
       const maxTurn = balance.rotationSpeed * deltaMs / 1_000
       enemy.rotation += Math.max(-maxTurn, Math.min(maxTurn, angleDifference))
       const playerDistance = Math.hypot(world.player.position.x - enemy.position.x, world.player.position.y - enemy.position.y)
       const shouldMove = enemy.enemyType === 'chaser' || playerDistance > config.enemies.shooter.preferredDistance
-        || !pathIsClear(enemy.position, world.player.position, enemy.collisionRadius)
+        || !pathIsClear(enemy.position, world.player.position, collisionPolygons, enemy.collisionRadius)
       enemy.velocity = shouldMove ? { x: Math.cos(enemy.rotation) * balance.moveSpeed, y: Math.sin(enemy.rotation) * balance.moveSpeed } : { x: 0, y: 0 }
       const next = {
         x: Math.max(enemy.collisionRadius, Math.min(config.arena.width - enemy.collisionRadius, enemy.position.x + enemy.velocity.x * deltaMs / 1_000)),
         y: Math.max(enemy.collisionRadius, Math.min(config.arena.height - enemy.collisionRadius, enemy.position.y + enemy.velocity.y * deltaMs / 1_000)),
       }
-      if (pathIsClear(enemy.position, next, enemy.collisionRadius)) enemy.position = next
+      if (pathIsClear(enemy.position, next, collisionPolygons, enemy.collisionRadius)) enemy.position = next
       const distance = Math.hypot(world.player.position.x - enemy.position.x, world.player.position.y - enemy.position.y)
       if (enemy.enemyType === 'chaser' && distance <= enemy.collisionRadius + world.player.collisionRadius) {
         enemy.active = false
@@ -31,7 +32,7 @@ export const enemyBehaviorSystem: GameSystem = {
         const aim = Math.atan2(world.player.position.y - enemy.position.y, world.player.position.x - enemy.position.x)
         const aimDifference = Math.atan2(Math.sin(aim - enemy.rotation), Math.cos(aim - enemy.rotation))
         if (distance > shooter.attackRange || Math.abs(aimDifference) > 0.15
-          || !pathIsClear(enemy.position, world.player.position)
+          || !pathIsClear(enemy.position, world.player.position, collisionPolygons)
           || world.elapsedMs - enemy.lastAttackAtMs < shooter.weapon.cooldownMs) continue
         enemy.lastAttackAtMs = world.elapsedMs
         const projectile = shooter.weapon.projectile

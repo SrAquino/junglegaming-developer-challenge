@@ -19,7 +19,7 @@ export const enemySpawnSystem: GameSystem = {
         y: radius + random.next() * (config.arena.height - radius * 2),
       }
       if (Math.hypot(position.x - world.player.position.x, position.y - world.player.position.y) < config.spawn.minimumDistanceFromPlayer) continue
-      if (circleIntersectsLand(position, radius)) continue
+      if (circleIntersectsLand(position, radius, config.arena.collisionPolygons ?? [])) continue
       if (world.enemies.some((enemy) => Math.hypot(position.x - enemy.position.x, position.y - enemy.position.y) < radius + enemy.collisionRadius)) continue
       world.spawnedEnemyCount += 1
       world.enemies.push({

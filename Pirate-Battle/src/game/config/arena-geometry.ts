@@ -1,12 +1,13 @@
-import { arenaLandmasses } from './arena-layout.ts'
 import type { Vector2 } from '../types/vector.ts'
 
-export function circleIntersectsLand(position: Vector2, radius: number): boolean {
-  return arenaLandmasses.some((landmass) => circleIntersectsPolygon(position, radius, landmass.coast))
+export type CollisionPolygons = readonly (readonly Readonly<Vector2>[])[]
+
+export function circleIntersectsLand(position: Vector2, radius: number, polygons: CollisionPolygons): boolean {
+  return polygons.some((polygon) => circleIntersectsPolygon(position, radius, polygon))
 }
 
-export function segmentIntersectsLand(from: Vector2, to: Vector2, clearance = 0): boolean {
-  return arenaLandmasses.some((landmass) => segmentIntersectsPolygon(from, to, clearance, landmass.coast))
+export function segmentIntersectsLand(from: Vector2, to: Vector2, polygons: CollisionPolygons, clearance = 0): boolean {
+  return polygons.some((polygon) => segmentIntersectsPolygon(from, to, clearance, polygon))
 }
 
 export function circleIntersectsPolygon(position: Vector2, radius: number, polygon: readonly Readonly<Vector2>[]): boolean {

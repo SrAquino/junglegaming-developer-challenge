@@ -1,16 +1,16 @@
 import { expect, test } from '@playwright/test'
-import { defaultGameConfig } from '../../src/game/config/game-config.ts'
+import { tiledArenaTestConfig } from '../helpers/tiled-arena-fixture.ts'
 import { createInitialWorld } from '../../src/game/core/create-world.ts'
 import { BrowserRandom } from '../../src/game/core/random-source.ts'
 import { playerMovementSystem } from '../../src/game/systems/player-movement-system.ts'
 import { emptyPlayerInput } from '../../src/game/types/game.ts'
 
 test('moves, turns, stays inside the arena and cannot cross a visible coastline', () => {
-  const world = createInitialWorld('test-match', defaultGameConfig)
+  const world = createInitialWorld('test-match', tiledArenaTestConfig)
   const startingPosition = { ...world.player.position }
   const startingRotation = world.player.rotation
   const context = {
-    config: defaultGameConfig,
+    config: tiledArenaTestConfig,
     world,
     input: { ...emptyPlayerInput, forward: true, turnRight: true },
     random: new BrowserRandom(),
@@ -25,7 +25,7 @@ test('moves, turns, stays inside the arena and cannot cross a visible coastline'
   playerMovementSystem.update(1_000, { ...context, input: { ...emptyPlayerInput, forward: true } })
   expect(world.player.position.x).toBe(world.player.collisionRadius)
 
-  world.player.position = { x: 400, y: 450 }
+  world.player.position = { x: 400, y: 360 }
   world.player.rotation = -Math.PI / 2
   const beforeIslandCollision = { ...world.player.position }
   playerMovementSystem.update(1_000, { ...context, input: { ...emptyPlayerInput, forward: true } })

@@ -21,7 +21,7 @@ export const playerMovementSystem: GameSystem = {
     player.position.y += player.velocity.y * deltaSeconds
     constrainToArena(player.position, player.collisionRadius, config.arena.width, config.arena.height)
 
-    if (circleIntersectsLand(player.position, player.collisionRadius)) {
+    if (circleIntersectsLand(player.position, player.collisionRadius, config.arena.collisionPolygons ?? [])) {
       player.position.x = previousPosition.x
       player.position.y = previousPosition.y
     }

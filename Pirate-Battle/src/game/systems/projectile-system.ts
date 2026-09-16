@@ -19,7 +19,7 @@ export const projectileSystem: GameSystem = {
       if (
         projectile.distanceTravelled >= projectile.maximumRange ||
         projectile.remainingLifetimeMs <= 0 ||
-        segmentIntersectsLand(previousPosition, projectile.position) ||
+        segmentIntersectsLand(previousPosition, projectile.position, config.arena.collisionPolygons ?? []) ||
         outsideArena
       ) {
         deactivateProjectile(projectile, world.effects)
