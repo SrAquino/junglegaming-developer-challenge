@@ -146,6 +146,7 @@ export class FirstPlayableScene implements GameRenderer {
       host.dataset.playerY = observation.playerPosition.y.toFixed(2)
       host.dataset.playerRotation = observation.playerRotation.toFixed(4)
       host.dataset.projectileCount = String(observation.projectileCount)
+      host.dataset.effectCount = String(observation.effectCount)
       host.dataset.enemies = JSON.stringify(simulation.enemies.map(({ id, enemyType, position, health }) => ({ id, enemyType, position, health })))
       host.dataset.score = String(observation.score)
       host.dataset.playerHealth = String(observation.playerHealth)

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { createGameConfigSnapshot } from '../game/config/game-config.ts'
+import { createGameConfigSnapshot, defaultGameConfig } from '../game/config/game-config.ts'
 import type { MatchResult } from '../game/types/game.ts'
 import { GameCanvas } from '../components/game/GameCanvas.tsx'
 import { loadGameOptions, loadLastMatchResult, saveGameOptions, saveLastMatchResult } from '../storage/game-storage.ts'
@@ -14,7 +14,8 @@ export default function App() {
   const [options, setOptions] = useState(loadGameOptions)
   const [lastResult, setLastResult] = useState<MatchResult | null>(loadLastMatchResult)
   const [screen, setScreen] = useState<'menu' | 'options' | 'game' | 'result'>(() => loadLastMatchResult() ? 'result' : 'menu')
-  const configuration = useMemo(() => createGameConfigSnapshot(options), [options])
+  const performanceProfile = new URLSearchParams(window.location.search).get('performance-profile') === '1'
+  const configuration = useMemo(() => createGameConfigSnapshot(options, performanceProfile ? { ...defaultGameConfig, player: { ...defaultGameConfig.player, maxHealth: 100_000 } } : defaultGameConfig), [options, performanceProfile])
   const player = getLocalPlayerIdentity()
   const submission = useMatchSubmission()
   const saveOptions = (next: typeof options) => { saveGameOptions(next); setOptions(next); setScreen('menu') }

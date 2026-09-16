@@ -182,11 +182,11 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 
 ## 12. Measure performance in the optimized build
 
-- [ ] Measure a three-minute match: frame rate, frame-interval p95 and entity counts over time, targeting 60 FPS.
-- [ ] Record hardware, browser/version, resolution, pixel density, match configuration and measurement method.
-- [ ] Profile memory and active resources across five start/play/exit cycles.
-- [ ] Investigate sustained growth in listeners, ticker subscriptions, entities, textures or other resources.
-- [ ] Record real profiling evidence and observed limitations; do not replace measurements with estimates.
+- [x] Measure a three-minute match: frame rate, frame-interval p95 and entity counts over time, targeting 60 FPS.
+- [x] Record hardware, browser/version, resolution, pixel density, match configuration and measurement method.
+- [x] Profile memory and active resources across five start/play/exit cycles.
+- [x] Investigate sustained growth in listeners, ticker subscriptions, entities, textures or other resources.
+- [x] Record real profiling evidence and observed limitations; do not replace measurements with estimates.
 
 ## 13. Audit and deliver
 
