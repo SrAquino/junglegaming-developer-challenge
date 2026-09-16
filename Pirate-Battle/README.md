@@ -9,6 +9,10 @@ npm install
 npm run dev
 ```
 
+## Environment
+
+No environment variables or private services are required. Ranking and match history are simulated in the browser by MSW, including in the production build.
+
 ## Available commands
 
 - `npm run dev` starts the Vite development server.
@@ -20,8 +24,13 @@ npm run dev
 - `npm run test:e2e:ui` opens the Playwright UI runner.
 - `npm run test:e2e:report` opens the latest HTML report.
 - `npm run test:e2e:update` updates approved visual snapshots.
+- `npx playwright test --config playwright.performance.config.ts` measures the optimized preview build.
 
 Playwright creates a fresh browser context for each test. The test setup also clears local and session storage before each navigation. HTML reports are written to `playwright-report/`, while traces, screenshots and videos from failures are written to `test-results/`.
+
+## Deployment
+
+Build with `npm run build`, then deploy the `Pirate-Battle` directory as a Vite project on Vercel. No build-time environment configuration is needed. After deployment, open the public URL and refresh it once to confirm that the bundled `mockServiceWorker.js`, assets, menu data and gameplay remain available.
 
 ## Gameplay configuration
 
@@ -56,3 +65,9 @@ The main menu includes **Network controls** for reproducing API behavior through
 | `unavailable-at-match-end` | Finish a match, switch back to `success`, then use Retry submission. |
 
 Playwright fixes the timing and data used by these scenarios. Run `npm run test:e2e` to exercise them in desktop Chromium and mobile Chromium.
+
+## Assets, balance and limitations
+
+All art in `public/assets` was supplied with the challenge and remains subject to the source challenge's asset terms; no third-party art was added. The default balance intentionally gives the player faster movement than Chasers, introduces both enemy types in the first two spawns, and keeps Shooters outside their preferred firing distance until they have line of sight.
+
+The arena uses one central island and a lightweight route around its perimeter instead of general pathfinding. Performance evidence is available in `docs/performance/`; the automated headless Chromium run measured 38.0 FPS and a 33.4 ms p95 frame interval, below the 60 FPS target. Validate the deployed build on representative user hardware before treating that result as a shipping performance claim.

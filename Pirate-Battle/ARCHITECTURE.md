@@ -61,3 +61,9 @@ Ranking and history tabs use Axios request functions through TanStack Query. Que
 ## Reproducible network scenarios
 
 The main-menu scenario control stores a named scenario in local storage and dispatches a browser event so active ranking and history queries refetch. The Axios client sends that scenario in a request header; MSW then applies deterministic fixture data, delay or failure behavior. The mock reset endpoint restores fixture state, and the browser reset also removes confirmed and pending local records. A registration can deliberately fail after the server has accepted it; retrying the same match ID verifies idempotent recovery.
+
+## Performance and limitations
+
+The optimized-build profile runs the normal Pixi scene for 180 seconds and samples browser animation-frame intervals plus rendered entity counts. A profiling-only query flag raises the player's hull so combat cannot end the required measurement early; it is never used in the normal game path. The measurement and five resource cycles are recorded in `docs/performance`.
+
+The headless Chromium profile did not meet the 60 FPS target. The current rendering path keeps the arena deliberately simple, but PixiJS and MSW remain in the primary client bundle. General pathfinding, audio and server persistence are outside the challenge scope; gameplay options, results, pending submissions and confirmed records use local storage.

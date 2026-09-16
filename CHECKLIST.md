@@ -118,7 +118,7 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 
 ## 7. Complete match lifecycle and screens
 
-- [ ] Build the menu with Play, Options, Ranking, Match History and instructions.
+- [x] Build the menu with Play, Options, Ranking, Match History and instructions.
 - [x] Implement Game session time (60–180 seconds) and Enemy spawn time with validation, explicit saving and refresh persistence; changes apply only to new matches.
 - [x] Show score, remaining time and match status in semantic HTML, with score and time in the HUD; avoid announcements every frame.
 - [x] Implement manual pause and automatic pause on blur or hidden tab.
@@ -190,10 +190,10 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 
 ## 13. Audit and deliver
 
-- [ ] Complete README.md: setup, environment variables, controls, gameplay configuration, network scenarios/reset and every required command.
-- [ ] Complete ARCHITECTURE.md: React/Pixi integration, simulation, collision approach, resource ownership, persistence, API contracts, cache and pending recovery.
-- [ ] Document balancing decisions, limitations, sources and licenses for assets.
-- [ ] Include test reports, visual baselines and profiling evidence in the deliverable.
+- [x] Complete README.md: setup, environment variables, controls, gameplay configuration, network scenarios/reset and every required command.
+- [x] Complete ARCHITECTURE.md: React/Pixi integration, simulation, collision approach, resource ownership, persistence, API contracts, cache and pending recovery.
+- [x] Document balancing decisions, limitations, sources and licenses for assets.
+- [x] Include test reports, visual baselines and profiling evidence in the deliverable.
 - [ ] Verify installation, lint, type checking, build and required tests from a clean checkout.
 - [ ] Have the user publish the final committed version to Vercel and verify it matches the delivered source.
 - [ ] Verify public URL access, refresh, assets, mobile gameplay, ranking/history and recovery scenarios.
