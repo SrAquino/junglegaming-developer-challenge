@@ -25,6 +25,7 @@ import {
 } from './game-assets.ts'
 import type { GameRenderer } from './game-renderer.ts'
 import { createArenaScenery } from './arena-scenery.ts'
+import { GameAudio } from '../audio/game-audio.ts'
 
 const MAX_DEVICE_PIXEL_RATIO = 2
 
@@ -47,7 +48,15 @@ export class FirstPlayableScene implements GameRenderer {
     this.session = new GameSession({ systems: [playerMovementSystem, enemySpawnSystem, weaponSystem, projectileSystem, combatSystem, enemyBehaviorSystem, effectSystem] })
     this.unsubscribeHud = this.session.subscribeHud((snapshot) => this.options.onHud?.(snapshot))
     this.unsubscribeLifecycle = this.session.subscribeLifecycle((event) => {
-      if (event.type === 'ended' && event.result) this.options.onFinished?.(event.result)
+      if (event.type === 'started') { this.audio.play('gameStart'); this.audio.startLoops() }
+      if (event.type === 'paused') { this.audio.play('gamePause'); this.audio.pauseLoops() }
+      if (event.type === 'resumed') { this.audio.play('gameResume'); this.audio.resumeLoops() }
+      if (event.type === 'ended') {
+        this.audio.pauseLoops()
+        if (event.reason === 'time-expired') this.audio.play('gameComplete')
+        if (event.reason === 'player-destroyed') this.audio.play('gameOver')
+        if (event.result) this.options.onFinished?.(event.result)
+      }
     })
   }
 
@@ -55,6 +64,8 @@ export class FirstPlayableScene implements GameRenderer {
   private readonly options: PlayableSceneOptions
   private readonly unsubscribeHud: () => void
   private readonly unsubscribeLifecycle: () => void
+  private readonly audio = new GameAudio()
+  private audioUnlockHost: HTMLElement | null = null
 
   public async mount(host: HTMLElement): Promise<void> {
     const application = new Application()
@@ -72,6 +83,8 @@ export class FirstPlayableScene implements GameRenderer {
       this.destroyApplication()
       return
     }
+    this.audioUnlockHost = host
+    host.addEventListener('pointerdown', this.unlockAudio, { once: true })
 
     const [shipTexture, rockTexture, combatAtlasTextures, chaserTexture, shooterTexture, waterTexture] = await Promise.all([
       loadPlayerShipTexture(),
@@ -129,8 +142,8 @@ export class FirstPlayableScene implements GameRenderer {
       const simulation = this.session.getWorldForRendering()
       syncEnemies(simulation.enemies, enemySprites, enemyLayer, { chaser: chaserTexture, shooter: shooterTexture }, this.options.configuration.presentation)
       syncEnemyHealthBars(simulation.enemies, enemyHealthBars, world, 62)
-      syncProjectiles(simulation.projectiles, projectileSprites, projectileLayer, combatAtlasTextures.cannonBall, this.options.configuration.presentation.projectileScale)
-      syncEffects(simulation.effects, effectSprites, effectLayer, combatAtlasTextures)
+      syncProjectiles(simulation.projectiles, projectileSprites, projectileLayer, combatAtlasTextures.cannonBall, this.options.configuration.presentation.projectileScale, () => this.audio.play('cannonFire'))
+      syncEffects(simulation.effects, effectSprites, effectLayer, combatAtlasTextures, (effectType) => this.audio.play(effectType === 'muzzle-flash' ? 'broadside' : effectType === 'impact' ? 'woodHit' : 'explosion'))
       host.dataset.playerX = observation.playerPosition.x.toFixed(2)
       host.dataset.playerY = observation.playerPosition.y.toFixed(2)
       host.dataset.playerRotation = observation.playerRotation.toFixed(4)
@@ -146,6 +159,9 @@ export class FirstPlayableScene implements GameRenderer {
   public destroy(): void {
     this.destroyed = true
     this.session.destroy()
+    this.audioUnlockHost?.removeEventListener('pointerdown', this.unlockAudio)
+    this.audioUnlockHost = null
+    this.audio.destroy()
     this.unsubscribeHud()
     this.unsubscribeLifecycle()
     if (this.initialization) {
@@ -162,6 +178,8 @@ export class FirstPlayableScene implements GameRenderer {
   public pause(): boolean { return this.session.pause() }
 
   public resume(): boolean { return this.session.resume() }
+
+  private readonly unlockAudio = (): void => { this.audio.unlock(); if (this.session.status === 'playing') this.audio.startLoops() }
 
   private destroyApplication(): void {
     if (this.didDestroy) {
@@ -249,6 +267,7 @@ function syncProjectiles(
   layer: Container,
   texture: import('pixi.js').Texture,
   presentationScale: number,
+  onCreated: () => void,
 ): void {
   const activeIds = new Set(projectiles.map((projectile) => projectile.id))
   for (const [id, sprite] of sprites) {
@@ -266,6 +285,7 @@ function syncProjectiles(
       sprite.zIndex = 1
       layer.addChild(sprite)
       sprites.set(projectile.id, sprite)
+      onCreated()
     }
     sprite.position.set(projectile.position.x, projectile.position.y)
     sprite.rotation = projectile.rotation
@@ -277,6 +297,7 @@ function syncEffects(
   spritesById: Map<string, Sprite>,
   layer: Container,
   textures: import('./game-assets.ts').CombatAtlasTextures,
+  onCreated: (effectType: 'muzzle-flash' | 'impact' | 'explosion') => void,
 ): void {
   const activeIds = new Set(effects.map((effect) => effect.id))
   for (const [id, sprite] of spritesById) {
@@ -293,6 +314,7 @@ function syncEffects(
       sprite.scale.set(effect.effectType === 'muzzle-flash' ? 1.15 : effect.effectType === 'impact' ? 0.48 : 0.82)
       layer.addChild(sprite)
       spritesById.set(effect.id, sprite)
+      onCreated(effect.effectType)
     }
     sprite.position.set(effect.position.x, effect.position.y)
   }
