@@ -20,9 +20,10 @@ export default function App() {
   const configuration = useMemo(() => createGameConfigSnapshot(options, performanceProfile ? { ...defaultGameConfig, player: { ...defaultGameConfig.player, maxHealth: 100_000 } } : defaultGameConfig), [options, performanceProfile])
   const player = getLocalPlayerIdentity()
   const submission = useMatchSubmission()
-  const saveOptions = (next: typeof options, nextAudioSettings: typeof audioSettings) => { saveGameOptions(next); saveAudioSettings(nextAudioSettings); setOptions(next); setAudioSettings(nextAudioSettings); setScreen('menu') }
+  const applyOptions = (next: typeof options, nextAudioSettings: typeof audioSettings) => { saveGameOptions(next); saveAudioSettings(nextAudioSettings); setOptions(next); setAudioSettings(nextAudioSettings) }
+  const saveOptions = (next: typeof options, nextAudioSettings: typeof audioSettings) => { applyOptions(next, nextAudioSettings); setScreen('menu') }
   const finish = (result: MatchResult) => { saveLastMatchResult(result); setLastResult(result); submission.submit(result); setScreen('result') }
-  if (screen === 'game') return <GameCanvas audioSettings={audioSettings} configuration={configuration} onExit={() => setScreen('menu')} onFinished={finish} />
+  if (screen === 'game') return <GameCanvas audioSettings={audioSettings} configuration={configuration} gameOptions={options} onExit={() => setScreen('menu')} onFinished={finish} onSaveOptions={applyOptions} />
   if (screen === 'options') return <OptionsScreen audioSettings={audioSettings} onBack={() => setScreen('menu')} onSave={saveOptions} options={options} />
   if (screen === 'result' && lastResult) return <MatchResultScreen onMenu={() => setScreen('menu')} onPlayAgain={() => setScreen('game')} onRetrySubmission={submission.retryPending} result={lastResult} submissionStatus={submission.status} />
   return <MainMenuScreen configurationKey={gameplayConfigurationKey(configuration)} hasLastResult={lastResult !== null} onLastResult={() => setScreen('result')} onOptions={() => setScreen('options')} onPlay={() => setScreen('game')} options={options} playerId={player.id} />

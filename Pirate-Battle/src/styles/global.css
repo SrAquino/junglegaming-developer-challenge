@@ -480,6 +480,31 @@ button:disabled {
 .pause-dialog h2,
 .pause-dialog p { margin: 0; }
 
+.paused-options {
+  display: grid;
+  gap: 0.7rem;
+  width: min(100%, 20rem);
+}
+
+.paused-options label {
+  display: grid;
+  gap: 0.3rem;
+  color: #ffe5a5;
+  font-weight: 800;
+  text-align: left;
+}
+
+.paused-options input:not([type='checkbox']):not([type='range']) {
+  border: 2px solid #b97b28;
+  border-radius: 0.4rem;
+  padding: 0.5rem;
+  color: #fff0c4;
+  background: #102a3d;
+}
+
+.paused-options input[type='checkbox'] { width: 1.1rem; height: 1.1rem; }
+.paused-options input[type='range'] { accent-color: #e6a92e; }
+
 .touch-control:active {
   background-image: url('/assets/png/default/ui/controls/button_round_pressed.png');
 }
