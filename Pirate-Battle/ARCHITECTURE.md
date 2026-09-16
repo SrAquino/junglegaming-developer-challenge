@@ -53,3 +53,7 @@ The arena uses a 1600×900 logical coordinate system. Pixi scales and centers th
 `api/contracts.ts` defines paginated ranking and history responses plus completed-match registration. Match IDs make registration idempotent. `gameplayConfigurationKey.ts` groups ranking entries by the complete gameplay balance represented in a configuration snapshot. Within a group, the mock orders entries by descending score, then ascending completion date and match ID for a deterministic tie-break.
 
 MSW starts before React renders in development and the published build. Its worker is versioned at `public/mockServiceWorker.js`, and its fixtures and handlers are shared by local development and Playwright. The local identity and confirmed registration store provide browser persistence for the query layer.
+
+## Query and submission flow
+
+Ranking and history tabs use Axios request functions through TanStack Query. Query keys include the configuration grouping, player and pagination values, while focus revalidation keeps visible tabs current. A completed match is written to pending local storage before its mutation begins. Successful registrations remove that entry, persist the confirmed record and invalidate both data sets. Failed entries remain available for bounded automatic retries after refresh or an explicit retry from the result screen.

@@ -144,16 +144,16 @@ Exit condition: a complete combat encounter works with both enemy types and all 
 
 ## 9. Integrate queries and resilient result submission
 
-- [ ] Use Axios for HTTP and TanStack Query for queries and match-registration mutations.
-- [ ] Implement pagination and loading, empty, error and background-refresh states for both tabs; ranking displays rank, player identity and score, while the player's history displays date, score, duration and end reason.
-- [ ] Use query keys that include the relevant player, configuration and pagination parameters.
-- [ ] Invalidate and refresh both tabs after successful registration and when they become visible again.
+- [x] Use Axios for HTTP and TanStack Query for queries and match-registration mutations.
+- [x] Implement pagination and loading, empty, error and background-refresh states for both tabs; ranking displays rank, player identity and score, while the player's history displays date, score, duration and end reason.
+- [x] Use query keys that include the relevant player, configuration and pagination parameters.
+- [x] Invalidate and refresh both tabs after successful registration and when they become visible again.
 - [ ] Prevent delayed responses from replacing data for a newer request or state.
-- [ ] Persist pending submissions before sending; preserve all pending matches, including across refresh.
-- [ ] Implement bounded retries, explicit retry actions and clear submission status.
-- [ ] Recover a timeout after server-side registration without duplicate history or ranking entries.
-- [ ] Allow starting another match while previous submissions remain pending.
-- [ ] Keep API failures from blocking menus, options or combat.
+- [x] Persist pending submissions before sending; preserve all pending matches, including across refresh.
+- [x] Implement bounded retries, explicit retry actions and clear submission status.
+- [x] Recover a timeout after server-side registration without duplicate history or ranking entries.
+- [x] Allow starting another match while previous submissions remain pending.
+- [x] Keep API failures from blocking menus, options or combat.
 - [ ] Test pagination, both tabs updating, pending recovery after refresh, duplicate retries and stale responses.
 
 ## 10. Complete reproducible failure scenarios

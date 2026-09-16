@@ -96,6 +96,36 @@ textarea {
   gap: 0.75rem;
 }
 
+.menu-tabs,
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.menu-tabs button[aria-selected='true'] {
+  color: #061d2d;
+  background: #f8c75b;
+}
+
+.data-list {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.data-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem;
+  border: 1px solid #1b6374;
+  border-radius: 0.4rem;
+}
+
 .menu-actions button,
 .game-actions button {
   border: 1px solid #78cad2;
