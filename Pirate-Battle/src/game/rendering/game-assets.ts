@@ -10,6 +10,8 @@ export interface CombatAtlasTextures { cannonBall: Texture; muzzleFlash: Texture
 export interface ArenaTileTextures {
   water: Texture
   sand: Texture
+  grass: Texture
+  coastline: readonly [Texture, Texture, Texture, Texture, Texture, Texture, Texture, Texture]
   rock: Texture
   vegetation: readonly [Texture, Texture, Texture]
   pier: Texture
@@ -34,18 +36,31 @@ export async function loadCombatAtlasTextures(): Promise<CombatAtlasTextures> {
 }
 
 export async function loadArenaTileTextures(): Promise<ArenaTileTextures> {
-  const [sheet, sand, plantA, plantB, plantC, pier] = await Promise.all([
+  const [sheet, sand, grass, plantA, plantB, plantC, pier, coastline] = await Promise.all([
     Assets.load<Texture>(tilesSheetAssetUrl),
     loadTexture(tileAssetUrl(68)),
+    loadTexture(tileAssetUrl(39)),
     loadTexture(tileAssetUrl(70)),
     loadTexture(tileAssetUrl(71)),
     loadTexture(tileAssetUrl(72)),
     loadTexture(tileAssetUrl(60)),
+    Promise.all([
+      loadTexture(tileAssetUrl(1)),
+      loadTexture(tileAssetUrl(2)),
+      loadTexture(tileAssetUrl(3)),
+      loadTexture(tileAssetUrl(17)),
+      loadTexture(tileAssetUrl(19)),
+      loadTexture(tileAssetUrl(33)),
+      loadTexture(tileAssetUrl(34)),
+      loadTexture(tileAssetUrl(35)),
+    ] as const),
   ])
   sheet.source.scaleMode = SCALE_MODES.NEAREST
   return {
     water: tileFrame(sheet, 73, 1),
     sand,
+    grass,
+    coastline,
     rock: tileFrame(sheet, 50),
     vegetation: [plantA, plantB, plantC],
     pier,

@@ -4,6 +4,8 @@ import { centralIslandDecorations, type CircularObstacle } from '../config/arena
 interface ArenaSceneryTextures {
   water: Texture
   sand: Texture
+  grass: Texture
+  coastline: readonly [Texture, Texture, Texture, Texture, Texture, Texture, Texture, Texture]
   rock: Texture
   vegetation: readonly [Texture, Texture, Texture]
   pier: Texture
@@ -17,17 +19,14 @@ export function createArenaScenery(width: number, height: number, island: Readon
   const islandContainer = new Container()
   islandContainer.label = 'central-island'
   islandContainer.position.set(island.center.x, island.center.y)
-  const sand = new TilingSprite({
-    texture: textures.sand,
-    width: island.radius * 2,
-    height: island.radius * 2,
-  })
-  sand.label = 'island-sand'
-  sand.position.set(-island.radius, -island.radius)
-  const sandMask = new Graphics().circle(0, 0, island.radius).fill({ color: 0xffffff })
-  sand.mask = sandMask
-  islandContainer.addChild(sand, sandMask)
-  islandContainer.addChild(new Graphics().circle(0, 0, island.radius - 4).stroke({ color: 0xb6843f, width: 9, alpha: 0.8 }))
+  islandContainer.addChild(createCoastline(textures, island.radius))
+
+  const grass = new TilingSprite({ texture: textures.grass, width: 108, height: 78 })
+  grass.label = 'island-grass'
+  grass.position.set(-54, -44)
+  const grassMask = new Graphics().ellipse(0, -5, 54, 39).fill({ color: 0xffffff })
+  grass.mask = grassMask
+  islandContainer.addChild(grass, grassMask)
 
   for (const decoration of centralIslandDecorations.filter((item) => item.kind === 'pier')) {
     islandContainer.addChild(createDecorationSprite(textures.pier, decoration.position.x, decoration.position.y, decoration.scale, decoration.rotation))
@@ -46,6 +45,22 @@ export function createArenaScenery(width: number, height: number, island: Readon
   }
   scenery.addChild(islandContainer)
   return scenery
+}
+
+function createCoastline(textures: ArenaSceneryTextures, radius: number): Container {
+  const coast = new Container()
+  coast.label = 'island-coastline'
+  const [northWest, north, northEast, west, east, southWest, south, southEast] = textures.coastline
+  const frames = [northWest, north, northEast, west, textures.sand, east, southWest, south, southEast]
+  const nativeTileSize = 64
+  for (let index = 0; index < frames.length; index += 1) {
+    const tile = new Sprite(frames[index])
+    tile.position.set((index % 3) * nativeTileSize, Math.floor(index / 3) * nativeTileSize)
+    coast.addChild(tile)
+  }
+  coast.position.set(-radius, -radius)
+  coast.scale.set((radius * 2) / (nativeTileSize * 3))
+  return coast
 }
 
 function createDecorationSprite(texture: Texture, x: number, y: number, scale: number, rotation = 0): Sprite {
