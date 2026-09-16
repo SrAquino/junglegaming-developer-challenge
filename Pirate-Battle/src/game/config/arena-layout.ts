@@ -7,7 +7,7 @@ export interface ArenaLandmass {
 }
 
 export interface ArenaDecoration {
-  kind: 'pier' | 'rock' | 'vegetation' | 'tower' | 'wall' | 'gate'
+  kind: 'pier' | 'rock' | 'vegetation' | 'tower' | 'wall' | 'gate' | 'dinghy' | 'cannon' | 'wood'
   position: Readonly<Vector2>
   scale: number
   rotation?: number
@@ -56,6 +56,9 @@ export const arenaDecorations: readonly Readonly<ArenaDecoration>[] = Object.fre
   Object.freeze({ kind: 'vegetation', position: Object.freeze({ x: 575, y: 185 }), scale: 0.9, variant: 0, blocksMovement: false }),
   Object.freeze({ kind: 'rock', position: Object.freeze({ x: 555, y: 345 }), scale: 1.1, variant: 1, blocksMovement: false }),
   Object.freeze({ kind: 'rock', position: Object.freeze({ x: 1080, y: 842 }), scale: 1, variant: 0, blocksMovement: false }),
+  Object.freeze({ kind: 'dinghy', position: Object.freeze({ x: 1160, y: 735 }), scale: 0.75, rotation: -0.35, variant: 0, blocksMovement: false }),
+  Object.freeze({ kind: 'cannon', position: Object.freeze({ x: 1450, y: 690 }), scale: 0.8, rotation: -0.4, blocksMovement: false }),
+  Object.freeze({ kind: 'wood', position: Object.freeze({ x: 1540, y: 745 }), scale: 0.9, rotation: 0.6, variant: 1, blocksMovement: false }),
   Object.freeze({ kind: 'vegetation', position: Object.freeze({ x: 1430, y: 805 }), scale: 1.1, variant: 2, blocksMovement: false }),
   Object.freeze({ kind: 'rock', position: Object.freeze({ x: 1510, y: 710 }), scale: 0.8, variant: 2, blocksMovement: false }),
 ])

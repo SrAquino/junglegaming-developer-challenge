@@ -12,6 +12,7 @@ export function createArenaScenery(width: number, height: number, textures: Aren
     const island = new Container()
     island.label = landmass.id
     island.addChild(createCoastGlow(landmass.coast), createTiledPolygon(textures.sand, landmass.coast, width, height, `${landmass.id}-sand`))
+    island.addChild(createCoastEdges(textures.coastline[1], landmass.coast))
     island.addChild(createTiledPolygon(textures.grass, landmass.grass, width, height, `${landmass.id}-grass`))
     scenery.addChild(island)
   }
@@ -39,10 +40,32 @@ function createCoastGlow(points: readonly Readonly<Vector2>[]): Graphics {
   return new Graphics().poly(flatten(points), true).stroke({ color: 0x8ee5ed, width: 52, alpha: 0.28 })
 }
 
+function createCoastEdges(texture: Texture, points: readonly Readonly<Vector2>[]): Container {
+  const edges = new Container()
+  edges.label = 'coast-edges'
+  points.forEach((point, index) => {
+    const next = points[(index + 1) % points.length]
+    const dx = next.x - point.x
+    const dy = next.y - point.y
+    const edge = new TilingSprite({ texture, width: Math.hypot(dx, dy), height: 64 })
+    edge.position.set(point.x, point.y)
+    edge.pivot.set(0, 32)
+    edge.rotation = Math.atan2(dy, dx)
+    edges.addChild(edge)
+  })
+  const coastMask = new Graphics().poly(flatten(points)).fill({ color: 0xffffff })
+  edges.mask = coastMask
+  edges.addChild(coastMask)
+  return edges
+}
+
 function textureForDecoration(textures: ArenaTileTextures, kind: string, variant = 0): Texture {
   if (kind === 'pier') return textures.pier
   if (kind === 'vegetation') return textures.vegetation[variant]
   if (kind === 'rock') return textures.rock[variant]
+  if (kind === 'dinghy') return textures.dinghy
+  if (kind === 'cannon') return textures.cannon
+  if (kind === 'wood') return textures.wood[variant]
   if (kind === 'tower') return textures.fortification[0]
   if (kind === 'wall') return textures.fortification[1]
   return textures.pier

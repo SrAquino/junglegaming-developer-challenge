@@ -16,6 +16,9 @@ export interface ArenaTileTextures {
   vegetation: readonly [Texture, Texture, Texture]
   pier: Texture
   fortification: readonly [Texture, Texture]
+  dinghy: Texture
+  cannon: Texture
+  wood: readonly [Texture, Texture, Texture]
 }
 
 export async function loadPlayerShipTexture(assetUrl = playerShipAssetUrl): Promise<Texture> {
@@ -37,7 +40,7 @@ export async function loadCombatAtlasTextures(): Promise<CombatAtlasTextures> {
 }
 
 export async function loadArenaTileTextures(): Promise<ArenaTileTextures> {
-  const [sheet, sand, grass, plantA, plantB, plantC, pier, coastline] = await Promise.all([
+  const [sheet, sand, grass, plantA, plantB, plantC, pier, dinghy, cannon, wood, coastline] = await Promise.all([
     Assets.load<Texture>(tilesSheetAssetUrl),
     loadTexture(tileAssetUrl(68)),
     loadTexture(tileAssetUrl(39)),
@@ -45,6 +48,13 @@ export async function loadArenaTileTextures(): Promise<ArenaTileTextures> {
     loadTexture(tileAssetUrl(71)),
     loadTexture(tileAssetUrl(72)),
     loadTexture(tileAssetUrl(60)),
+    loadTexture('/assets/png/default/ships/dinghy_small_1.png'),
+    loadTexture('/assets/png/default/ship_parts/cannon_loose.png'),
+    Promise.all([
+      loadTexture('/assets/png/default/ship_parts/wood_1.png'),
+      loadTexture('/assets/png/default/ship_parts/wood_2.png'),
+      loadTexture('/assets/png/default/ship_parts/wood_3.png'),
+    ] as const),
     Promise.all([
       loadTexture(tileAssetUrl(1)),
       loadTexture(tileAssetUrl(2)),
@@ -66,6 +76,9 @@ export async function loadArenaTileTextures(): Promise<ArenaTileTextures> {
     vegetation: [plantA, plantB, plantC],
     pier,
     fortification: [tileFrame(sheet, 13), tileFrame(sheet, 15)],
+    dinghy,
+    cannon,
+    wood,
   }
 }
 

@@ -6,8 +6,8 @@ Reviewed against source commit `24237dc` and `sample.png` on September 16, 2026.
 
 | Family | Current runtime use | Remaining planned use |
 | --- | --- | --- |
-| Ships | `ship_1` is the player and menu preview; `ship_2` and `ship_3` are enemies. Damage currently changes tint. | Inspect the 24 ship sprites for readable faction/health variants; use selected dinghies as coastal or sinking props. |
-| Ship parts | The atlas `cannon_ball.png` frame renders every projectile. | Hull, sail, flag and crew composition. |
+| Ships | `ship_1` is the player and menu preview; `ship_2` and `ship_3` are enemies; `dinghy_small_1` decorates the south channel. Damage currently changes tint. | Inspect the 24 ship sprites for readable faction/health variants and consider additional dinghies for sinking feedback. |
+| Ship parts | The atlas `cannon_ball.png` frame renders every projectile; `cannon_loose` and three wood variants decorate the south-east coast. | Hull, sail, flag and crew composition. |
 | Effects | `fire_1`, `explosion_1` and `explosion_2` atlas frames render static, short-lived effects. | Timed variants using the five supplied effect images, sustained damage fire and sinking; wakes/trails/ripples may use bounded procedural rendering. |
 | Tiles | Named 64 by 64 frames `tile_73` and `tile_50` are sliced from `tiles_sheet.png` for water and rocks. Direct exports `tile_1`–`3`, `17`, `19`, `33`–`35`, `39`, `68`, `70`–`72` and `60` compose the coastline, interior, vegetation and pier. | Fortifications and additional props. |
 | UI | Menu title/panel/buttons, six touch icons and all round button states, HUD health/counter frames, background and logo are used. HUD and 64px touch controls are overlaid inside the arena. | Consider amber/red HUD fills for health thresholds and settings/home icons where they improve navigation. |
@@ -39,7 +39,7 @@ The pack contains 96 tiles, 30 ship/dinghy images, 67 ship parts, five effects a
 | Water and coast masks | Use a calmer apparent water scale and shallow-water bands around land; inspect mask families before tinting/compositing them. Keep shallow water decorative and make blocking land boundaries explicit. |
 | Wall/tower/pier tiles | Build the upper-left fortification and a pier meeting the shoreline. Determine which parts are walk-blocking land decoration versus independent obstacles before adding collision. |
 | Rocks `49`–`51`, mossy rocks `65`–`67`, plants `70`–`72` | Vary clusters along coasts and grass; maintain gameplay silhouettes and collision consistency. |
-| Sand-backed boat/cannon/wood tiles and standalone ship parts | Put opaque sand-backed props only on compatible land. Use transparent dinghies, `cannon_loose`, `cannon_mobile`, `wood_1`–`4` and selected crew sprites for appropriate coastal/destruction details. |
+| Sand-backed boat/cannon/wood tiles and standalone ship parts | Opaque sand-backed props remain restricted to compatible land. Transparent `dinghy_small_1`, `cannon_loose` and `wood_1`–`3` now decorate the south-east coast; all are nonblocking because the underlying land contour already blocks ships. |
 | Hulls, sails and flags | Inspect the artwork before pairing health stages; alternate color/faction art is not automatically a damage animation. Full modular ship construction is optional if complete ship variants satisfy the effect requirement. |
 | HUD frames and fills | Match the sample's gold frames, top-left health and top-right score/time; clip fills to actual ratios and retain accessible HTML values. Use Pixi for health bars above ships. |
 | Default/retina atlases and PNGs | Select one representation per asset/resolution; use retina where measured visual benefit warrants the cost. Validate scale, frame coordinates and filtering. |

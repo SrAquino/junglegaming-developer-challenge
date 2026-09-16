@@ -257,7 +257,7 @@ Original grouping: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared
 ### 14.5 Tile-based arena — Terra / Medium
 
 - [x] Use `tiles_sheet.png` or its retina alternative with correctly mapped grid frames for textured water, coastline, sand, grass and island interiors.
-- [ ] Compose scenery closer to `sample.png` with available rocks, vegetation, docks/fortifications and nautical props; define which objects block movement and which are decorative. The current single 3×3 island is only an initial asset integration; implement the multi-coast composition in section 15.3.
+- [x] Compose scenery closer to `sample.png` with available rocks, vegetation, docks/fortifications and nautical props; define which objects block movement and which are decorative. The three-coast composition uses shared blocking land polygons; its current props are decorative and placed on land or at the shoreline.
 - [x] Make collision geometry match visible coastlines and obstacles; update enemy routing and spawn clearance for the resulting arena layout.
 - [ ] Keep decorative art below gameplay sprites, preserve projectile contrast and avoid seams/texture bleeding during resizing. Revalidate on the complete redesigned screen; canvas-only snapshots miss clipping, overlays and very small mobile ships.
 
@@ -322,7 +322,7 @@ Audit result before this repair: lint, strict types and build passed; the comple
 - [x] Define a declarative fixed map in world coordinates: a large upper-left island with fortification, a lower-center landmass and a lower-right coast joined or separated by navigable channels, following the sample's silhouette. Reserve an open central/right combat lane and safe initial positions. Do not place ships by copying their transient positions in the sample.
 - [x] Establish one shared geometry source for land contours, blocking props, rendering bounds, collision, line of fire, routing and spawn clearance. Replace the hard-coded `centralIsland` circle throughout; simple polygons or a tile occupancy map are sufficient. Define shallow-water bands as decorative and dry land as blocking.
 - [ ] Compose connected sand/grass regions with the supplied convex/concave edge families; replace the current elliptical grass patch and visible center-tile mismatch. Add shallow-water/coast bands and tune water repetition/contrast against the sample while keeping cannonballs visible.
-- [ ] Add walls/towers, a pier that visually meets water, mixed rocks/plants and selected dinghies/cannon/wood props. Use the asset inventory for mappings and document which are decorative or blocking; avoid opaque sand-backed props floating on water.
+- [x] Add walls/towers, a pier that visually meets water, mixed rocks/plants and selected dinghies/cannon/wood props. Use the asset inventory for mappings and document which are decorative or blocking; avoid opaque sand-backed props floating on water.
 - [ ] Update ship movement, swept projectile obstruction, enemy line of sight, waypoints and spawning to the shared map; test narrow passages, concave coasts, corner contacts, both enemy types approaching from opposite sides and no valid spawn candidates. Make corridor clearance account for enlarged hulls.
 - [ ] Compare full arena captures with `sample.png` at the target sizes: land distribution, broad green interiors, shoreline transition, water scale, fortification readability and navigable space. Close sections 14.2/14.5 only after the geometry and visual checks pass together.
 
