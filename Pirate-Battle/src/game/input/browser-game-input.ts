@@ -17,7 +17,7 @@ const keyboardActions: Readonly<Record<string, InputAction>> = Object.freeze({
 
 export class BrowserGameInput implements GameInput {
   private readonly keyboardHeld = new Set<InputAction>()
-  private readonly touchHeld = new Set<InputAction>()
+  private readonly touchPointers = new Map<number, InputAction>()
   private readonly keyDownListener = (event: KeyboardEvent) => this.updateKeyboard(event, true)
   private readonly keyUpListener = (event: KeyboardEvent) => this.updateKeyboard(event, false)
   private readonly clearListener = () => this.reset()
@@ -40,17 +40,17 @@ export class BrowserGameInput implements GameInput {
     })
   }
 
-  public setTouchAction(action: InputAction, held: boolean): void {
+  public setTouchAction(action: InputAction, held: boolean, pointerId = 0): void {
     if (held) {
-      this.touchHeld.add(action)
+      this.touchPointers.set(pointerId, action)
     } else {
-      this.touchHeld.delete(action)
+      this.touchPointers.delete(pointerId)
     }
   }
 
   public reset(): void {
     this.keyboardHeld.clear()
-    this.touchHeld.clear()
+    this.touchPointers.clear()
   }
 
   public destroy(): void {
@@ -62,6 +62,9 @@ export class BrowserGameInput implements GameInput {
   }
 
   private updateKeyboard(event: KeyboardEvent, held: boolean): void {
+    if (isEditableTarget(event.target)) {
+      return
+    }
     const action = keyboardActions[event.code]
     if (!action) {
       return
@@ -76,6 +79,10 @@ export class BrowserGameInput implements GameInput {
   }
 
   private isHeld(action: InputAction): boolean {
-    return this.keyboardHeld.has(action) || this.touchHeld.has(action)
+    return this.keyboardHeld.has(action) || Array.from(this.touchPointers.values()).includes(action)
   }
+}
+
+function isEditableTarget(target: EventTarget | null): boolean {
+  return target instanceof HTMLElement && (target.isContentEditable || target.matches('input, textarea, select, [contenteditable="true"]'))
 }

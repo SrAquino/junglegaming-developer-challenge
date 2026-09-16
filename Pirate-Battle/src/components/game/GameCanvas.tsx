@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { RefObject } from 'react'
+import type { CSSProperties, RefObject } from 'react'
 import type { GameConfigSnapshot } from '../../game/config/game-config.ts'
 import { BrowserGameInput } from '../../game/input/browser-game-input.ts'
 import type { InputAction } from '../../game/input/browser-game-input.ts'
@@ -75,10 +75,12 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
       onFinished: (result) => { if (!cancelled) onFinishedRef.current(result) },
     })
     sceneRef.current = scene
-    const pauseOnHidden = () => { if (document.hidden) scene.pause() }
-    const pauseOnBlur = () => scene.pause()
+    const pauseOnHidden = () => { if (document.hidden) { input.reset(); scene.pause() } }
+    const pauseOnBlur = () => { input.reset(); scene.pause() }
+    const resetInput = () => input.reset()
     document.addEventListener('visibilitychange', pauseOnHidden)
     window.addEventListener('blur', pauseOnBlur)
+    window.addEventListener('resize', resetInput)
     setLoadState('loading')
     void scene.mount(host).then(
       () => { if (!cancelled) setLoadState('ready') },
@@ -88,6 +90,7 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
       cancelled = true
       document.removeEventListener('visibilitychange', pauseOnHidden)
       window.removeEventListener('blur', pauseOnBlur)
+      window.removeEventListener('resize', resetInput)
       scene.destroy()
       input.destroy()
       sceneRef.current = null
@@ -100,29 +103,45 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
     setPauseOptionsOpen(false)
     window.requestAnimationFrame(() => pauseButtonRef.current?.focus())
   }
-  const pause = () => sceneRef.current?.pause()
+  const pause = () => { inputRef.current?.reset(); sceneRef.current?.pause() }
+  const exit = () => { inputRef.current?.reset(); onExit() }
+  const controlsActive = loadState === 'ready' && !paused
   return (
     <main className="game-screen">
-      <header aria-label="Match status" className="game-hud">
-        <span><img alt="" src="/assets/png/default/ui/hud/icon_score.png" />Score: {hud.score}</span><span><img alt="" src="/assets/png/default/ui/hud/icon_time.png" />Time: {hud.remainingSeconds}s</span><span><img alt="" src="/assets/png/default/ui/hud/icon_heart.png" />Hull: {hud.playerHealth}/{hud.playerMaxHealth}</span>
-      </header>
       <div className="game-canvas-shell">
         <div aria-busy={loadState === 'loading'} aria-label="Pirate Battle arena" className="game-canvas" ref={hostRef} role="img" />
+        <header aria-label="Match status" className="arena-hud">
+          <HudHealth health={hud.playerHealth} maxHealth={hud.playerMaxHealth} />
+          <div className="arena-hud-counters">
+            <HudCounter icon="icon_score.png" label={`Score: ${hud.score}`} />
+            <HudCounter icon="icon_time.png" label={`Time: ${formatDuration(hud.remainingSeconds)}`} />
+            {!paused && <button aria-label="Pause match" className="arena-pause-control" disabled={loadState !== 'ready'} onClick={pause} ref={pauseButtonRef} type="button"><img alt="" src="/assets/png/default/ui/controls/icon_pause.png" /></button>}
+          </div>
+        </header>
+        {controlsActive && <>
+          <div aria-label="Touch navigation controls" className="arena-control-cluster arena-navigation-controls" role="group"><TouchControl action="forward" inputRef={inputRef} label="Sail forward" /><TouchControl action="turnLeft" inputRef={inputRef} label="Turn left" /><TouchControl action="turnRight" inputRef={inputRef} label="Turn right" /></div>
+          <div aria-label="Touch firing controls" className="arena-control-cluster arena-firing-controls" role="group"><TouchControl action="fireFront" inputRef={inputRef} label="Fire front" /><TouchControl action="fireLeft" inputRef={inputRef} label="Fire left broadside" /><TouchControl action="fireRight" inputRef={inputRef} label="Fire right broadside" /></div>
+        </>}
         {loadState === 'loading' && <p className="game-status">Loading game assets…</p>}
         {loadState === 'error' && <div className="game-status" role="alert"><p>Unable to load game assets.</p><button onClick={() => setAttempt((value) => value + 1)} type="button">Retry</button></div>}
-        {paused && <div className="game-status pause-dialog" ref={pauseDialogRef} role="dialog" aria-label={pauseOptionsOpen ? 'Match options' : 'Match paused'} aria-modal="true">{pauseOptionsOpen ? <PausedOptions audioSettings={audioSettings} gameOptions={gameOptions} onBack={() => setPauseOptionsOpen(false)} onSave={onSaveOptions} /> : <><p className="eyebrow">The sea awaits</p><h2>Match paused</h2><button onClick={resume} ref={resumeButtonRef} type="button">Resume match</button><button onClick={() => setPauseOptionsOpen(true)} type="button">Options</button><button onClick={onExit} type="button">Main menu</button></>}</div>}
+        {paused && <div className="game-status pause-dialog" ref={pauseDialogRef} role="dialog" aria-label={pauseOptionsOpen ? 'Match options' : 'Match paused'} aria-modal="true">{pauseOptionsOpen ? <PausedOptions audioSettings={audioSettings} gameOptions={gameOptions} onBack={() => setPauseOptionsOpen(false)} onSave={onSaveOptions} /> : <><p className="eyebrow">The sea awaits</p><h2>Match paused</h2><button onClick={resume} ref={resumeButtonRef} type="button">Resume match</button><button onClick={() => setPauseOptionsOpen(true)} type="button">Options</button><button onClick={exit} type="button">Main menu</button></>}</div>}
       </div>
-      <p className="game-instructions">Keyboard: W/↑ sails, A/D or ←/→ turns, F fires ahead, Q/E fire broadsides.</p>
-      <div aria-label="Touch movement and combat controls" className="touch-controls" role="group">
-        <TouchControl action="turnLeft" inputRef={inputRef} label="Turn left" /><TouchControl action="forward" inputRef={inputRef} label="Sail forward" /><TouchControl action="turnRight" inputRef={inputRef} label="Turn right" />
-        <TouchControl action="fireLeft" inputRef={inputRef} label="Fire left broadside" /><TouchControl action="fireFront" inputRef={inputRef} label="Fire front" /><TouchControl action="fireRight" inputRef={inputRef} label="Fire right broadside" />
-      </div>
-      <div className="game-actions">
-        {!paused && <button disabled={loadState !== 'ready'} onClick={pause} ref={pauseButtonRef} type="button">Pause match</button>}
-        <button onClick={onExit} type="button">Back to menu</button>
-      </div>
+      <p className="sr-only">Keyboard: W or Up sails, A and D turn, F fires ahead, Q and E fire broadsides.</p>
     </main>
   )
+}
+
+function HudHealth({ health, maxHealth }: { health: number; maxHealth: number }) {
+  const ratio = maxHealth > 0 ? Math.max(0, Math.min(1, health / maxHealth)) : 0
+  return <span aria-label={`Hull: ${health}/${maxHealth}`} className="arena-hud-health" style={{ '--health-ratio': ratio } as CSSProperties}><span className="arena-hud-health-fill" /><img alt="" src="/assets/png/default/ui/hud/icon_heart.png" /><span>Hull: {health}/{maxHealth}</span></span>
+}
+
+function HudCounter({ icon, label }: { icon: string; label: string }) {
+  return <span className="arena-hud-counter"><img alt="" src={`/assets/png/default/ui/hud/${icon}`} /><span>{label}</span></span>
+}
+
+function formatDuration(seconds: number): string {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
 }
 
 interface PausedOptionsProps { gameOptions: GameOptions; audioSettings: AudioSettings; onSave: (options: GameOptions, audioSettings: AudioSettings) => void; onBack: () => void }
@@ -147,9 +166,16 @@ interface TouchControlProps { action: InputAction; inputRef: RefObject<BrowserGa
 const controlIcons: Readonly<Record<InputAction, string>> = Object.freeze({ turnLeft: 'icon_turn_left.png', forward: 'icon_forward.png', turnRight: 'icon_turn_right.png', fireLeft: 'icon_fire_left.png', fireFront: 'icon_fire_front.png', fireRight: 'icon_fire_right.png' })
 
 function TouchControl({ action, inputRef, label }: TouchControlProps) {
-  const release = () => inputRef.current?.setTouchAction(action, false)
-  return <button aria-label={label} className="touch-control" onPointerCancel={release} onPointerDown={(event) => {
-    event.currentTarget.setPointerCapture(event.pointerId)
-    inputRef.current?.setTouchAction(action, true)
-  }} onPointerLeave={release} onPointerUp={release} type="button"><img alt="" src={`/assets/png/default/ui/controls/${controlIcons[action]}`} /></button>
+  const pointerIdRef = useRef<number | null>(null)
+  const release = (pointerId: number) => {
+    if (pointerIdRef.current !== pointerId) return
+    inputRef.current?.setTouchAction(action, false, pointerId)
+    pointerIdRef.current = null
+  }
+  return <button aria-label={label} className="touch-control" onLostPointerCapture={(event) => release(event.pointerId)} onPointerCancel={(event) => release(event.pointerId)} onPointerDown={(event) => {
+    if (pointerIdRef.current !== null) return
+    pointerIdRef.current = event.pointerId
+    try { event.currentTarget.setPointerCapture(event.pointerId) } catch { /* synthetic pointer events do not have native capture */ }
+    inputRef.current?.setTouchAction(action, true, event.pointerId)
+  }} onPointerUp={(event) => release(event.pointerId)} type="button"><img alt="" src={`/assets/png/default/ui/controls/${controlIcons[action]}`} /></button>
 }

@@ -42,6 +42,51 @@ test('keeps the game controls and arena within a landscape mobile viewport', asy
   await expect(page.getByRole('button', { name: 'Pause match' })).toBeVisible()
 })
 
+test('anchors navigation and firing controls to separate lower corners of the arena', async ({ page }) => {
+  for (const viewport of [{ width: 412, height: 839 }, { width: 844, height: 390 }]) {
+    await page.setViewportSize(viewport)
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Play' }).click()
+    await expect(page.getByRole('img', { name: 'Pirate Battle arena' })).toHaveAttribute('aria-busy', 'false')
+    const bounds = await page.evaluate(() => {
+      const rect = (selector: string) => {
+        const element = document.querySelector<HTMLElement>(selector)
+        if (!element) throw new Error(`Missing ${selector}`)
+        const value = element.getBoundingClientRect()
+        return { left: value.left, right: value.right, top: value.top, bottom: value.bottom }
+      }
+      return { shell: rect('.game-canvas-shell'), navigation: rect('.arena-navigation-controls'), firing: rect('.arena-firing-controls') }
+    })
+    expect(bounds.navigation.left).toBeGreaterThanOrEqual(bounds.shell.left)
+    expect(bounds.firing.right).toBeLessThanOrEqual(bounds.shell.right)
+    expect(bounds.navigation.right).toBeLessThan(bounds.firing.left)
+    expect(bounds.navigation.bottom).toBeLessThanOrEqual(bounds.shell.bottom)
+    expect(bounds.firing.bottom).toBeLessThanOrEqual(bounds.shell.bottom)
+  }
+})
+
+test('keeps sailing while a second touch fires and is released', async ({ page }) => {
+  await page.clock.install()
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Play' }).click()
+  const arena = page.getByRole('img', { name: 'Pirate Battle arena' })
+  await expect(arena).toHaveAttribute('aria-busy', 'false')
+  const playerY = async () => Number(await arena.getAttribute('data-player-y'))
+  const start = await playerY()
+  const forward = page.getByRole('button', { name: 'Sail forward' })
+  const fire = page.getByRole('button', { name: 'Fire front' })
+  await forward.dispatchEvent('pointerdown', { pointerId: 11, pointerType: 'touch' })
+  await fire.dispatchEvent('pointerdown', { pointerId: 12, pointerType: 'touch' })
+  await page.clock.runFor(150)
+  expect(Number(await arena.getAttribute('data-projectile-count'))).toBeGreaterThan(0)
+  const moving = await playerY()
+  expect(moving).toBeLessThan(start)
+  await fire.dispatchEvent('pointerup', { pointerId: 12, pointerType: 'touch' })
+  await page.clock.runFor(150)
+  expect(await playerY()).toBeLessThan(moving)
+  await forward.dispatchEvent('pointerup', { pointerId: 11, pointerType: 'touch' })
+})
+
 test('resizes one complete arena across the supported desktop and mobile viewports', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('button', { name: 'Play' }).click()

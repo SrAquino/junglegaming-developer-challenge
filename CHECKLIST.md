@@ -311,10 +311,10 @@ Audit result before this repair: lint, strict types and build passed; the comple
 
 ### 15.2 Put HUD and both control clusters inside the arena — Terra / Medium
 
-- [ ] Move the navigation group to the bottom-left of the displayed world rectangle: forward above, turn-left and turn-right below. Move firing to the bottom-right: front above, left/right broadsides below. Anchor to the visible game area, including any aspect-ratio padding, rather than to an unrelated page section.
-- [ ] Use the supplied round normal/pressed/hover button art, with at least 48×48 CSS-pixel touch targets, separation between targets, safe-area padding and a clear central view. Keep controls reachable with the two thumbs in landscape and prevent the groups overlapping in portrait.
-- [ ] Place supplied health-frame/fill art at top left and counter panels for score and mm:ss time plus the pause icon at top right. Keep health/time/score semantic and keyboard accessible; move long keyboard instructions and menu exit into help/pause so they do not consume mobile combat height.
-- [ ] Route pointer events only to active buttons; use pointer capture and pointer-ID ownership. Release on up/cancel/lost capture, blur, pause, resize/orientation and exit. Make background controls inactive while loading or a dialog is open; ignore game shortcuts in form fields.
+- [x] Move the navigation group to the bottom-left of the displayed world rectangle: forward above, turn-left and turn-right below. Move firing to the bottom-right: front above, left/right broadsides below. Anchor to the visible game area, including any aspect-ratio padding, rather than to an unrelated page section.
+- [x] Use the supplied round normal/pressed/hover button art, with at least 48×48 CSS-pixel touch targets, separation between targets, safe-area padding and a clear central view. Keep controls reachable with the two thumbs in landscape and prevent the groups overlapping in portrait.
+- [x] Place supplied health-frame/fill art at top left and counter panels for score and mm:ss time plus the pause icon at top right. Keep health/time/score semantic and keyboard accessible; move long keyboard instructions and menu exit into help/pause so they do not consume mobile combat height.
+- [x] Route pointer events only to active buttons; use pointer capture and pointer-ID ownership. Release on up/cancel/lost capture, blur, pause, resize/orientation and exit. Make background controls inactive while loading or a dialog is open; ignore game shortcuts in form fields.
 - [ ] Verify true simultaneous touches (move+fire, turn+fire, release one while retaining the other), cancel and pause/resume. Assert button rectangles lie inside the rendered arena and do not overlap; retain full-screen HUD/control snapshots and inspect on a physical mobile device when available.
 
 ### 15.3 Build the sample-inspired map and matching geometry — Sol / Medium
