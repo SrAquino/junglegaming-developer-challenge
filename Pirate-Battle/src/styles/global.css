@@ -64,6 +64,26 @@ textarea:focus-visible {
   margin-top: 0.25rem;
 }
 
+.menu-ship-preview {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  margin: -0.25rem 0;
+}
+
+.menu-ship-preview img {
+  width: 5.25rem;
+  filter: drop-shadow(0 0.2rem 0.25rem #071a28);
+}
+
+.menu-ship-preview p {
+  margin: 0;
+  color: #c6d8df;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .primary-button {
   min-width: 12rem;
 }
@@ -490,6 +510,28 @@ button:disabled {
     min-height: 0;
     padding: 3rem 1.5rem;
   }
+
+  .logbook-table {
+    overflow: visible;
+    font-size: 0.75rem;
+  }
+
+  .logbook-row,
+  .logbook-heading,
+  .history-table .logbook-row {
+    grid-template-columns: 1.8rem minmax(5.3rem, 1.25fr) 2.9rem minmax(4.75rem, 1fr);
+    min-width: 0;
+    gap: 0.3rem;
+    padding: 0.55rem 0.35rem;
+  }
+
+  .history-table .logbook-row {
+    grid-template-columns: minmax(5.6rem, 1.35fr) 2.8rem 3.5rem minmax(3.8rem, 0.9fr);
+  }
+
+  .logbook-heading { padding: 0.2rem 0.35rem; }
+
+  .logbook-row time { white-space: nowrap; }
 
   .game-screen {
     gap: 0.5rem;

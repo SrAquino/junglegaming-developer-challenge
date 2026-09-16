@@ -237,7 +237,7 @@ Execution order: 14.1 asset map, 14.2 projectile/ship readability, 14.3 shared U
 
 ### 14.4 Menu, logbook, options, pause and result — Terra / Medium
 
-- [ ] Recreate the menu hierarchy from `sample_menu.png`: title, primary Play/Options actions, ship illustration, control instructions and Ranking/Match History navigation.
+- [x] Recreate the menu hierarchy from `sample_menu.png`: title, primary Play/Options actions, ship illustration, control instructions and Ranking/Match History navigation.
 - [x] Style Options after `sample_options.png` with labelled minus/plus controls and editable numeric values; retain range validation, explicit save and persistence. Sample values do not silently change gameplay defaults.
 - [x] Build the Captain's Log layout from `sample_history.png`: date and time, points, duration in mm:ss, result badges, five-row pagination and Main Menu action; retain loading, empty, refreshing and error states.
 - [x] Build Ranking from `sample_ranking.png`: rank, captain, points, played date/time, local-player highlight and active configuration label; extend contracts/fixtures if necessary to supply real displayed fields.
