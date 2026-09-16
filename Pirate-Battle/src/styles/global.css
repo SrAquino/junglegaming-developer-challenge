@@ -476,6 +476,8 @@ button:disabled {
 }
 
 .arena-pause-control {
+  display: grid;
+  place-items: center;
   width: 2.5rem;
   min-width: 2.5rem;
   min-height: 2.5rem;
@@ -484,38 +486,49 @@ button:disabled {
   border-radius: 0;
   background: url('/assets/png/default/ui/controls/button_round_normal.png') center / contain no-repeat;
   pointer-events: auto;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
-.arena-pause-control img { width: 1.2rem; height: 1.2rem; }
+.arena-pause-control img { width: 1.2rem; height: 1.2rem; pointer-events: none; user-select: none; }
 
 .arena-control-cluster {
   position: absolute;
   bottom: clamp(0.35rem, 1.25vw, 0.9rem);
   z-index: 2;
   display: grid;
-  grid-template-columns: repeat(2, minmax(3rem, 1fr));
-  grid-template-rows: repeat(2, minmax(3rem, 1fr));
-  gap: 0.2rem;
+  grid-template-columns: repeat(2, minmax(4rem, 1fr));
+  grid-template-rows: repeat(2, minmax(4rem, 1fr));
+  gap: 0.35rem;
 }
 
 .arena-navigation-controls { left: clamp(0.35rem, 1.25vw, 0.9rem); }
 .arena-firing-controls { right: clamp(0.35rem, 1.25vw, 0.9rem); }
 .arena-control-cluster .touch-control:first-child { grid-column: 1 / -1; justify-self: center; }
 
-.touch-control {
-  width: clamp(3rem, 5vw, 3.75rem);
-  min-width: 3rem;
-  min-height: 3rem;
+button.touch-control {
+  display: grid;
+  place-items: center;
+  width: clamp(4rem, 7vw, 4.75rem);
+  min-width: 4rem;
+  min-height: 4rem;
+  padding: 0;
   border: 0;
+  border-radius: 0;
   color: #2b1b10;
   background: url('/assets/png/default/ui/controls/button_round_normal.png') center / contain no-repeat;
   touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
-.touch-control img {
-  width: 1.55rem;
-  height: 1.55rem;
+button.touch-control img {
+  display: block;
+  width: 45%;
+  height: 45%;
   object-fit: contain;
+  pointer-events: none;
+  user-select: none;
 }
 
 .pause-dialog {
@@ -556,14 +569,14 @@ button:disabled {
 .paused-options input[type='checkbox'] { width: 1.1rem; height: 1.1rem; }
 .paused-options input[type='range'] { accent-color: #e6a92e; }
 
-.touch-control:active {
+button.touch-control:hover:not(:disabled),
+button.arena-pause-control:hover:not(:disabled) { background-image: url('/assets/png/default/ui/controls/button_round_hover.png'); }
+
+button.touch-control:active:not(:disabled),
+button.arena-pause-control:active:not(:disabled) {
   background-image: url('/assets/png/default/ui/controls/button_round_pressed.png');
+  transform: none;
 }
-
-.touch-control:hover,
-.arena-pause-control:hover { background-image: url('/assets/png/default/ui/controls/button_round_hover.png'); }
-
-.arena-pause-control:active { background-image: url('/assets/png/default/ui/controls/button_round_pressed.png'); }
 
 .sr-only {
   position: absolute;
@@ -618,7 +631,4 @@ button:disabled {
     aspect-ratio: 16 / 9;
   }
 
-  .touch-control {
-    width: 3rem;
-  }
 }

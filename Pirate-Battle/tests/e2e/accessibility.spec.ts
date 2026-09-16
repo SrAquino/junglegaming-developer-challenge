@@ -65,6 +65,43 @@ test('anchors navigation and firing controls to separate lower corners of the ar
   }
 })
 
+test('keeps large centered touch controls stable while pressed and suppresses the image menu', async ({ page }) => {
+  await page.setViewportSize({ width: 844, height: 390 })
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Play' }).click()
+  const control = page.getByRole('button', { name: 'Sail forward' })
+  await expect(control).toBeVisible()
+  const before = await control.boundingBox()
+  expect(before).not.toBeNull()
+  expect(before?.width).toBeGreaterThanOrEqual(64)
+  expect(before?.height).toBeGreaterThanOrEqual(64)
+
+  const centers = await control.evaluate((button) => {
+    const buttonBox = button.getBoundingClientRect()
+    const iconBox = button.querySelector('img')?.getBoundingClientRect()
+    if (!iconBox) throw new Error('Control icon is missing.')
+    return {
+      button: { x: buttonBox.left + buttonBox.width / 2, y: buttonBox.top + buttonBox.height / 2 },
+      icon: { x: iconBox.left + iconBox.width / 2, y: iconBox.top + iconBox.height / 2 },
+    }
+  })
+  expect(centers.icon.x).toBeCloseTo(centers.button.x, 0)
+  expect(centers.icon.y).toBeCloseTo(centers.button.y, 0)
+
+  await control.hover()
+  await expect(control).toHaveCSS('background-image', /button_round_hover/)
+  if (!before) throw new Error('Control bounds are unavailable.')
+  await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2)
+  await page.mouse.down()
+  await expect(control).toHaveCSS('background-image', /button_round_pressed/)
+  expect(await control.boundingBox()).toEqual(before)
+  await page.mouse.up()
+
+  const contextMenuSuppressed = await control.evaluate((button) => !button.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true })))
+  expect(contextMenuSuppressed).toBe(true)
+  await expect(control.locator('img')).toHaveCSS('pointer-events', 'none')
+})
+
 test('keeps sailing while a second touch fires and is released', async ({ page }) => {
   await page.clock.install()
   await page.goto('/')

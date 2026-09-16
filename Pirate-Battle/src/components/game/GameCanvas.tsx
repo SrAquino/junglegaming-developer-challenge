@@ -115,7 +115,7 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
           <div className="arena-hud-counters">
             <HudCounter icon="icon_score.png" label={`Score: ${hud.score}`} />
             <HudCounter icon="icon_time.png" label={`Time: ${formatDuration(hud.remainingSeconds)}`} />
-            {!paused && <button aria-label="Pause match" className="arena-pause-control" disabled={loadState !== 'ready'} onClick={pause} ref={pauseButtonRef} type="button"><img alt="" src="/assets/png/default/ui/controls/icon_pause.png" /></button>}
+            {!paused && <button aria-label="Pause match" className="arena-pause-control" disabled={loadState !== 'ready'} onClick={pause} onContextMenu={(event) => event.preventDefault()} ref={pauseButtonRef} type="button"><img alt="" draggable="false" src="/assets/png/default/ui/controls/icon_pause.png" /></button>}
           </div>
         </header>
         {controlsActive && <>
@@ -172,10 +172,10 @@ function TouchControl({ action, inputRef, label }: TouchControlProps) {
     inputRef.current?.setTouchAction(action, false, pointerId)
     pointerIdRef.current = null
   }
-  return <button aria-label={label} className="touch-control" onLostPointerCapture={(event) => release(event.pointerId)} onPointerCancel={(event) => release(event.pointerId)} onPointerDown={(event) => {
+  return <button aria-label={label} className="touch-control" onContextMenu={(event) => event.preventDefault()} onLostPointerCapture={(event) => release(event.pointerId)} onPointerCancel={(event) => release(event.pointerId)} onPointerDown={(event) => {
     if (pointerIdRef.current !== null) return
     pointerIdRef.current = event.pointerId
     try { event.currentTarget.setPointerCapture(event.pointerId) } catch { /* synthetic pointer events do not have native capture */ }
     inputRef.current?.setTouchAction(action, true, event.pointerId)
-  }} onPointerUp={(event) => release(event.pointerId)} type="button"><img alt="" src={`/assets/png/default/ui/controls/${controlIcons[action]}`} /></button>
+  }} onPointerUp={(event) => release(event.pointerId)} type="button"><img alt="" draggable="false" src={`/assets/png/default/ui/controls/${controlIcons[action]}`} /></button>
 }
