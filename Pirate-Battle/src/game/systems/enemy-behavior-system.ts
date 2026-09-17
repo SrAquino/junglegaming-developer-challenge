@@ -26,7 +26,13 @@ export const enemyBehaviorSystem: GameSystem = {
         enemy.active = false
         world.player.health = Math.max(0, world.player.health - config.enemies.chaser.collisionDamage)
         world.effects.push({ id: `explosion-${enemy.id}`, kind: 'effect', effectType: 'explosion', active: true,
-          position: { ...enemy.position }, rotation: enemy.rotation, remainingLifetimeMs: 420 })
+          position: { ...enemy.position }, rotation: enemy.rotation, durationMs: 420, remainingLifetimeMs: 420 })
+        world.effects.push({ id: `sinking-${enemy.id}`, kind: 'effect', effectType: 'sinking', shipIdentity: 'chaser', active: true,
+          position: { ...enemy.position }, rotation: enemy.rotation + Math.PI / 2, durationMs: 900, remainingLifetimeMs: 900 })
+        if (world.player.health === 0) {
+          world.effects.push({ id: `sinking-${world.player.id}`, kind: 'effect', effectType: 'sinking', shipIdentity: 'player', active: true,
+            position: { ...world.player.position }, rotation: world.player.rotation + Math.PI / 2, durationMs: 900, remainingLifetimeMs: 900 })
+        }
       } else if (enemy.enemyType === 'shooter') {
         const shooter = config.enemies.shooter
         const aim = Math.atan2(world.player.position.y - enemy.position.y, world.player.position.x - enemy.position.x)
@@ -41,7 +47,7 @@ export const enemyBehaviorSystem: GameSystem = {
           position, rotation: aim, velocity: { x: Math.cos(aim) * projectile.speed, y: Math.sin(aim) * projectile.speed },
           damage: projectile.damage, distanceTravelled: 0, maximumRange: projectile.range, remainingLifetimeMs: projectile.lifetimeMs })
         world.effects.push({ id: `${enemy.id}-muzzle-${world.elapsedMs}`, kind: 'effect', effectType: 'muzzle-flash', active: true,
-          position: { ...position }, rotation: aim, remainingLifetimeMs: 120 })
+          position: { ...position }, rotation: aim, durationMs: 120, remainingLifetimeMs: 120 })
       }
     }
     world.enemies = world.enemies.filter((enemy) => enemy.active)

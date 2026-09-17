@@ -41,6 +41,7 @@ function deactivateProjectile(
     active: true,
     position: { ...projectile.position },
     rotation: 0,
+    durationMs: 170,
     remainingLifetimeMs: 170,
   })
 }

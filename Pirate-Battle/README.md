@@ -38,7 +38,7 @@ Gameplay values live in `src/game/config/game-config.ts`. The default match last
 
 Movement, rotation, health, collision sizes, spawn distribution, damage, projectile speed/range/lifetime, weapon cooldowns and Shooter range are part of the same typed configuration. Balance changes therefore do not require changes to the simulation systems.
 
-The first two successful enemy spawns guarantee one Chaser and one Shooter; later spawns use the configured weights. Spawn candidates must be clear of all coastlines and ships and at least 420 logical pixels from the player. Enemies route through the declared channels around three landmasses, Chasers damage on impact without awarding score, and Shooters require range and unobstructed line of sight.
+The first two successful enemy spawns guarantee one Chaser and one Shooter; later spawns use the configured weights. Spawn candidates must be clear of the Tiled Collision polygons and ships and at least 420 logical pixels from the player. Enemies derive routes around those polygons, Chasers damage on impact without awarding score, and Shooters require range and unobstructed line of sight.
 
 ## Controls
 
@@ -70,4 +70,4 @@ Playwright fixes the timing and data used by these scenarios. Run `npm run test:
 
 All art in `public/assets` was supplied with the challenge and remains subject to the source challenge's asset terms; no third-party art was added. The default balance intentionally gives the player faster movement than Chasers, introduces both enemy types in the first two spawns, and keeps Shooters outside their preferred firing distance until they have line of sight.
 
-The arena uses fixed polygonal coastlines and a lightweight visibility graph over authored channel points instead of a general navigation mesh. Performance evidence is available in `docs/performance/`; the automated headless Chromium run measured 38.0 FPS and a 33.4 ms p95 frame interval before this map redesign, below the 60 FPS target. Repeat the profile and validate the deployed build on representative user hardware before treating that result as a shipping performance claim.
+The arena loads `public/maps/arena.tmj` and its external JSON tileset at runtime. Tile positions, transparency and layer order come from Tiled; its Collision object layer supplies the polygons used by movement, projectiles, spawning and enemy routing. Ship damage uses supplied staged artwork, while the supplied combat atlas provides cannonballs, fire, explosions and debris. Performance evidence is available in `docs/performance/`; the automated headless Chromium run measured 38.0 FPS and a 33.4 ms p95 frame interval before this map redesign, below the 60 FPS target. Repeat the profile and validate the deployed build on representative user hardware before treating that result as a shipping performance claim.

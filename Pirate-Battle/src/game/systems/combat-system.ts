@@ -17,6 +17,7 @@ export const combatSystem: GameSystem = {
       if (target.health === 0) {
         target.active = false
         createExplosionEffect(world.effects, target)
+        createSinkingEffect(world.effects, target)
         if (isEnemy(target)) world.player.score += 1
       }
     }
@@ -41,6 +42,7 @@ function createImpactEffect(effects: EffectEntity[], projectile: ProjectileEntit
     active: true,
     position: { ...projectile.position },
     rotation: projectile.rotation,
+    durationMs: 180,
     remainingLifetimeMs: 180,
   })
 }
@@ -53,6 +55,21 @@ function createExplosionEffect(effects: EffectEntity[], target: { id: string; po
     active: true,
     position: { ...target.position },
     rotation: target.rotation,
+    durationMs: 420,
     remainingLifetimeMs: 420,
+  })
+}
+
+function createSinkingEffect(effects: EffectEntity[], target: EnemyEntity | { id: string; kind: 'player'; position: { x: number; y: number }; rotation: number }): void {
+  effects.push({
+    id: `sinking-${target.id}`,
+    kind: 'effect',
+    effectType: 'sinking',
+    shipIdentity: target.kind === 'enemy' ? target.enemyType : 'player',
+    active: true,
+    position: { ...target.position },
+    rotation: target.rotation + Math.PI / 2,
+    durationMs: 900,
+    remainingLifetimeMs: 900,
   })
 }

@@ -122,21 +122,21 @@ export const defaultGameConfig: GameConfigSnapshot = deepFreeze({
     maxHealth: 100,
     moveSpeed: 210,
     rotationSpeed: Math.PI * 0.9,
-    collisionRadius: 34,
+    collisionRadius: 42,
   },
   enemies: {
     chaser: {
       maxHealth: 30,
       moveSpeed: 150,
       rotationSpeed: Math.PI * 0.72,
-      collisionRadius: 28,
+      collisionRadius: 38,
       collisionDamage: 25,
     },
     shooter: {
       maxHealth: 45,
       moveSpeed: 105,
       rotationSpeed: Math.PI * 0.55,
-      collisionRadius: 32,
+      collisionRadius: 40,
       attackRange: 460,
       preferredDistance: 360,
       weapon: {

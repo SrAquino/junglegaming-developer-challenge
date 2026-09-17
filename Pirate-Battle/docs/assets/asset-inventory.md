@@ -6,14 +6,14 @@ Reviewed against source commit `24237dc` and `sample.png` on September 16, 2026.
 
 | Family | Current runtime use | Remaining planned use |
 | --- | --- | --- |
-| Ships | `ship_1` is the player and menu preview; `ship_2` and `ship_3` are enemies; `dinghy_small_1` decorates the south channel. Damage currently changes tint. | Inspect the 24 ship sprites for readable faction/health variants and consider additional dinghies for sinking feedback. |
-| Ship parts | The atlas `cannon_ball.png` frame renders every projectile; `cannon_loose` and three wood variants decorate the south-east coast. | Hull, sail, flag and crew composition. |
-| Effects | `fire_1`, `explosion_1` and `explosion_2` atlas frames render static, short-lived effects. | Timed variants using the five supplied effect images, sustained damage fire and sinking; wakes/trails/ripples may use bounded procedural rendering. |
-| Tiles | Named 64 by 64 frames `tile_73` and `tile_50` are sliced from `tiles_sheet.png` for water and rocks. Direct exports `tile_1`–`3`, `17`, `19`, `33`–`35`, `39`, `68`, `70`–`72` and `60` compose the coastline, interior, vegetation and pier. | Fortifications and additional props. |
+| Ships | White `ship_1/7/13` are the player's intact/damaged/critical stages; red `ship_3/9/15` identify Chasers; black `ship_2/8/14` identify Shooters. `ship_19/21/20` provide their sunk states. | The green, blue and yellow families (`4–6`, `10–12`, `16–18`, `22–24`) remain documented alternatives. |
+| Ship parts | The named atlas frame `cannon_ball.png` renders every projectile; `wood_1`–`4` animate sinking debris. `cannon_loose` and three wood variants also appear as authored map decoration. | Hull, sail, flag and crew composition remains optional because complete ship variants cover the gameplay states. |
+| Effects | Both fire frames and all three explosion frames animate muzzle, damage, impact and destruction feedback. Sunk ships and debris fade outward; bounded procedural wakes and projectile trails add motion cues. | Revisit timing only if device profiling identifies excessive overdraw. |
+| Tiles | `public/maps/arena.tmj` selects and positions all water, land, fortification and decoration tiles from `tiles_sheet.png`. The runtime preserves its three authored tile layers. | Edit map content only in Tiled and retain the Collision object layer with matching geometry. |
 | UI | Menu title/panel/buttons, six touch icons and all round button states, HUD health/counter frames, background and logo are used. HUD and 64px touch controls are overlaid inside the arena. | Consider amber/red HUD fills for health thresholds and settings/home icons where they improve navigation. |
-| Spritesheet | `ships_miscellaneous_sheet.png` is loaded through the shared asset cache; four frames are manually hard-coded in `game-assets.ts`. XML is not parsed at runtime. | Validate named frame mappings against XML or generate a manifest; add selected damage/prop frames and a measured resolution policy. |
-| Tilesheet | `tiles_sheet.png` loads once and provides shared water, three rock variants and fortification frames. Supplied sand and grass textures are masked to three shared polygonal land contours. | Replace straight polygon edges with the matching convex/concave coast families and add resolution-aware selection if profiling supports it. |
-| Sounds | 13 source names are mapped, including sinking; 14 are unmapped. The sinking source has no playback call. | Correct unlock/event/cleanup behavior, then wire UI, score, health, warning, collision, sinking and combat variants; details below. |
+| Spritesheet | `ships_miscellaneous_sheet.png` is loaded through the shared asset cache. `game-assets.ts` contains a typed frame manifest validated against the supplied XML for cannonball, fire, explosion and debris frames. | The identically mapped retina sheet is an explicit alternative and is not loaded alongside the default sheet. |
+| Tilesheet | `tiles_sheet.png` loads once through the external `tiles_sheet.tsj`; tile GID flip flags, alpha, positions and layer order are interpreted at runtime. | The retina export remains an unloaded alternative pending measured benefit. |
+| Sounds | 13 source names are mapped, including sinking; 14 are unmapped. Sinking now plays when its visual effect is created. | Correct unlock/event/cleanup behavior, then wire UI, score, health, warning, collision and combat variants; details below. |
 | Vectors | Reference only. | Use only if a scalable presentation source is needed. |
 | Samples | Review references only. | Never render samples as product screens. |
 
@@ -21,7 +21,7 @@ Reviewed against source commit `24237dc` and `sample.png` on September 16, 2026.
 
 - `tilesheets.txt` defines 64 by 64 tiles with no margin.
 - `png/default/tiles` contains the same grid as standalone PNG files. The arena currently maps fortification frames `13` and `15`, grass `39`, rocks `49`–`51`, pier/gate `60`, sand `68`, and plants `70`–`72`; matching retina files remain available for a later resolution-selection pass.
-- `ships_miscellaneous_sheet.xml` defines `cannon_ball.png` as a 10 by 10 frame and names the fire/explosion frames used by the renderer.
+- `ships_miscellaneous_sheet.xml` defines the cannonball, fire, explosion and wood frames captured by the typed runtime manifest.
 - `ui_sheet.json` and its retina counterpart document stretchable UI components; direct PNG exports are used for responsive panels and buttons.
 - The ship atlas is a named frame map, not an animation timeline. Frame choices must be driven by gameplay time and cleaned up with the Pixi scene.
 
@@ -40,7 +40,7 @@ The pack contains 96 tiles, 30 ship/dinghy images, 67 ship parts, five effects a
 | Wall/tower/pier tiles | Build the upper-left fortification and a pier meeting the shoreline. Determine which parts are walk-blocking land decoration versus independent obstacles before adding collision. |
 | Rocks `49`–`51`, mossy rocks `65`–`67`, plants `70`–`72` | Vary clusters along coasts and grass; maintain gameplay silhouettes and collision consistency. |
 | Sand-backed boat/cannon/wood tiles and standalone ship parts | Opaque sand-backed props remain restricted to compatible land. Transparent `dinghy_small_1`, `cannon_loose` and `wood_1`–`3` now decorate the south-east coast; all are nonblocking because the underlying land contour already blocks ships. |
-| Hulls, sails and flags | Inspect the artwork before pairing health stages; alternate color/faction art is not automatically a damage animation. Full modular ship construction is optional if complete ship variants satisfy the effect requirement. |
+| Hulls, sails and flags | All 24 complete ship sprites were reviewed as six color families with intact, damaged, critical and sunk artwork. White/red/black are assigned to player/Chaser/Shooter; modular construction remains an unused alternative. |
 | HUD frames and fills | Match the sample's gold frames, top-left health and top-right score/time; clip fills to actual ratios and retain accessible HTML values. Use Pixi for health bars above ships. |
 | Default/retina atlases and PNGs | Select one representation per asset/resolution; use retina where measured visual benefit warrants the cost. Validate scale, frame coordinates and filtering. |
 | Vectors, samples, preview and unused variants | Retain provenance and document as sources, references or alternatives. No requirement to load every duplicate, recolor or vector into a match. |
@@ -54,7 +54,7 @@ All 27 WAVs are accounted for below; mapped files still need playback acceptance
 | `game_start`, `game_pause`, `game_resume`, `game_complete`, `game_over` | Five mapped lifecycle sources. Start occurs before the canvas-only audio unlock. | Unlock from the initial Play/control gesture and verify exactly one cue per transition, including result-screen lifetime. |
 | `cannon_fire_1`, `cannon_broadside` | Two mapped sources, called from projectile/effect sprite creation. | Trigger by actual weapon events; avoid playing both cues for every muzzle flash or once per broadside projectile. |
 | `cannonball_water_hit_1`, `ship_wood_hit_1`, `ship_explosion_1` | Three mapped sources. | Verify real impact classification and bounded overlapping voices. |
-| `ship_sinking` | One mapped source with no `play('sinking')` call. | Connect to sinking/destruction once, or explicitly exclude if there is no sinking phase. |
+| `ship_sinking` | Mapped and called once when each renderer-visible sinking effect is created. | Verify playback unlock and voice cleanup with the rest of section 15.5. |
 | `ocean_ambience_loop`, `ship_sailing_loop` | Two mapped loops start together after a canvas tap. | Unlock without empty-water taps, gate sailing on movement, pause/restore and release on exit. |
 | `ui_hover`, `ui_click`, `ui_open`, `ui_close`, `ui_back` | Five unmapped sources. | Map meaningful UI transitions; hover is desktop-only and must not fire repeatedly from renders. |
 | `score_point`, `health_low`, `time_warning`, `ship_collision` | Four unmapped sources. | Map actual score/threshold/collision events; gate repeat warnings and honor mute. |

@@ -21,11 +21,14 @@ test('matches the stable paused arena visual baseline', async ({ page }) => {
 })
 
 test('matches the visible cannonball visual baseline', async ({ page }) => {
+  await page.clock.install()
   await page.goto('/')
   await page.getByRole('button', { name: 'Play' }).click()
   const arena = page.locator('.game-canvas')
   await expect(arena).toHaveAttribute('data-projectile-count', '0')
-  await page.keyboard.press('f')
+  await page.keyboard.down('e')
+  await page.clock.runFor(20)
+  await page.keyboard.up('e')
   await expect.poll(async () => Number(await arena.getAttribute('data-projectile-count'))).toBeGreaterThan(0)
   await page.getByRole('button', { name: 'Pause match' }).click()
   await page.getByRole('dialog', { name: 'Match paused' }).evaluate((dialog) => { dialog.style.visibility = 'hidden' })

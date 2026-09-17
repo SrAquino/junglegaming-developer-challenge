@@ -194,11 +194,13 @@ export class GameSession {
     })
   }
 
-  public getWorldForRendering(): Readonly<Pick<GameWorldState, 'enemies' | 'projectiles' | 'effects'>> {
+  public getWorldForRendering(): Readonly<Pick<GameWorldState, 'player' | 'enemies' | 'projectiles' | 'effects'>> {
+    if (!this.world) throw new Error('Cannot render before the game session starts.')
     return Object.freeze({
-      enemies: this.world?.enemies ?? [],
-      projectiles: this.world?.projectiles ?? [],
-      effects: this.world?.effects ?? [],
+      player: this.world.player,
+      enemies: this.world.enemies,
+      projectiles: this.world.projectiles,
+      effects: this.world.effects,
     })
   }
 

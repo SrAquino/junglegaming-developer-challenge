@@ -328,9 +328,9 @@ Audit result before this repair: lint, strict types and build passed; the comple
 
 ### 15.4 Finish ship readability and combat artwork — Terra / Medium
 
-- [ ] Review the 24 ship sprites and sail/hull variants visually before assigning player/Chaser/Shooter identities and health stages; add real damaged artwork instead of only tint. Align visual hulls, collision clearance, health bars and muzzle origins at each supported scale.
-- [ ] Use the named ship atlas metadata (or a validated generated frame manifest) for cannonballs, fire/explosion stages and selected debris/crew/dinghy props. Map default/retina representations explicitly; do not load duplicate resolutions without need.
-- [ ] Add bounded wakes, short projectile trails, time-based impacts, damage fire and sinking feedback. Freeze combat animation on pause, clean up on restart, respect reduced-motion preferences and keep shots readable over shallow water and shore art.
+- [x] Review the 24 ship sprites and sail/hull variants visually before assigning player/Chaser/Shooter identities and health stages; add real damaged artwork instead of only tint. Align visual hulls, collision clearance, health bars and muzzle origins at each supported scale.
+- [x] Use the named ship atlas metadata (or a validated generated frame manifest) for cannonballs, fire/explosion stages and selected debris/crew/dinghy props. Map default/retina representations explicitly; do not load duplicate resolutions without need.
+- [x] Add bounded wakes, short projectile trails, time-based impacts, damage fire and sinking feedback. Freeze combat animation on pause, clean up on restart, respect reduced-motion preferences and keep shots readable over shallow water and shore art.
 
 ### 15.5 Complete usable audio — Terra / Medium
 

@@ -6,6 +6,7 @@ import { combatSystem } from '../../src/game/systems/combat-system.ts'
 import { projectileSystem } from '../../src/game/systems/projectile-system.ts'
 import { weaponSystem } from '../../src/game/systems/weapon-system.ts'
 import { emptyPlayerInput } from '../../src/game/types/game.ts'
+import { damageStage } from '../../src/game/rendering/game-assets.ts'
 import { tiledArenaTestConfig } from '../helpers/tiled-arena-fixture.ts'
 
 test('fires front and broadside weapons with their configured cooldowns', () => {
@@ -60,6 +61,13 @@ test('projectiles damage enemies once', () => {
   expect(world.player.score).toBe(1)
   expect(world.projectiles).toHaveLength(0)
   expect(world.effects.some((effect) => effect.effectType === 'explosion')).toBe(true)
+  expect(world.effects.some((effect) => effect.effectType === 'sinking' && effect.shipIdentity === 'chaser')).toBe(true)
+})
+
+test('selects authored damage artwork at the health thresholds', () => {
+  expect(damageStage(100, 100)).toBe('intact')
+  expect(damageStage(66, 100)).toBe('damaged')
+  expect(damageStage(33, 100)).toBe('critical')
 })
 
 test('a swept projectile stops at the coastline instead of tunnelling through land', () => {

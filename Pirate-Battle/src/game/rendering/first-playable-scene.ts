@@ -1,4 +1,4 @@
-import { Application, Container, Graphics, Sprite } from 'pixi.js'
+import { Application, Container, Graphics } from 'pixi.js'
 import { withArenaMap, type GameConfigSnapshot } from '../config/game-config.ts'
 import { GameSession } from '../core/game-session.ts'
 import type { HudSnapshot, MatchResult } from '../types/game.ts'
@@ -10,15 +10,18 @@ import { combatSystem } from '../systems/combat-system.ts'
 import { effectSystem } from '../systems/effect-system.ts'
 import { enemySpawnSystem } from '../systems/enemy-spawn-system.ts'
 import { enemyBehaviorSystem } from '../systems/enemy-behavior-system.ts'
-import type { EnemyEntity } from '../entities/entity.ts'
-import type { Texture } from 'pixi.js'
+import { loadCombatAtlasTextures, loadShipTextures } from './game-assets.ts'
 import {
-  chaserShipAssetUrl,
-  shooterShipAssetUrl,
-  loadPlayerShipTexture,
-  loadCombatAtlasTextures,
-  loadTexture,
-} from './game-assets.ts'
+  createShipVisual,
+  syncEffectVisuals,
+  syncEnemyShipVisuals,
+  syncProjectileVisuals,
+  updateDamageFire,
+  updateShipVisual,
+  type EffectVisual,
+  type ProjectileVisual,
+  type ShipVisual,
+} from './combat-art-renderer.ts'
 import type { GameRenderer } from './game-renderer.ts'
 import { loadTiledArenaMap } from './tiled-map-loader.ts'
 import { createTiledMapContainer } from './tiled-map-renderer.ts'
@@ -86,12 +89,10 @@ export class FirstPlayableScene implements GameRenderer {
     this.audioUnlockHost = host
     host.addEventListener('pointerdown', this.unlockAudio, { once: true })
 
-    const [shipTexture, tiledArena, combatAtlasTextures, chaserTexture, shooterTexture] = await Promise.all([
-      loadPlayerShipTexture(),
+    const [shipTextures, tiledArena, combatAtlasTextures] = await Promise.all([
+      loadShipTextures(),
       loadTiledArenaMap(),
       loadCombatAtlasTextures(),
-      loadTexture(chaserShipAssetUrl),
-      loadTexture(shooterShipAssetUrl),
     ])
     const tiledMap = await createTiledMapContainer(tiledArena)
     if (this.destroyed) {
@@ -113,22 +114,19 @@ export class FirstPlayableScene implements GameRenderer {
     host.dataset.arenaWidth = String(tiledArena.width)
     host.dataset.arenaHeight = String(tiledArena.height)
 
-    const ship = new Sprite(shipTexture)
-    ship.anchor.set(0.5)
-    ship.scale.set(configuration.presentation.playerShipScale)
-    world.addChild(ship)
-
-    const playerHealthBar = createHealthBar()
-    world.addChild(playerHealthBar.container)
+    const enemyLayer = new Container()
+    const shipLayer = new Container()
     const projectileLayer = new Container()
     const effectLayer = new Container()
-    world.addChild(projectileLayer, effectLayer)
-    const projectileSprites = new Map<string, Sprite>()
-    const effectSprites = new Map<string, Sprite>()
+    world.addChild(enemyLayer, shipLayer, projectileLayer, effectLayer)
+    const playerShip = createShipVisual('player', shipTextures, configuration.presentation.playerShipScale, shipLayer)
+    const playerHealthBar = createHealthBar()
+    world.addChild(playerHealthBar.container)
+    const projectileSprites = new Map<string, ProjectileVisual>()
+    const effectSprites = new Map<string, EffectVisual>()
     const enemyHealthBars = new Map<string, HealthBar>()
-    const enemySprites = new Map<string, Sprite>()
-    const enemyLayer = new Container()
-    world.addChildAt(enemyLayer, 2)
+    const enemySprites = new Map<string, ShipVisual>()
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     this.session.start(configuration)
     application.ticker.add(() => {
@@ -144,15 +142,17 @@ export class FirstPlayableScene implements GameRenderer {
         (application.screen.width - arena.width * scale) / 2,
         (application.screen.height - arena.height * scale) / 2,
       )
-      ship.position.set(observation.playerPosition.x, observation.playerPosition.y)
-      ship.rotation = observation.playerRotation + Math.PI / 2
-      ship.tint = observation.playerHealth <= 35 ? 0xd88372 : 0xffffff
-      updateHealthBar(playerHealthBar, observation.playerPosition.x, observation.playerPosition.y, observation.playerHealth, player.maxHealth, 72)
       const simulation = this.session.getWorldForRendering()
-      syncEnemies(simulation.enemies, enemySprites, enemyLayer, { chaser: chaserTexture, shooter: shooterTexture }, configuration.presentation)
-      syncEnemyHealthBars(simulation.enemies, enemyHealthBars, world, 62)
-      syncProjectiles(simulation.projectiles, projectileSprites, projectileLayer, combatAtlasTextures.cannonBall, configuration.presentation.projectileScale, () => this.audio.play('cannonFire'))
-      syncEffects(simulation.effects, effectSprites, effectLayer, combatAtlasTextures, (effectType) => this.audio.play(effectType === 'muzzle-flash' ? 'broadside' : effectType === 'impact-water' ? 'waterHit' : effectType === 'impact-wood' ? 'woodHit' : 'explosion'))
+      updateShipVisual(playerShip, simulation.player, 'player', shipTextures, observation.elapsedMs, reducedMotion)
+      updateDamageFire(playerShip, combatAtlasTextures.fire, observation.elapsedMs, reducedMotion)
+      updateHealthBar(playerHealthBar, observation.playerPosition.x, observation.playerPosition.y, observation.playerHealth, player.maxHealth, 72)
+      syncEnemyShipVisuals(simulation.enemies, enemySprites, enemyLayer, shipTextures, {
+        chaser: configuration.presentation.chaserShipScale,
+        shooter: configuration.presentation.shooterShipScale,
+      }, observation.elapsedMs, combatAtlasTextures.fire, reducedMotion)
+      syncEnemyHealthBars(simulation.enemies, enemyHealthBars, world, 68)
+      syncProjectileVisuals(simulation.projectiles, projectileSprites, projectileLayer, combatAtlasTextures.cannonBall, configuration.presentation.projectileScale, reducedMotion, () => this.audio.play('cannonFire'))
+      syncEffectVisuals(simulation.effects, effectSprites, effectLayer, combatAtlasTextures, shipTextures, reducedMotion, (effectType) => this.audio.play(effectType === 'muzzle-flash' ? 'broadside' : effectType === 'impact-water' ? 'waterHit' : effectType === 'impact-wood' ? 'woodHit' : effectType === 'sinking' ? 'sinking' : 'explosion'))
       host.dataset.playerX = observation.playerPosition.x.toFixed(2)
       host.dataset.playerY = observation.playerPosition.y.toFixed(2)
       host.dataset.playerRotation = observation.playerRotation.toFixed(4)
@@ -210,32 +210,6 @@ interface HealthBar {
   fill: Graphics
 }
 
-function syncEnemies(
-  enemies: readonly EnemyEntity[],
-  sprites: Map<string, Sprite>,
-  layer: Container,
-  textures: Record<'chaser' | 'shooter', Texture>,
-  presentation: GameConfigSnapshot['presentation'],
-): void {
-  const activeIds = new Set(enemies.map((enemy) => enemy.id))
-  for (const [id, sprite] of sprites) {
-    if (!activeIds.has(id)) { sprite.destroy(); sprites.delete(id) }
-  }
-  for (const enemy of enemies) {
-    let sprite = sprites.get(enemy.id)
-    if (!sprite) {
-      sprite = new Sprite(textures[enemy.enemyType])
-      sprite.anchor.set(0.5)
-      sprite.scale.set(enemy.enemyType === 'chaser' ? presentation.chaserShipScale : presentation.shooterShipScale)
-      layer.addChild(sprite)
-      sprites.set(enemy.id, sprite)
-    }
-    sprite.position.set(enemy.position.x, enemy.position.y)
-    sprite.rotation = enemy.rotation + Math.PI / 2
-    sprite.tint = enemy.health / enemy.maxHealth <= 0.35 ? 0xd88372 : enemy.enemyType === 'chaser' ? 0xffc68a : 0xb4cfff
-  }
-}
-
 function createHealthBar(): HealthBar {
   const healthBar = new Container()
   const background = new Graphics().roundRect(-25, -4, 50, 8, 3).fill({ color: 0x241b1b, alpha: 0.85 })
@@ -271,64 +245,5 @@ function syncEnemyHealthBars(
       bars.set(enemy.id, bar)
     }
     updateHealthBar(bar, enemy.position.x, enemy.position.y, enemy.health, enemy.maxHealth, verticalOffset)
-  }
-}
-
-function syncProjectiles(
-  projectiles: readonly { id: string; position: { x: number; y: number }; rotation: number }[],
-  sprites: Map<string, Sprite>,
-  layer: Container,
-  texture: import('pixi.js').Texture,
-  presentationScale: number,
-  onCreated: () => void,
-): void {
-  const activeIds = new Set(projectiles.map((projectile) => projectile.id))
-  for (const [id, sprite] of sprites) {
-    if (!activeIds.has(id)) {
-      sprite.destroy()
-      sprites.delete(id)
-    }
-  }
-  for (const projectile of projectiles) {
-    let sprite = sprites.get(projectile.id)
-    if (!sprite) {
-      sprite = new Sprite(texture)
-      sprite.anchor.set(0.5)
-      sprite.scale.set(presentationScale)
-      sprite.zIndex = 1
-      layer.addChild(sprite)
-      sprites.set(projectile.id, sprite)
-      onCreated()
-    }
-    sprite.position.set(projectile.position.x, projectile.position.y)
-    sprite.rotation = projectile.rotation
-  }
-}
-
-function syncEffects(
-  effects: readonly { id: string; effectType: 'muzzle-flash' | 'impact-water' | 'impact-wood' | 'explosion'; position: { x: number; y: number } }[],
-  spritesById: Map<string, Sprite>,
-  layer: Container,
-  textures: import('./game-assets.ts').CombatAtlasTextures,
-  onCreated: (effectType: 'muzzle-flash' | 'impact-water' | 'impact-wood' | 'explosion') => void,
-): void {
-  const activeIds = new Set(effects.map((effect) => effect.id))
-  for (const [id, sprite] of spritesById) {
-    if (!activeIds.has(id)) {
-      sprite.destroy()
-      spritesById.delete(id)
-    }
-  }
-  for (const effect of effects) {
-    let sprite = spritesById.get(effect.id)
-    if (!sprite) {
-      sprite = new Sprite(effect.effectType === 'muzzle-flash' ? textures.muzzleFlash : effect.effectType === 'explosion' ? textures.explosion : textures.impact)
-      sprite.anchor.set(0.5)
-      sprite.scale.set(effect.effectType === 'muzzle-flash' ? 1.15 : effect.effectType === 'explosion' ? 0.82 : 0.48)
-      layer.addChild(sprite)
-      spritesById.set(effect.id, sprite)
-      onCreated(effect.effectType)
-    }
-    sprite.position.set(effect.position.x, effect.position.y)
   }
 }

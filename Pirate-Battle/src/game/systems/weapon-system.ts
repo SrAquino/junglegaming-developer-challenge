@@ -42,6 +42,7 @@ function fireWeapon(
       y: player.position.y + forwardY * (player.collisionRadius + 12),
     },
     rotation: angle,
+    durationMs: 120,
     remainingLifetimeMs: 120,
   })
   for (let index = 0; index < weapon.projectileCount; index += 1) {

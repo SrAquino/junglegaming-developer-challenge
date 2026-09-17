@@ -43,8 +43,10 @@ export interface ProjectileEntity extends BaseEntity {
 
 export interface EffectEntity extends BaseEntity {
   kind: 'effect'
-  effectType: 'muzzle-flash' | 'impact-water' | 'impact-wood' | 'explosion'
+  effectType: 'muzzle-flash' | 'impact-water' | 'impact-wood' | 'explosion' | 'sinking'
+  durationMs: number
   remainingLifetimeMs: number
+  shipIdentity?: 'player' | EnemyType
 }
 
 export interface GameWorldState {

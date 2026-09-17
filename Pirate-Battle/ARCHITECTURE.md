@@ -14,7 +14,7 @@ Further decisions are recorded as the systems are implemented.
 
 ## First Pixi scene
 
-`FirstPlayableScene` owns one Pixi `Application`, its ticker and canvas. It uses the supplied `ship_1.png` through Pixi `Assets`; that cache retains the shared texture across scene mounts. The scene destroys only the application, canvas and stage children when the React component unmounts, leaving cached textures available for a later game scene.
+`FirstPlayableScene` owns one Pixi `Application`, its ticker and canvas. Supplied ship PNGs and the combat atlas load through Pixi `Assets`; that cache retains shared textures across scene mounts. `combat-art-renderer.ts` owns ship, projectile and effect display objects. The scene destroys the application, canvas and complete stage tree when React unmounts, so wakes, trails, fire, debris and Tiled layers cannot survive a restart.
 
 React Strict Mode may unmount a component while `Application.init()` is pending. The scene therefore defers destruction until initialization settles, and makes destruction idempotent. This prevents a stale initialization from leaving a ticker, listener or canvas behind.
 
@@ -30,13 +30,13 @@ The lifecycle accepts `idle → playing → paused → playing → ended`. A sin
 
 ## Arena and input
 
-The arena uses a logical coordinate system from each immutable match configuration. Pixi scales and centers that configured world inside a responsive canvas, preserving proportions while `Application` handles device pixel density. The canvas host fills the bordered arena shell; portrait uses a 16:9 shell and wider views use all available space with contained world scaling. `arena-layout.ts` declares three sample-inspired landmasses, grass regions, navigation points and props. `arena-geometry.ts` applies those exact coast polygons to movement, swept projectiles, line of sight and spawning, while Pixi masks the supplied sand and grass textures to the same contours.
+The arena uses the logical dimensions authored in `public/maps/arena.tmj`. The runtime derives them from Tiled width, height and tile size, then Pixi scales and centers that world inside the responsive canvas. `tiled-map-loader.ts` loads the map and external JSON tileset, parses the Collision object layer and preserves ordered tile data. `tiled-map-renderer.ts` renders `AguaRasa`, `Land` and `Decorations`, including Tiled flip flags. `arena-geometry.ts` applies the parsed collision polygons to movement, swept projectiles, line of sight and spawning.
 
 `playerMovementSystem` runs in the fixed simulation loop. It applies rotation and forward velocity from the immutable input snapshot, then constrains the ship to arena edges and rejects a movement that intersects a coastline. `BrowserGameInput` listens only while `GameCanvas` is mounted, tracks touch actions by pointer ID so two controls remain independent, and clears all held actions on release, cancellation, lost capture, blur, visibility change, resize and cleanup.
 
 ## Combat
 
-`weapon-system.ts` creates typed front and broadside projectiles from the configuration, while `projectile-system.ts` advances and expires them. `combat-system.ts` applies a projectile hit once, removes it immediately and awards one point only when a player shot destroys an enemy. `effect-system.ts` expires muzzle, impact and explosion feedback. Pixi renders projectile sprites, transient effects and health bars independently from simulation.
+`weapon-system.ts` creates typed front and broadside projectiles from the configuration, while `projectile-system.ts` advances and expires them. `combat-system.ts` applies a projectile hit once, removes it immediately and awards one point only when a player shot destroys an enemy. `effect-system.ts` advances finite effect lifetimes only with simulation time. Pixi maps health ratios to supplied damaged ship art and renders bounded wakes, trails, animated fire/explosions, sinking ships and debris independently from the rules. Reduced-motion mode removes continuous wake/trail motion and uses stable effect frames.
 
 ## Enemies and spawning
 
