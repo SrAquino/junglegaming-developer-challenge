@@ -13,7 +13,7 @@ Reviewed against source commit `24237dc` and `sample.png` on September 16, 2026.
 | UI | Menu title/panel/buttons, six touch icons and all round button states, HUD health/counter frames, background and logo are used. HUD and 64px touch controls are overlaid inside the arena. | Consider amber/red HUD fills for health thresholds and settings/home icons where they improve navigation. |
 | Spritesheet | `ships_miscellaneous_sheet.png` is loaded through the shared asset cache. `game-assets.ts` contains a typed frame manifest validated against the supplied XML for cannonball, fire, explosion and debris frames. | The identically mapped retina sheet is an explicit alternative and is not loaded alongside the default sheet. |
 | Tilesheet | `tiles_sheet.png` loads once through the external `tiles_sheet.tsj`; tile GID flip flags, alpha, positions and layer order are interpreted at runtime. | The retina export remains an unloaded alternative pending measured benefit. |
-| Sounds | 13 source names are mapped, including sinking; 14 are unmapped. Sinking now plays when its visual effect is created. | Correct unlock/event/cleanup behavior, then wire UI, score, health, warning, collision and combat variants; details below. |
+| Sounds | All 27 WAV files have an event or deterministic variant mapping. Audio unlocks from a UI/control gesture, combat uses semantic simulation events, and loops/one-shots have bounded lifecycles. | Complete a physical mobile listening check before closing checklist 15.5. |
 | Vectors | Reference only. | Use only if a scalable presentation source is needed. |
 | Samples | Review references only. | Never render samples as product screens. |
 
@@ -27,7 +27,7 @@ Reviewed against source commit `24237dc` and `sample.png` on September 16, 2026.
 
 ## Ownership
 
-`src/game/rendering/game-assets.ts` owns asset URLs, direct texture loading and named sprite atlas frames. `FirstPlayableScene` owns Pixi texture and sprite cleanup. `src/game/audio/game-audio.ts` owns HTML audio element lifecycle. No supplied asset is modified or converted.
+`src/game/rendering/game-assets.ts` owns asset URLs, direct texture loading and named sprite atlas frames. `FirstPlayableScene` owns Pixi texture and sprite cleanup. The app-scoped `GameAudio` owns HTML audio prototypes across screens; each game scene starts, suspends and ends its bounded voices and loops. No supplied asset is modified or converted.
 
 ## Sample-inspired composition and remaining material
 
@@ -47,17 +47,16 @@ The pack contains 96 tiles, 30 ship/dinghy images, 67 ship parts, five effects a
 
 ## Sound event audit
 
-All 27 WAVs are accounted for below; mapped files still need playback acceptance checks.
+All 27 WAVs are accounted for below. Automated browser checks cover mapping, UI unlock, mute/volume, variants, voice caps, pause/resume, failed playback and gesture recovery.
 
 | Files | Current state | Required action |
 | --- | --- | --- |
-| `game_start`, `game_pause`, `game_resume`, `game_complete`, `game_over` | Five mapped lifecycle sources. Start occurs before the canvas-only audio unlock. | Unlock from the initial Play/control gesture and verify exactly one cue per transition, including result-screen lifetime. |
-| `cannon_fire_1`, `cannon_broadside` | Two mapped sources, called from projectile/effect sprite creation. | Trigger by actual weapon events; avoid playing both cues for every muzzle flash or once per broadside projectile. |
-| `cannonball_water_hit_1`, `ship_wood_hit_1`, `ship_explosion_1` | Three mapped sources. | Verify real impact classification and bounded overlapping voices. |
-| `ship_sinking` | Mapped and called once when each renderer-visible sinking effect is created. | Verify playback unlock and voice cleanup with the rest of section 15.5. |
-| `ocean_ambience_loop`, `ship_sailing_loop` | Two mapped loops start together after a canvas tap. | Unlock without empty-water taps, gate sailing on movement, pause/restore and release on exit. |
-| `ui_hover`, `ui_click`, `ui_open`, `ui_close`, `ui_back` | Five unmapped sources. | Map meaningful UI transitions; hover is desktop-only and must not fire repeatedly from renders. |
-| `score_point`, `health_low`, `time_warning`, `ship_collision` | Four unmapped sources. | Map actual score/threshold/collision events; gate repeat warnings and honor mute. |
-| `cannon_fire_2`, `cannon_fire_3`, `cannonball_water_hit_2`, `ship_wood_hit_2`, `ship_explosion_2` | Five unmapped variants. | Define variation selection without changing simulation randomness, or document exclusions. |
+| `game_start`, `game_pause`, `game_resume`, `game_complete`, `game_over` | Lifecycle cues. Play unlocks before game start; pause/resume emit once and result cues are owned by the persistent app audio instance. | Physical mobile listening pending. |
+| `cannon_fire_1`–`3`, `cannon_broadside` | Front and enemy shots rotate through the three fire files; one broadside event plays once for the complete volley. | Complete. |
+| `cannonball_water_hit_1`–`2`, `ship_wood_hit_1`–`2`, `ship_explosion_1`–`2` | Water, hull and destruction events rotate through their respective variants without using simulation randomness. | Complete. |
+| `ship_sinking` | Plays once from each semantic ship-destroyed event alongside the explosion cue. | Complete. |
+| `ocean_ambience_loop`, `ship_sailing_loop` | Ocean starts with an unlocked match; sailing runs only while player velocity is nonzero. Both pause and release with the session. | Physical mobile listening pending. |
+| `ui_hover`, `ui_click`, `ui_open`, `ui_close`, `ui_back` | Delegated app UI cues; hover only plays after unlock and is throttled, while open/save/back receive distinct sounds. | Complete. |
+| `score_point`, `health_low`, `time_warning`, `ship_collision` | Score, first low-health crossing, 30/10-second thresholds and new collision contacts emit gated cues. | Complete. |
 
-The adapter uses reusable HTMLAudio prototypes and cloned voices, not decoded Web Audio buffers. `unlock()` currently sets a Boolean; actual browser playback permission still needs verification. One-shot clones are not tracked for cleanup or a global voice cap. Failed `play()` promises are caught, which prevents propagation but does not prove successful audio recovery.
+The adapter uses reusable HTMLAudio prototypes and cloned voices rather than decoded Web Audio buffers. It tracks and caps one-shots at 12, owns loop instances separately, and releases `src` resources during pause/end/destroy. A failed `play()` releases that voice or loop; the next keyboard/touch gesture retries desired loops. Automated checks instrument browser media calls, so a physical phone remains necessary to confirm actual speaker volume and balance.

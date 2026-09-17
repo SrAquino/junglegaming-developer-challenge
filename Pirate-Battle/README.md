@@ -49,6 +49,10 @@ The first two successful enemy spawns guarantee one Chaser and one Shooter; late
 
 Mobile supports portrait and landscape layouts. Landscape is recommended during gameplay because it provides more room for the arena and simultaneous touch controls. Touch buttons use pointer capture and clear their held state on release, cancel, blur, visibility change or leaving gameplay.
 
+## Audio
+
+The Play click or first keyboard/touch control unlocks sound. Ocean ambience runs during an active match, sailing audio follows actual movement, and pause/hidden-tab handling suspends active media. Options persist mute and volume for later matches. The supplied combat, lifecycle, UI, score, warning and collision sounds are mapped in `docs/assets/asset-inventory.md`.
+
 ## Network scenarios
 
 The main menu includes **Network controls** for reproducing API behavior through MSW. Choose a scenario, then open Ranking or History (or finish a match for registration scenarios). **Reset mock data** restores the fixture data and clears locally confirmed and pending submissions.

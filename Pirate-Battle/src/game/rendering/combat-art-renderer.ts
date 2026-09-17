@@ -94,7 +94,6 @@ export function syncProjectileVisuals(
   texture: Texture,
   scale: number,
   reducedMotion: boolean,
-  onCreated: () => void,
 ): void {
   const activeIds = new Set(projectiles.map((projectile) => projectile.id))
   for (const [id, visual] of visuals) {
@@ -114,7 +113,6 @@ export function syncProjectileVisuals(
       layer.addChild(container)
       visual = { container, ball }
       visuals.set(projectile.id, visual)
-      onCreated()
     }
     visual.container.position.set(projectile.position.x, projectile.position.y)
     visual.container.rotation = projectile.rotation
@@ -128,7 +126,6 @@ export function syncEffectVisuals(
   combatTextures: CombatAtlasTextures,
   shipTextures: ShipTextures,
   reducedMotion: boolean,
-  onCreated: (effectType: EffectEntity['effectType']) => void,
 ): void {
   const activeIds = new Set(effects.map((effect) => effect.id))
   for (const [id, visual] of visuals) {
@@ -139,7 +136,6 @@ export function syncEffectVisuals(
     if (!visual) {
       visual = createEffectVisual(effect, layer, combatTextures, shipTextures)
       visuals.set(effect.id, visual)
-      onCreated(effect.effectType)
     }
     updateEffectVisual(visual, effect, combatTextures, reducedMotion)
   }

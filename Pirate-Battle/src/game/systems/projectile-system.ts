@@ -1,5 +1,5 @@
 import { segmentIntersectsLand } from '../config/arena-geometry.ts'
-import type { EffectEntity } from '../entities/entity.ts'
+import type { EffectEntity, GameWorldState } from '../entities/entity.ts'
 import type { GameSystem } from './game-system.ts'
 
 export const projectileSystem: GameSystem = {
@@ -22,7 +22,7 @@ export const projectileSystem: GameSystem = {
         segmentIntersectsLand(previousPosition, projectile.position, config.arena.collisionPolygons ?? []) ||
         outsideArena
       ) {
-        deactivateProjectile(projectile, world.effects)
+        deactivateProjectile(projectile, world)
       }
     }
     world.projectiles = world.projectiles.filter((projectile) => projectile.active)
@@ -31,11 +31,12 @@ export const projectileSystem: GameSystem = {
 
 function deactivateProjectile(
   projectile: { active: boolean; position: { x: number; y: number } },
-  effects: EffectEntity[],
+  world: { effects: EffectEntity[]; events: GameWorldState['events'] },
 ): void {
   projectile.active = false
-  effects.push({
-    id: `impact-${projectile.position.x.toFixed(1)}-${projectile.position.y.toFixed(1)}-${effects.length}`,
+  world.events.push({ type: 'projectile-impact', material: 'water' })
+  world.effects.push({
+    id: `impact-${projectile.position.x.toFixed(1)}-${projectile.position.y.toFixed(1)}-${world.effects.length}`,
     kind: 'effect',
     effectType: 'impact-water',
     active: true,

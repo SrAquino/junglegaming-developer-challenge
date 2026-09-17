@@ -38,6 +38,8 @@ The arena uses the logical dimensions authored in `public/maps/arena.tmj`. The r
 
 `weapon-system.ts` creates typed front and broadside projectiles from the configuration, while `projectile-system.ts` advances and expires them. `combat-system.ts` applies a projectile hit once, removes it immediately and awards one point only when a player shot destroys an enemy. `effect-system.ts` advances finite effect lifetimes only with simulation time. Pixi maps health ratios to supplied damaged ship art and renders bounded wakes, trails, animated fire/explosions, sinking ships and debris independently from the rules. Reduced-motion mode removes continuous wake/trail motion and uses stable effect frames.
 
+Systems append semantic events for weapons, impacts, damage, destruction, score and collision to the world. `GameSession.drainEvents()` gives each event to the audio adapter once; Pixi sprite creation does not trigger sound. `GameAudio` persists at the app level so the Play gesture can unlock media before the async scene loads. It rotates supplied variants, caps one-shots, gates warnings, starts sailing only with motion and releases media resources on pause, exit, result and restart.
+
 ## Enemies and spawning
 
 `enemy-spawn-system.ts` consumes active simulation time and tries bounded random positions that are inside the arena, clear of every coast and other ships, and at least the configured safe distance from the player. The first two successful spawns are a Chaser and Shooter so a default match always demonstrates both behaviors; subsequent spawns use the configured weights.

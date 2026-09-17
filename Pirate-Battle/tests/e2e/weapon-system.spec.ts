@@ -21,6 +21,10 @@ test('fires front and broadside weapons with their configured cooldowns', () => 
   weaponSystem.update(0, context)
   expect(world.projectiles).toHaveLength(4)
   expect(world.effects).toHaveLength(2)
+  expect(world.events.filter((event) => event.type === 'weapon-fired')).toEqual([
+    { type: 'weapon-fired', weapon: 'front', owner: 'player' },
+    { type: 'weapon-fired', weapon: 'broadside', owner: 'player' },
+  ])
 
   weaponSystem.update(100, context)
   expect(world.projectiles).toHaveLength(4)
@@ -62,6 +66,11 @@ test('projectiles damage enemies once', () => {
   expect(world.projectiles).toHaveLength(0)
   expect(world.effects.some((effect) => effect.effectType === 'explosion')).toBe(true)
   expect(world.effects.some((effect) => effect.effectType === 'sinking' && effect.shipIdentity === 'chaser')).toBe(true)
+  expect(world.events).toEqual(expect.arrayContaining([
+    { type: 'projectile-impact', material: 'wood' },
+    { type: 'ship-destroyed', target: 'chaser' },
+    { type: 'score-changed' },
+  ]))
 })
 
 test('selects authored damage artwork at the health thresholds', () => {
@@ -85,4 +94,5 @@ test('a swept projectile stops at the coastline instead of tunnelling through la
   })
   expect(world.projectiles).toHaveLength(0)
   expect(world.effects.at(-1)?.effectType).toBe('impact-water')
+  expect(world.events.at(-1)).toEqual({ type: 'projectile-impact', material: 'water' })
 })

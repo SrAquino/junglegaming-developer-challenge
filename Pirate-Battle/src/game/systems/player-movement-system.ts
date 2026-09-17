@@ -11,6 +11,7 @@ export const playerMovementSystem: GameSystem = {
     if (!input.forward) {
       player.velocity.x = 0
       player.velocity.y = 0
+      world.playerBlockedByLand = false
       return
     }
 
@@ -19,11 +20,19 @@ export const playerMovementSystem: GameSystem = {
     const previousPosition = { ...player.position }
     player.position.x += player.velocity.x * deltaSeconds
     player.position.y += player.velocity.y * deltaSeconds
+    const attemptedPosition = { ...player.position }
     constrainToArena(player.position, player.collisionRadius, config.arena.width, config.arena.height)
 
-    if (circleIntersectsLand(player.position, player.collisionRadius, config.arena.collisionPolygons ?? [])) {
+    const blockedByLand = circleIntersectsLand(player.position, player.collisionRadius, config.arena.collisionPolygons ?? [])
+    const blockedByBoundary = player.position.x !== attemptedPosition.x || player.position.y !== attemptedPosition.y
+    const blocked = blockedByLand || blockedByBoundary
+    if (blocked && !world.playerBlockedByLand) world.events.push({ type: 'ship-collision' })
+    world.playerBlockedByLand = blocked
+    if (blockedByLand) {
       player.position.x = previousPosition.x
       player.position.y = previousPosition.y
+      player.velocity.x = 0
+      player.velocity.y = 0
     }
   },
 }

@@ -11,14 +11,24 @@ export const combatSystem: GameSystem = {
         : collides(projectile, world.player) ? world.player : undefined
       if (!target) continue
 
+      const previousHealth = target.health
       target.health = Math.max(0, target.health - projectile.damage)
       projectile.active = false
       createImpactEffect(world.effects, projectile)
+      world.events.push({ type: 'projectile-impact', material: 'wood' })
+      world.events.push({
+        type: 'ship-damaged',
+        target: isEnemy(target) ? target.enemyType : 'player',
+        health: target.health,
+        previousHealth,
+        maxHealth: target.maxHealth,
+      })
       if (target.health === 0) {
         target.active = false
         createExplosionEffect(world.effects, target)
         createSinkingEffect(world.effects, target)
-        if (isEnemy(target)) world.player.score += 1
+        world.events.push({ type: 'ship-destroyed', target: isEnemy(target) ? target.enemyType : 'player' })
+        if (isEnemy(target)) { world.player.score += 1; world.events.push({ type: 'score-changed' }) }
       }
     }
     world.projectiles = world.projectiles.filter((projectile) => projectile.active)

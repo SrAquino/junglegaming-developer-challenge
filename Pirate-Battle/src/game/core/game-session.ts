@@ -20,6 +20,7 @@ import { BrowserGameClock } from './game-clock.ts'
 import type { GameClock } from './game-clock.ts'
 import { BrowserRandom } from './random-source.ts'
 import type { RandomSource } from './random-source.ts'
+import type { GameEvent } from '../types/game-event.ts'
 
 export interface SimulationObservation {
   matchId: string | null
@@ -202,6 +203,11 @@ export class GameSession {
       projectiles: this.world.projectiles,
       effects: this.world.effects,
     })
+  }
+
+  public drainEvents(): readonly Readonly<GameEvent>[] {
+    if (!this.world || this.world.events.length === 0) return []
+    return this.world.events.splice(0, this.world.events.length)
   }
 
   public subscribeHud(listener: HudListener): () => void {

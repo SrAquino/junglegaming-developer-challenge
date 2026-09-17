@@ -24,12 +24,17 @@ export const enemyBehaviorSystem: GameSystem = {
       const distance = Math.hypot(world.player.position.x - enemy.position.x, world.player.position.y - enemy.position.y)
       if (enemy.enemyType === 'chaser' && distance <= enemy.collisionRadius + world.player.collisionRadius) {
         enemy.active = false
+        const previousHealth = world.player.health
         world.player.health = Math.max(0, world.player.health - config.enemies.chaser.collisionDamage)
+        world.events.push({ type: 'ship-collision' })
+        world.events.push({ type: 'ship-damaged', target: 'player', health: world.player.health, previousHealth, maxHealth: world.player.maxHealth })
+        world.events.push({ type: 'ship-destroyed', target: 'chaser' })
         world.effects.push({ id: `explosion-${enemy.id}`, kind: 'effect', effectType: 'explosion', active: true,
           position: { ...enemy.position }, rotation: enemy.rotation, durationMs: 420, remainingLifetimeMs: 420 })
         world.effects.push({ id: `sinking-${enemy.id}`, kind: 'effect', effectType: 'sinking', shipIdentity: 'chaser', active: true,
           position: { ...enemy.position }, rotation: enemy.rotation + Math.PI / 2, durationMs: 900, remainingLifetimeMs: 900 })
         if (world.player.health === 0) {
+          world.events.push({ type: 'ship-destroyed', target: 'player' })
           world.effects.push({ id: `sinking-${world.player.id}`, kind: 'effect', effectType: 'sinking', shipIdentity: 'player', active: true,
             position: { ...world.player.position }, rotation: world.player.rotation + Math.PI / 2, durationMs: 900, remainingLifetimeMs: 900 })
         }
@@ -46,6 +51,7 @@ export const enemyBehaviorSystem: GameSystem = {
         world.projectiles.push({ id: `${enemy.id}-shot-${world.elapsedMs}`, kind: 'projectile', active: true, owner: 'enemy',
           position, rotation: aim, velocity: { x: Math.cos(aim) * projectile.speed, y: Math.sin(aim) * projectile.speed },
           damage: projectile.damage, distanceTravelled: 0, maximumRange: projectile.range, remainingLifetimeMs: projectile.lifetimeMs })
+        world.events.push({ type: 'weapon-fired', weapon: 'front', owner: 'enemy' })
         world.effects.push({ id: `${enemy.id}-muzzle-${world.elapsedMs}`, kind: 'effect', effectType: 'muzzle-flash', active: true,
           position: { ...position }, rotation: aim, durationMs: 120, remainingLifetimeMs: 120 })
       }

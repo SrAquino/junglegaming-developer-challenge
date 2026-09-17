@@ -8,10 +8,12 @@ import type { HudSnapshot, MatchResult } from '../../game/types/game.ts'
 import type { AudioSettings } from '../../storage/audio-settings.ts'
 import type { GameOptions } from '../../game/config/game-config.ts'
 import { enemySpawnIntervalLimits, sessionDurationLimits } from '../../game/config/game-config.ts'
+import type { GameAudio } from '../../game/audio/game-audio.ts'
 
 type LoadState = 'loading' | 'ready' | 'error'
 
 interface GameCanvasProps {
+  audio: GameAudio
   configuration: GameConfigSnapshot
   audioSettings: AudioSettings
   gameOptions: GameOptions
@@ -22,7 +24,7 @@ interface GameCanvasProps {
 
 const initialHud: HudSnapshot = { status: 'playing', score: 0, remainingSeconds: 0, playerHealth: 0, playerMaxHealth: 0 }
 
-export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, onFinished, onSaveOptions }: GameCanvasProps) {
+export function GameCanvas({ audio, audioSettings, configuration, gameOptions, onExit, onFinished, onSaveOptions }: GameCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<BrowserGameInput | null>(null)
   const sceneRef = useRef<FirstPlayableScene | null>(null)
@@ -30,7 +32,6 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
   const resumeButtonRef = useRef<HTMLButtonElement>(null)
   const pauseDialogRef = useRef<HTMLDivElement>(null)
   const configurationRef = useRef(configuration)
-  const audioSettingsRef = useRef(audioSettings)
   const onFinishedRef = useRef(onFinished)
   const [attempt, setAttempt] = useState(0)
   const [loadState, setLoadState] = useState<LoadState>('loading')
@@ -69,16 +70,19 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
     inputRef.current = input
     let cancelled = false
     const scene = new FirstPlayableScene(input, {
-      audioSettings: audioSettingsRef.current,
+      audio,
       configuration: configurationRef.current,
       onHud: (snapshot) => { if (!cancelled) setHud(snapshot) },
       onFinished: (result) => { if (!cancelled) onFinishedRef.current(result) },
     })
     sceneRef.current = scene
-    const pauseOnHidden = () => { if (document.hidden) { input.reset(); scene.pause() } }
-    const pauseOnBlur = () => { input.reset(); scene.pause() }
+    const pauseOnHidden = () => { if (document.hidden) { input.reset(); scene.pause(false) } }
+    const pauseOnBlur = () => { input.reset(); scene.pause(false) }
     const resetInput = () => input.reset()
+    const unlockAudio = () => scene.unlockAudio()
     document.addEventListener('visibilitychange', pauseOnHidden)
+    document.addEventListener('pointerdown', unlockAudio)
+    window.addEventListener('keydown', unlockAudio)
     window.addEventListener('blur', pauseOnBlur)
     window.addEventListener('resize', resetInput)
     setLoadState('loading')
@@ -89,6 +93,8 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
     return () => {
       cancelled = true
       document.removeEventListener('visibilitychange', pauseOnHidden)
+      document.removeEventListener('pointerdown', unlockAudio)
+      window.removeEventListener('keydown', unlockAudio)
       window.removeEventListener('blur', pauseOnBlur)
       window.removeEventListener('resize', resetInput)
       scene.destroy()
@@ -96,7 +102,7 @@ export function GameCanvas({ audioSettings, configuration, gameOptions, onExit, 
       sceneRef.current = null
       inputRef.current = null
     }
-  }, [attempt])
+  }, [attempt, audio])
 
   const resume = () => {
     sceneRef.current?.resume()

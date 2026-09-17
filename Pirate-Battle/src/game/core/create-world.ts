@@ -26,5 +26,7 @@ export function createInitialWorld(matchId: string, config: GameConfigSnapshot):
     enemies: [],
     projectiles: [],
     effects: [],
+    events: [],
+    playerBlockedByLand: false,
   }
 }

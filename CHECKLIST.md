@@ -334,10 +334,11 @@ Audit result before this repair: lint, strict types and build passed; the comple
 
 ### 15.5 Complete usable audio — Terra / Medium
 
-- [ ] Unlock audio from Play or the first keyboard/touch control gesture; verify audibility without requiring a tap on empty water. Emit sounds from weapon/lifecycle/damage events once per event, not per rendered projectile or frame.
-- [ ] Wire the missing UI, score, low-health, time-warning and collision cues; actually trigger the mapped sinking sound and select supplied fire/hit/explosion variants. Start sailing audio only while moving and gate repeated warnings.
-- [ ] Track and cap one-shot voices as well as loops; suspend/stop and release them appropriately on pause, hidden tab, result, exit and restart. Verify persisted mute/volume, rejected playback, failed WAV loads and resume after a blocked first play.
+- [x] Unlock audio from Play or the first keyboard/touch control gesture; verify audibility without requiring a tap on empty water. Emit sounds from weapon/lifecycle/damage events once per event, not per rendered projectile or frame.
+- [x] Wire the missing UI, score, low-health, time-warning and collision cues; actually trigger the mapped sinking sound and select supplied fire/hit/explosion variants. Start sailing audio only while moving and gate repeated warnings.
+- [x] Track and cap one-shot voices as well as loops; suspend/stop and release them appropriately on pause, hidden tab, result, exit and restart. Verify persisted mute/volume, rejected playback, failed WAV loads and resume after a blocked first play.
 - [ ] Give every one of the 27 WAV files an event/variant mapping or an explicit exclusion reason in the inventory. Verify with browser playback checks and a real mobile listening check; settings persistence alone is insufficient.
+  - Automated mapping and desktop/mobile browser playback checks complete; physical mobile listening remains pending.
 
 ### 15.6 Repair data flows and close challenge coverage — Sol / Medium
 

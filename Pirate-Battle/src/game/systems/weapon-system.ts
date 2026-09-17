@@ -1,5 +1,5 @@
 import type { WeaponConfig } from '../config/game-config.ts'
-import type { EffectEntity, ProjectileEntity } from '../entities/entity.ts'
+import type { GameWorldState } from '../entities/entity.ts'
 import type { GameSystem } from './game-system.ts'
 
 export const weaponSystem: GameSystem = {
@@ -7,20 +7,19 @@ export const weaponSystem: GameSystem = {
     const player = world.player
     const now = world.elapsedMs
     if (input.fireFront && now >= player.weaponReadyAtMs.front) {
-      fireWeapon(world.projectiles, world.effects, player, config.weapons.front, player.rotation, now, 'front')
+      fireWeapon(world, player, config.weapons.front, player.rotation, now, 'front')
     }
     if (input.fireLeft && now >= player.weaponReadyAtMs.leftBroadside) {
-      fireWeapon(world.projectiles, world.effects, player, config.weapons.broadside, player.rotation - Math.PI / 2, now, 'leftBroadside')
+      fireWeapon(world, player, config.weapons.broadside, player.rotation - Math.PI / 2, now, 'leftBroadside')
     }
     if (input.fireRight && now >= player.weaponReadyAtMs.rightBroadside) {
-      fireWeapon(world.projectiles, world.effects, player, config.weapons.broadside, player.rotation + Math.PI / 2, now, 'rightBroadside')
+      fireWeapon(world, player, config.weapons.broadside, player.rotation + Math.PI / 2, now, 'rightBroadside')
     }
   },
 }
 
 function fireWeapon(
-  projectiles: ProjectileEntity[],
-  effects: EffectEntity[],
+  world: GameWorldState,
   player: { id: string; position: { x: number; y: number }; collisionRadius: number; weaponReadyAtMs: Record<'front' | 'leftBroadside' | 'rightBroadside', number> },
   weapon: WeaponConfig,
   angle: number,
@@ -32,7 +31,8 @@ function fireWeapon(
   const forwardY = Math.sin(angle)
   const sideX = -forwardY
   const sideY = forwardX
-  effects.push({
+  world.events.push({ type: 'weapon-fired', weapon: weaponKey === 'front' ? 'front' : 'broadside', owner: 'player' })
+  world.effects.push({
     id: `${player.id}-${weaponKey}-muzzle-${now}`,
     kind: 'effect',
     effectType: 'muzzle-flash',
@@ -47,7 +47,7 @@ function fireWeapon(
   })
   for (let index = 0; index < weapon.projectileCount; index += 1) {
     const offset = (index - (weapon.projectileCount - 1) / 2) * weapon.projectileSpacing
-    projectiles.push({
+    world.projectiles.push({
       id: `${player.id}-${weaponKey}-${now}-${index}`,
       kind: 'projectile',
       active: true,

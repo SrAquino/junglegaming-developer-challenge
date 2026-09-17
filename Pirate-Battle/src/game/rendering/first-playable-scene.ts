@@ -25,14 +25,13 @@ import {
 import type { GameRenderer } from './game-renderer.ts'
 import { loadTiledArenaMap } from './tiled-map-loader.ts'
 import { createTiledMapContainer } from './tiled-map-renderer.ts'
-import { GameAudio } from '../audio/game-audio.ts'
-import type { AudioSettings } from '../../storage/audio-settings.ts'
+import { GameAudio, soundsForGameEvent } from '../audio/game-audio.ts'
 
 const MAX_DEVICE_PIXEL_RATIO = 2
 
 export interface PlayableSceneOptions {
   configuration: GameConfigSnapshot
-  audioSettings: AudioSettings
+  audio: GameAudio
   onHud?: (snapshot: Readonly<HudSnapshot>) => void
   onFinished?: (result: Readonly<MatchResult>) => void
 }
@@ -47,17 +46,15 @@ export class FirstPlayableScene implements GameRenderer {
   public constructor(input: GameInput, options: PlayableSceneOptions) {
     this.input = input
     this.options = options
-    this.audio = new GameAudio(options.audioSettings)
+    this.audio = options.audio
     this.session = new GameSession({ systems: [playerMovementSystem, enemySpawnSystem, weaponSystem, projectileSystem, combatSystem, enemyBehaviorSystem, effectSystem] })
     this.unsubscribeHud = this.session.subscribeHud((snapshot) => this.options.onHud?.(snapshot))
     this.unsubscribeLifecycle = this.session.subscribeLifecycle((event) => {
-      if (event.type === 'started') { this.audio.play('gameStart'); this.audio.startLoops() }
-      if (event.type === 'paused') { this.audio.play('gamePause'); this.audio.pauseLoops() }
-      if (event.type === 'resumed') { this.audio.play('gameResume'); this.audio.resumeLoops() }
+      if (event.type === 'started') this.audio.startSession()
+      if (event.type === 'paused') { this.audio.pauseSession(this.pauseAudible); this.pauseAudible = true }
+      if (event.type === 'resumed') this.audio.resumeSession()
       if (event.type === 'ended') {
-        this.audio.pauseLoops()
-        if (event.reason === 'time-expired') this.audio.play('gameComplete')
-        if (event.reason === 'player-destroyed') this.audio.play('gameOver')
+        this.audio.endSession()
         if (event.result) this.options.onFinished?.(event.result)
       }
     })
@@ -68,7 +65,8 @@ export class FirstPlayableScene implements GameRenderer {
   private readonly unsubscribeHud: () => void
   private readonly unsubscribeLifecycle: () => void
   private readonly audio: GameAudio
-  private audioUnlockHost: HTMLElement | null = null
+  private pauseAudible = true
+  private previousRemainingSeconds = Infinity
 
   public async mount(host: HTMLElement): Promise<void> {
     const application = new Application()
@@ -86,9 +84,6 @@ export class FirstPlayableScene implements GameRenderer {
       this.destroyApplication()
       return
     }
-    this.audioUnlockHost = host
-    host.addEventListener('pointerdown', this.unlockAudio, { once: true })
-
     const [shipTextures, tiledArena, combatAtlasTextures] = await Promise.all([
       loadShipTextures(),
       loadTiledArenaMap(),
@@ -127,11 +122,20 @@ export class FirstPlayableScene implements GameRenderer {
     const enemyHealthBars = new Map<string, HealthBar>()
     const enemySprites = new Map<string, ShipVisual>()
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    this.previousRemainingSeconds = configuration.sessionDurationSeconds
 
     this.session.start(configuration)
     application.ticker.add(() => {
       this.session.tick(this.input.getSnapshot())
       const observation = this.session.observe()
+      for (const event of this.session.drainEvents()) {
+        for (const sound of soundsForGameEvent(event)) this.audio.play(sound)
+      }
+      const remainingSeconds = Math.max(0, Math.ceil(configuration.sessionDurationSeconds - observation.elapsedMs / 1_000))
+      for (const threshold of [30, 10]) {
+        if (this.previousRemainingSeconds > threshold && remainingSeconds <= threshold) this.audio.play('timeWarning')
+      }
+      this.previousRemainingSeconds = remainingSeconds
       const { arena, player } = configuration
       const scale = Math.min(
         application.screen.width / arena.width,
@@ -151,8 +155,14 @@ export class FirstPlayableScene implements GameRenderer {
         shooter: configuration.presentation.shooterShipScale,
       }, observation.elapsedMs, combatAtlasTextures.fire, reducedMotion)
       syncEnemyHealthBars(simulation.enemies, enemyHealthBars, world, 68)
-      syncProjectileVisuals(simulation.projectiles, projectileSprites, projectileLayer, combatAtlasTextures.cannonBall, configuration.presentation.projectileScale, reducedMotion, () => this.audio.play('cannonFire'))
-      syncEffectVisuals(simulation.effects, effectSprites, effectLayer, combatAtlasTextures, shipTextures, reducedMotion, (effectType) => this.audio.play(effectType === 'muzzle-flash' ? 'broadside' : effectType === 'impact-water' ? 'waterHit' : effectType === 'impact-wood' ? 'woodHit' : effectType === 'sinking' ? 'sinking' : 'explosion'))
+      syncProjectileVisuals(simulation.projectiles, projectileSprites, projectileLayer, combatAtlasTextures.cannonBall, configuration.presentation.projectileScale, reducedMotion)
+      syncEffectVisuals(simulation.effects, effectSprites, effectLayer, combatAtlasTextures, shipTextures, reducedMotion)
+      this.audio.setSailing(Math.hypot(simulation.player.velocity.x, simulation.player.velocity.y) > 1)
+      const audioDiagnostics = this.audio.getDiagnostics()
+      host.dataset.audioUnlocked = String(audioDiagnostics.unlocked)
+      host.dataset.audioVoices = String(audioDiagnostics.activeVoices)
+      host.dataset.audioLoops = String(audioDiagnostics.activeLoops)
+      host.dataset.audioFailures = String(audioDiagnostics.failedPlays)
       host.dataset.playerX = observation.playerPosition.x.toFixed(2)
       host.dataset.playerY = observation.playerPosition.y.toFixed(2)
       host.dataset.playerRotation = observation.playerRotation.toFixed(4)
@@ -172,9 +182,7 @@ export class FirstPlayableScene implements GameRenderer {
   public destroy(): void {
     this.destroyed = true
     this.session.destroy()
-    this.audioUnlockHost?.removeEventListener('pointerdown', this.unlockAudio)
-    this.audioUnlockHost = null
-    this.audio.destroy()
+    this.audio.endSession()
     this.unsubscribeHud()
     this.unsubscribeLifecycle()
     if (this.initialization) {
@@ -188,11 +196,11 @@ export class FirstPlayableScene implements GameRenderer {
     this.destroyApplication()
   }
 
-  public pause(): boolean { return this.session.pause() }
+  public pause(audible = true): boolean { this.pauseAudible = audible; return this.session.pause() }
 
   public resume(): boolean { return this.session.resume() }
 
-  private readonly unlockAudio = (): void => { this.audio.unlock(); if (this.session.status === 'playing') this.audio.startLoops() }
+  public unlockAudio(): void { this.audio.unlock() }
 
   private destroyApplication(): void {
     if (this.didDestroy) {

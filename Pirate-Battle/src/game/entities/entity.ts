@@ -1,4 +1,5 @@
 import type { Vector2 } from '../types/vector.ts'
+import type { GameEvent } from '../types/game-event.ts'
 
 export type EnemyType = 'chaser' | 'shooter'
 export type ProjectileOwner = 'player' | 'enemy'
@@ -58,6 +59,8 @@ export interface GameWorldState {
   enemies: EnemyEntity[]
   projectiles: ProjectileEntity[]
   effects: EffectEntity[]
+  events: GameEvent[]
+  playerBlockedByLand: boolean
 }
 
 export type GameEntity = PlayerEntity | EnemyEntity | ProjectileEntity | EffectEntity

@@ -24,10 +24,12 @@ test('moves, turns, stays inside the arena and cannot cross a visible coastline'
   world.player.rotation = Math.PI
   playerMovementSystem.update(1_000, { ...context, input: { ...emptyPlayerInput, forward: true } })
   expect(world.player.position.x).toBe(world.player.collisionRadius)
+  playerMovementSystem.update(0, { ...context, input: emptyPlayerInput })
 
   world.player.position = { x: 400, y: 360 }
   world.player.rotation = -Math.PI / 2
   const beforeIslandCollision = { ...world.player.position }
   playerMovementSystem.update(1_000, { ...context, input: { ...emptyPlayerInput, forward: true } })
   expect(world.player.position).toEqual(beforeIslandCollision)
+  expect(world.events.filter((event) => event.type === 'ship-collision')).toHaveLength(2)
 })
