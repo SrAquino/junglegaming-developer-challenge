@@ -10,12 +10,13 @@ export type NetworkScenario =
   | 'client-error'
   | 'ranking-error'
   | 'history-error'
+  | 'timeout'
   | 'timeout-after-register'
   | 'unavailable-at-match-end'
 
 const scenarioStorageKey = 'pirate-battle.network-scenario'
 
-export const networkScenarios: readonly NetworkScenario[] = ['success', 'empty', 'multiple-pages', 'slow', 'variable-latency', 'out-of-order', 'offline', 'server-error', 'client-error', 'ranking-error', 'history-error', 'timeout-after-register', 'unavailable-at-match-end']
+export const networkScenarios: readonly NetworkScenario[] = ['success', 'empty', 'multiple-pages', 'slow', 'variable-latency', 'out-of-order', 'offline', 'server-error', 'client-error', 'ranking-error', 'history-error', 'timeout', 'timeout-after-register', 'unavailable-at-match-end']
 
 export function getNetworkScenario(): NetworkScenario {
   const value = localStorage.getItem(scenarioStorageKey)

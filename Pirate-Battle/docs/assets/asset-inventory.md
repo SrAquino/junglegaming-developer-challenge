@@ -2,7 +2,7 @@
 
 The supplied `public/assets` pack contains 234 default PNGs, 234 retina PNGs, 27 WAV files, sprite sheets, tile sheets, vectors and sample screens. Default and retina trees mirror each other; default assets are the current runtime selection.
 
-Reviewed against source commit `24237dc` and `sample.png` on September 16, 2026. Integration means that a file is referenced by the implementation; it does not establish correct event timing, visual fidelity or mobile usability. See [the audit](../reviews/2026-09-16/README.md) and checklist section 15 for acceptance steps.
+Updated against the current Tiled/audio implementation and `sample.png` on September 17, 2026. Integration means that a file is referenced by the implementation; runtime behavior is covered by the current [verification matrix](../reviews/2026-09-17/README.md) and checklist section 15.
 
 | Family | Current runtime use | Remaining planned use |
 | --- | --- | --- |
@@ -13,7 +13,7 @@ Reviewed against source commit `24237dc` and `sample.png` on September 16, 2026.
 | UI | Menu title/panel/buttons, six touch icons and all round button states, HUD health/counter frames, background and logo are used. HUD and 64px touch controls are overlaid inside the arena. | Consider amber/red HUD fills for health thresholds and settings/home icons where they improve navigation. |
 | Spritesheet | `ships_miscellaneous_sheet.png` is loaded through the shared asset cache. `game-assets.ts` contains a typed frame manifest validated against the supplied XML for cannonball, fire, explosion and debris frames. | The identically mapped retina sheet is an explicit alternative and is not loaded alongside the default sheet. |
 | Tilesheet | `tiles_sheet.png` loads once through the external `tiles_sheet.tsj`; tile GID flip flags, alpha, positions and layer order are interpreted at runtime. | The retina export remains an unloaded alternative pending measured benefit. |
-| Sounds | All 27 WAV files have an event or deterministic variant mapping. Audio unlocks from a UI/control gesture, combat uses semantic simulation events, and loops/one-shots have bounded lifecycles. | Complete a physical mobile listening check before closing checklist 15.5. |
+| Sounds | All 27 WAV files have an event or deterministic variant mapping. Audio unlocks from a UI/control gesture, combat uses semantic simulation events, and loops/one-shots have bounded lifecycles. | Automated integration is complete; headed-device listening remains a delivery validation limitation rather than an unused asset. |
 | Vectors | Reference only. | Use only if a scalable presentation source is needed. |
 | Samples | Review references only. | Never render samples as product screens. |
 
@@ -35,10 +35,10 @@ The pack contains 96 tiles, 30 ship/dinghy images, 67 ship parts, five effects a
 
 | Material | Planned role and acceptance |
 | --- | --- |
-| Sand/grass coast families | Compose large connected upper-left and lower landmasses with matching convex/concave corners and broad grassy interiors. The current 3×3 sand island and elliptical grass mask do not reproduce the sample. |
-| Water and coast masks | Use a calmer apparent water scale and shallow-water bands around land; inspect mask families before tinting/compositing them. Keep shallow water decorative and make blocking land boundaries explicit. |
-| Wall/tower/pier tiles | Build the upper-left fortification and a pier meeting the shoreline. Determine which parts are walk-blocking land decoration versus independent obstacles before adding collision. |
-| Rocks `49`–`51`, mossy rocks `65`–`67`, plants `70`–`72` | Vary clusters along coasts and grass; maintain gameplay silhouettes and collision consistency. |
+| Sand/grass coast families | The authored Tiled map composes the upper-left fortification island and lower landmasses from matching coastal corners and interiors. Their blocking contours come only from the Collision object layer. |
+| Water and coast masks | `AguaRasa` supplies authored shallow-water bands below `Land`; it remains decorative and does not block movement or projectiles. |
+| Wall/tower/pier tiles | Fortifications and piers are placed by `arena.tmj`; structures block only where matching Collision polygons were authored. |
+| Rocks `49`–`51`, mossy rocks `65`–`67`, plants `70`–`72` | The `Decorations` layer varies coast detail without introducing implicit collision. Additional variants remain optional Tiled edits. |
 | Sand-backed boat/cannon/wood tiles and standalone ship parts | Opaque sand-backed props remain restricted to compatible land. Transparent `dinghy_small_1`, `cannon_loose` and `wood_1`–`3` now decorate the south-east coast; all are nonblocking because the underlying land contour already blocks ships. |
 | Hulls, sails and flags | All 24 complete ship sprites were reviewed as six color families with intact, damaged, critical and sunk artwork. White/red/black are assigned to player/Chaser/Shooter; modular construction remains an unused alternative. |
 | HUD frames and fills | Match the sample's gold frames, top-left health and top-right score/time; clip fills to actual ratios and retain accessible HTML values. Use Pixi for health bars above ships. |
@@ -51,12 +51,12 @@ All 27 WAVs are accounted for below. Automated browser checks cover mapping, UI 
 
 | Files | Current state | Required action |
 | --- | --- | --- |
-| `game_start`, `game_pause`, `game_resume`, `game_complete`, `game_over` | Lifecycle cues. Play unlocks before game start; pause/resume emit once and result cues are owned by the persistent app audio instance. | Physical mobile listening pending. |
+| `game_start`, `game_pause`, `game_resume`, `game_complete`, `game_over` | Lifecycle cues. Play unlocks before game start; pause/resume emit once and result cues are owned by the persistent app audio instance. | Automated mapping and lifecycle coverage complete. |
 | `cannon_fire_1`–`3`, `cannon_broadside` | Front and enemy shots rotate through the three fire files; one broadside event plays once for the complete volley. | Complete. |
 | `cannonball_water_hit_1`–`2`, `ship_wood_hit_1`–`2`, `ship_explosion_1`–`2` | Water, hull and destruction events rotate through their respective variants without using simulation randomness. | Complete. |
 | `ship_sinking` | Plays once from each semantic ship-destroyed event alongside the explosion cue. | Complete. |
-| `ocean_ambience_loop`, `ship_sailing_loop` | Ocean starts with an unlocked match; sailing runs only while player velocity is nonzero. Both pause and release with the session. | Physical mobile listening pending. |
+| `ocean_ambience_loop`, `ship_sailing_loop` | Ocean starts with an unlocked match; sailing runs only while player velocity is nonzero. Both pause and release with the session. | Automated lifecycle coverage exists; the current full-suite hidden-tab sailing check is recorded as failing in the September 17 review. |
 | `ui_hover`, `ui_click`, `ui_open`, `ui_close`, `ui_back` | Delegated app UI cues; hover only plays after unlock and is throttled, while open/save/back receive distinct sounds. | Complete. |
 | `score_point`, `health_low`, `time_warning`, `ship_collision` | Score, first low-health crossing, 30/10-second thresholds and new collision contacts emit gated cues. | Complete. |
 
-The adapter uses reusable HTMLAudio prototypes and cloned voices rather than decoded Web Audio buffers. It tracks and caps one-shots at 12, owns loop instances separately, and releases `src` resources during pause/end/destroy. A failed `play()` releases that voice or loop; the next keyboard/touch gesture retries desired loops. Automated checks instrument browser media calls, so a physical phone remains necessary to confirm actual speaker volume and balance.
+The adapter uses reusable HTMLAudio prototypes and cloned voices rather than decoded Web Audio buffers. It tracks and caps one-shots at 12, owns loop instances separately, and releases `src` resources during pause/end/destroy. A failed `play()` releases that voice or loop; the next keyboard/touch gesture retries desired loops. Automated checks instrument browser media calls. Actual speaker volume and balance remain device-level validation and are not presented as an incomplete asset integration task.

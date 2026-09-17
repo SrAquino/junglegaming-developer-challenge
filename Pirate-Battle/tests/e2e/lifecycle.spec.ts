@@ -59,6 +59,28 @@ test('pauses without advancing and resumes only from an explicit action', async 
   await expect(page.getByRole('dialog', { name: 'Match paused' })).toBeVisible()
 })
 
+test('ignores gameplay keys held during pause after resuming', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Play' }).click()
+  const arena = page.getByRole('img', { name: 'Pirate Battle arena' })
+  await expect(arena).toHaveAttribute('aria-busy', 'false')
+  await expect(arena).toHaveAttribute('data-player-y', /.+/)
+  await page.getByRole('button', { name: 'Pause match' }).click()
+  await expect(page.getByRole('dialog', { name: 'Match paused' })).toBeVisible()
+  const pausedPosition = {
+    x: await arena.getAttribute('data-player-x'),
+    y: await arena.getAttribute('data-player-y'),
+  }
+
+  await page.keyboard.down('KeyW')
+  await page.getByRole('button', { name: 'Resume match' }).click()
+  await page.waitForTimeout(250)
+  await page.keyboard.up('KeyW')
+
+  expect(await arena.getAttribute('data-player-x')).toBe(pausedPosition.x)
+  expect(await arena.getAttribute('data-player-y')).toBe(pausedPosition.y)
+})
+
 test('restores a completed result after refresh and starts a clean new match', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('pirate-battle.last-match-result', JSON.stringify({

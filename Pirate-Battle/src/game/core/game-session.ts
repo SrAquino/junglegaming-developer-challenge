@@ -41,6 +41,7 @@ export interface SimulationObservation {
 interface GameSessionDependencies {
   clock?: GameClock
   random?: RandomSource
+  createMatchId?: () => string
   systems?: readonly GameSystem[]
 }
 
@@ -56,6 +57,7 @@ const emptyFrameAdvance: Readonly<FrameAdvanceResult> = Object.freeze({
 export class GameSession {
   private readonly clock: GameClock
   private readonly random: RandomSource
+  private readonly createMatchId: () => string
   private readonly systems: readonly GameSystem[]
   private readonly hudListeners = new Set<HudListener>()
   private readonly lifecycleListeners = new Set<LifecycleListener>()
@@ -71,6 +73,8 @@ export class GameSession {
   public constructor(dependencies: GameSessionDependencies = {}) {
     this.clock = dependencies.clock ?? new BrowserGameClock()
     this.random = dependencies.random ?? new BrowserRandom()
+    // Registration identity must stay unique even when simulation seeds repeat.
+    this.createMatchId = dependencies.createMatchId ?? (() => `match-${crypto.randomUUID()}`)
     this.systems = dependencies.systems ?? []
   }
 
@@ -95,7 +99,7 @@ export class GameSession {
       this.configuration.simulation.maxFrameDeltaMs,
       this.configuration.simulation.maxStepsPerFrame,
     )
-    this.world = createInitialWorld(createMatchId(this.random), this.configuration)
+    this.world = createInitialWorld(this.createMatchId(), this.configuration)
     this.statusValue = 'playing'
     this.latestInput = emptyPlayerInput
     this.result = null
@@ -303,9 +307,4 @@ export class GameSession {
       listener(frozenEvent)
     }
   }
-}
-
-function createMatchId(random: RandomSource): string {
-  const segments = Array.from({ length: 4 }, () => Math.floor(random.next() * 0x1_0000).toString(16).padStart(4, '0'))
-  return `match-${segments.join('')}`
 }

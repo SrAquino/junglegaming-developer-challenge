@@ -4,6 +4,7 @@ import { gameplayConfigurationKey } from '../api/gameplay-configuration-key.ts'
 import type { MatchRecord, MatchRegistrationRequest, PaginatedResponse, RankingEntry } from '../api/contracts.ts'
 import { fixturePlayers, fixtureRecords } from './fixtures/ranking-fixtures.ts'
 import type { NetworkScenario } from './scenarios/network-scenario.ts'
+import { simulatedTimeoutDelayMs } from '../api/network-timing.ts'
 
 const mockRecordsStorageKey = 'pirate-battle.mock-records'
 let records: MatchRecord[] = loadMockRecords()
@@ -88,6 +89,7 @@ async function scenarioFailure(scenario: NetworkScenario, resource: 'ranking' | 
   if (scenario === 'offline') return HttpResponse.error()
   if (scenario === 'client-error') return HttpResponse.json({ message: 'Configured client failure.' }, { status: 400 })
   if (scenario === 'server-error' || scenario === 'unavailable-at-match-end' && resource === 'registration' || scenario === 'ranking-error' && resource === 'ranking' || scenario === 'history-error' && resource === 'history') return HttpResponse.json({ message: 'Configured network failure.' }, { status: 503 })
+  if (scenario === 'timeout') { await delay(simulatedTimeoutDelayMs); return HttpResponse.json({ message: 'Configured request timeout.' }, { status: 504 }) }
   if (scenario === 'slow') await delay(1_200)
   if (scenario === 'variable-latency') await delay(resource === 'ranking' ? 800 : 250)
   if (scenario === 'out-of-order') await delay(resource === 'ranking' ? 900 : 100)

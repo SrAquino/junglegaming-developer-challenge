@@ -18,6 +18,7 @@ const keyboardActions: Readonly<Record<string, InputAction>> = Object.freeze({
 export class BrowserGameInput implements GameInput {
   private readonly keyboardHeld = new Set<InputAction>()
   private readonly touchPointers = new Map<number, InputAction>()
+  private enabled = false
   private readonly keyDownListener = (event: KeyboardEvent) => this.updateKeyboard(event, true)
   private readonly keyUpListener = (event: KeyboardEvent) => this.updateKeyboard(event, false)
   private readonly clearListener = () => this.reset()
@@ -40,7 +41,13 @@ export class BrowserGameInput implements GameInput {
     })
   }
 
+  public setEnabled(enabled: boolean): void {
+    this.enabled = enabled
+    if (!enabled) this.reset()
+  }
+
   public setTouchAction(action: InputAction, held: boolean, pointerId = 0): void {
+    if (!this.enabled) return
     if (held) {
       this.touchPointers.set(pointerId, action)
     } else {
@@ -67,6 +74,11 @@ export class BrowserGameInput implements GameInput {
     }
     const action = keyboardActions[event.code]
     if (!action) {
+      return
+    }
+
+    if (!this.enabled) {
+      this.keyboardHeld.delete(action)
       return
     }
 

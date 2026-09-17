@@ -11,6 +11,8 @@ export function MatchHistoryPanel({ playerId }: MatchHistoryPanelProps) {
   const pageSize = 5
   const query = useQuery({ queryKey: queryKeys.matchHistory(playerId, page, pageSize), queryFn: ({ signal }) => fetchMatchHistory(playerId, page, pageSize, signal), placeholderData: (previous) => previous })
   useEffect(() => { const refresh = () => void query.refetch(); window.addEventListener('pirate-network-scenario-change', refresh); return () => window.removeEventListener('pirate-network-scenario-change', refresh) }, [query])
+  const lastPage = query.data ? Math.max(1, Math.ceil(query.data.total / pageSize)) : 1
+  if (page > lastPage) setPage(lastPage)
   if (query.isPending) return <p>Loading match historyâ€¦</p>
   if (query.isError) return <section role="alert"><p>Unable to load match history.</p><button onClick={() => query.refetch()} type="button">Retry history</button></section>
   if (!query.data || query.data.total === 0) return <p>No completed matches yet.</p>

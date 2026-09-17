@@ -72,8 +72,8 @@ export function GameCanvas({ audio, audioSettings, configuration, gameOptions, o
     const input = new BrowserGameInput()
     inputRef.current = input
     let cancelled = false
-    const requestedRate = Number(new URLSearchParams(window.location.search).get('simulation-rate'))
-    const clock = Number.isInteger(requestedRate) && requestedRate >= 1 && requestedRate <= 15 ? new ScaledBrowserGameClock(requestedRate) : undefined
+    const timeScale = configurationRef.current.simulation.timeScale ?? 1
+    const clock = timeScale === 1 ? undefined : new ScaledBrowserGameClock(timeScale)
     const scene = new FirstPlayableScene(input, {
       audio,
       clock,
@@ -83,8 +83,8 @@ export function GameCanvas({ audio, audioSettings, configuration, gameOptions, o
       onFinished: (result) => { if (!cancelled) onFinishedRef.current(result) },
     })
     sceneRef.current = scene
-    const pauseOnHidden = () => { if (document.hidden) { input.reset(); scene.pause(false) } }
-    const pauseOnBlur = () => { input.reset(); scene.pause(false) }
+    const pauseOnHidden = () => { if (document.hidden) { input.setEnabled(false); scene.pause(false) } }
+    const pauseOnBlur = () => { input.setEnabled(false); scene.pause(false) }
     const resetInput = () => input.reset()
     const unlockAudio = () => scene.unlockAudio()
     document.addEventListener('visibilitychange', pauseOnHidden)
@@ -94,7 +94,7 @@ export function GameCanvas({ audio, audioSettings, configuration, gameOptions, o
     window.addEventListener('resize', resetInput)
     setLoadState('loading')
     void scene.mount(host).then(
-      () => { if (!cancelled) setLoadState('ready') },
+      () => { if (!cancelled) { input.setEnabled(true); setLoadState('ready') } },
       () => { if (!cancelled) setLoadState('error') },
     )
     return () => {
@@ -112,12 +112,13 @@ export function GameCanvas({ audio, audioSettings, configuration, gameOptions, o
   }, [attempt, audio, random])
 
   const resume = () => {
-    sceneRef.current?.resume()
+    inputRef.current?.reset()
+    if (sceneRef.current?.resume()) inputRef.current?.setEnabled(true)
     setPauseOptionsOpen(false)
     window.requestAnimationFrame(() => pauseButtonRef.current?.focus())
   }
-  const pause = () => { inputRef.current?.reset(); sceneRef.current?.pause() }
-  const exit = () => { inputRef.current?.reset(); onExit() }
+  const pause = () => { inputRef.current?.setEnabled(false); sceneRef.current?.pause() }
+  const exit = () => { inputRef.current?.setEnabled(false); onExit() }
   const controlsActive = loadState === 'ready' && !paused
   return (
     <main className="game-screen">

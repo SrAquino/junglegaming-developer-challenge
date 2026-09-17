@@ -1,9 +1,36 @@
 {
-  "durationMs": 180010.39999999703,
-  "frameRate": 34.697995226943014,
-  "frameIntervalP95Ms": 33.40000000000873,
-  "maximumEnemies": 5,
-  "maximumProjectiles": 4,
-  "maximumEffects": 2,
-  "endedEarly": false
+  "measuredAt": "2026-09-17T14:54:19.682Z",
+  "environment": {
+    "operatingSystem": "win32 10.0.26200 x64",
+    "cpu": "AMD Ryzen 5 4600G with Radeon Graphics",
+    "logicalProcessors": 12,
+    "totalMemoryBytes": 16484818944,
+    "browser": "Chromium 153.0.8010.12",
+    "node": "v22.20.0",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "headless": true,
+    "devicePixelRatio": 1,
+    "webglVendor": "Google Inc. (Google)",
+    "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  "matchConfiguration": {
+    "durationSeconds": 180,
+    "enemySpawnIntervalSeconds": 20,
+    "input": "continuous forward and right turn",
+    "performanceProfile": "player hull raised to 100,000; gameplay clock remains 1x"
+  },
+  "method": "warm-cache start/exit, then requestAnimationFrame intervals for 180 seconds; entity diagnostics sampled from the live Pixi arena once per second",
+  "targetFrameRate": 60,
+  "metrics": {
+    "durationMs": 180009.6999999821,
+    "frameRate": 28.631790397964735,
+    "frameIntervalP95Ms": 50,
+    "maximumEnemies": 6,
+    "maximumProjectiles": 6,
+    "maximumEffects": 4,
+    "endedEarly": false
+  }
 }

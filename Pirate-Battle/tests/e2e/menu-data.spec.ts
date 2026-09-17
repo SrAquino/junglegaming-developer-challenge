@@ -60,6 +60,39 @@ test('resets ranking pagination when the active gameplay configuration changes',
   await expect(page.getByRole('region', { name: 'Ranking' }).getByText('Page 1 of 10')).toBeVisible()
 })
 
+test('clamps ranking and history to a valid page when their totals shrink', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.clear()
+    localStorage.setItem('pirate-battle.player-id', 'fixture-anne')
+    localStorage.setItem('pirate-battle.network-scenario', 'multiple-pages')
+  })
+  await page.goto('/')
+  const scenario = page.getByLabel('Network scenario')
+  const ranking = page.getByRole('region', { name: 'Ranking' })
+  await expect(ranking.getByText('Page 1 of 10')).toBeVisible()
+  await ranking.getByRole('button', { name: 'Next page' }).click()
+  await expect(ranking.getByText('Page 2 of 10')).toBeVisible()
+
+  await page.getByText('Network demo controls').click()
+  await scenario.selectOption('success')
+  await expect(ranking.getByText('Page 1 of 1')).toBeVisible()
+  await expect(ranking.getByRole('button', { name: 'Next page' })).toBeDisabled()
+  await expect(ranking.getByRole('row')).toHaveCount(5)
+
+  await scenario.selectOption('multiple-pages')
+  await expect(ranking.getByText('Page 1 of 10')).toBeVisible()
+  await page.getByRole('tab', { name: 'Match History' }).click()
+  const history = page.getByRole('region', { name: 'Match History' })
+  await expect(history.getByText('Page 1 of 3')).toBeVisible()
+  await history.getByRole('button', { name: 'Next page' }).click()
+  await expect(history.getByText('Page 2 of 3')).toBeVisible()
+
+  await scenario.selectOption('success')
+  await expect(history.getByText('Page 1 of 1')).toBeVisible()
+  await expect(history.getByRole('button', { name: 'Next page' })).toBeDisabled()
+  await expect(history.getByRole('row')).toHaveCount(2)
+})
+
 test('cancels a stale same-ranking request when a newer response finishes first', async ({ page }) => {
   await page.goto('/')
   await page.waitForFunction(() => navigator.serviceWorker.controller !== null)

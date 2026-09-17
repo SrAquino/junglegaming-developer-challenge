@@ -18,16 +18,23 @@ export default function App() {
   const [audioSettings, setAudioSettings] = useState(loadAudioSettings)
   const [audio] = useState(() => new GameAudio(audioSettings))
   const [simulationRandom] = useState(() => {
-    const seed = Number(new URLSearchParams(window.location.search).get('simulation-seed'))
+    const parameter = new URLSearchParams(window.location.search).get('simulation-seed')
+    if (parameter === null || parameter.trim() === '') return undefined
+    const seed = Number(parameter)
     return Number.isInteger(seed) ? new SeededRandom(seed) : undefined
   })
   const audioDestroyTimer = useRef<number | null>(null)
   const [lastResult, setLastResult] = useState<MatchResult | null>(loadLastMatchResult)
   const [screen, setScreen] = useState<'menu' | 'options' | 'game' | 'result'>(() => loadLastMatchResult() ? 'result' : 'menu')
   const performanceProfile = new URLSearchParams(window.location.search).get('performance-profile') === '1'
-  const configuration = useMemo(() => createGameConfigSnapshot(options, performanceProfile ? { ...defaultGameConfig, player: { ...defaultGameConfig.player, maxHealth: 100_000 } } : defaultGameConfig), [options, performanceProfile])
+  const simulationRate = readSimulationRate()
+  const configuration = useMemo(() => createGameConfigSnapshot(options, {
+    ...defaultGameConfig,
+    simulation: { ...defaultGameConfig.simulation, timeScale: simulationRate },
+    player: performanceProfile ? { ...defaultGameConfig.player, maxHealth: 100_000 } : defaultGameConfig.player,
+  }), [options, performanceProfile, simulationRate])
   const player = getLocalPlayerIdentity()
-  const submission = useMatchSubmission()
+  const submission = useMatchSubmission(lastResult?.matchId)
   useEffect(() => {
     if (audioDestroyTimer.current !== null) window.clearTimeout(audioDestroyTimer.current)
     const click = (event: MouseEvent) => {
@@ -60,7 +67,12 @@ export default function App() {
   if (screen === 'game') return <GameCanvas audio={audio} audioSettings={audioSettings} configuration={configuration} gameOptions={options} onExit={() => setScreen('menu')} onFinished={finish} onSaveOptions={applyOptions} random={simulationRandom} />
   if (screen === 'options') return <OptionsScreen audioSettings={audioSettings} onBack={() => setScreen('menu')} onSave={saveOptions} options={options} />
   if (screen === 'result' && lastResult) return <MatchResultScreen onMenu={() => setScreen('menu')} onPlayAgain={() => setScreen('game')} onRetrySubmission={submission.retryPending} result={lastResult} submissionStatus={submission.status} />
-  return <MainMenuScreen configurationKey={gameplayConfigurationKey(configuration)} hasLastResult={lastResult !== null} onLastResult={() => setScreen('result')} onOptions={() => setScreen('options')} onPlay={() => setScreen('game')} options={options} playerId={player.id} />
+  return <MainMenuScreen configurationKey={gameplayConfigurationKey(configuration)} hasLastResult={lastResult !== null} onLastResult={() => setScreen('result')} onOptions={() => setScreen('options')} onPlay={() => setScreen('game')} options={options} playerId={player.id} simulationRate={simulationRate} />
+}
+
+function readSimulationRate(): number {
+  const value = Number(new URLSearchParams(window.location.search).get('simulation-rate'))
+  return Number.isInteger(value) && value >= 1 && value <= 15 ? value : 1
 }
 
 function uiCueForButton(button: HTMLButtonElement): GameSound | null {

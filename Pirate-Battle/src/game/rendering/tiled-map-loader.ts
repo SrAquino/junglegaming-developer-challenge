@@ -67,10 +67,27 @@ export interface LoadedTiledArena {
   width: number
 }
 
+const loadedArenaCache = new Map<string, Promise<LoadedTiledArena>>()
+
 export async function loadTiledArenaMap(
   mapUrl = tiledArenaMapUrl,
   tilesetUrl = tiledArenaTilesetUrl,
 ): Promise<LoadedTiledArena> {
+  const cacheKey = `${mapUrl}\n${tilesetUrl}`
+  const cached = loadedArenaCache.get(cacheKey)
+  if (cached) return cached
+
+  const pending = loadTiledArenaFiles(mapUrl, tilesetUrl)
+  loadedArenaCache.set(cacheKey, pending)
+  try {
+    return await pending
+  } catch (error) {
+    loadedArenaCache.delete(cacheKey)
+    throw error
+  }
+}
+
+async function loadTiledArenaFiles(mapUrl: string, tilesetUrl: string): Promise<LoadedTiledArena> {
   const [map, tileset] = await Promise.all([
     fetchJson<TiledMapJson>(mapUrl),
     fetchJson<TiledTilesetJson>(tilesetUrl),

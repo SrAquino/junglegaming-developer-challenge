@@ -50,6 +50,26 @@ test('keeps real movement, combat and spawning equivalent across render rates', 
   expect(fast).toEqual(slow)
 })
 
+test('allocates distinct match IDs without consuming the simulation random sequence', () => {
+  const random = new SeededRandom(0)
+  const referenceRandom = new SeededRandom(0)
+  const session = new GameSession({ random })
+  const reloadedSession = new GameSession({ random: new SeededRandom(0) })
+  session.start(deterministicConfig)
+  const firstId = session.observe().matchId
+  session.finish('time-expired')
+  expect(session.getResult()?.matchId).toBe(firstId)
+  session.start(deterministicConfig)
+  reloadedSession.start(deterministicConfig)
+
+  const ids = [firstId, session.observe().matchId, reloadedSession.observe().matchId]
+  for (const id of ids) expect(id).toMatch(/^match-[0-9a-f-]{36}$/)
+  expect(new Set(ids).size).toBe(3)
+  expect(random.next()).toBe(referenceRandom.next())
+  session.destroy()
+  reloadedSession.destroy()
+})
+
 test('suspends time during pause and guards match completion', () => {
   const clock = new ManualGameClock()
   const session = new GameSession({ clock, random: new SeededRandom(7) })
@@ -141,6 +161,7 @@ function runRealSimulation(frameDeltas: readonly number[]) {
   const session = new GameSession({
     clock,
     random: new SeededRandom(321),
+    createMatchId: () => 'deterministic-match',
     systems: [playerMovementSystem, enemySpawnSystem, weaponSystem, projectileSystem, combatSystem, enemyBehaviorSystem, effectSystem],
   })
   session.start(createGameConfigSnapshot({ sessionDurationSeconds: 60, enemySpawnIntervalSeconds: 1 }, deterministicConfig))

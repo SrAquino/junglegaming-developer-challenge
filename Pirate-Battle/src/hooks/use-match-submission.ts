@@ -5,12 +5,13 @@ import type { MatchRegistrationRequest } from '../api/contracts.ts'
 import type { MatchResult } from '../game/types/game.ts'
 import { getLocalPlayerIdentity } from '../storage/player-identity.ts'
 import { loadPendingMatches, removePendingMatch, savePendingMatch } from '../storage/pending-match-store.ts'
+import { loadConfirmedRecords } from '../storage/match-record-store.ts'
 
 export type SubmissionStatus = 'idle' | 'pending' | 'submitted' | 'failed'
 
-export function useMatchSubmission(): { status: SubmissionStatus; submit: (result: MatchResult) => void; retryPending: () => void } {
+export function useMatchSubmission(lastResultMatchId?: string): { status: SubmissionStatus; submit: (result: MatchResult) => void; retryPending: () => void } {
   const queryClient = useQueryClient()
-  const [status, setStatus] = useState<SubmissionStatus>(() => loadPendingMatches().length ? 'pending' : 'idle')
+  const [status, setStatus] = useState<SubmissionStatus>(() => initialSubmissionStatus(lastResultMatchId))
   const recovered = useRef(false)
   const mutation = useMutation({
     mutationFn: registerMatch,
@@ -41,4 +42,11 @@ export function useMatchSubmission(): { status: SubmissionStatus; submit: (resul
     },
     retryPending,
   }
+}
+
+function initialSubmissionStatus(matchId?: string): SubmissionStatus {
+  const pending = loadPendingMatches()
+  if (matchId && pending.some((record) => record.matchId === matchId)) return 'pending'
+  if (matchId && loadConfirmedRecords().some((record) => record.matchId === matchId)) return 'submitted'
+  return pending.length ? 'pending' : 'idle'
 }

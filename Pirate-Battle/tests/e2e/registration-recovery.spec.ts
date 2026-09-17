@@ -61,6 +61,37 @@ test('recovers one server-accepted timeout after reload without a duplicate', as
   await expect(page.getByRole('region', { name: 'Match History' }).getByRole('row')).toHaveCount(2)
 })
 
+for (const seed of ['', '&simulation-seed=0']) {
+  test(`registers distinct completed matches across reload (${seed ? 'same explicit seed' : 'no seed'})`, async ({ page }) => {
+    test.setTimeout(90_000)
+    await page.goto(`/?performance-profile=1&simulation-rate=15${seed}`)
+    await completeTimedMatch(page, 'Play')
+    await expect.poll(() => confirmedIds(page)).toHaveLength(1)
+    const [firstId] = await confirmedIds(page)
+
+    await page.reload()
+    await expect(page.getByRole('heading', { name: 'Battle complete' })).toBeVisible()
+    await expect(page.getByText('Submission status: submitted')).toBeVisible()
+    await expect.poll(() => confirmedIds(page)).toEqual([firstId])
+    await completeTimedMatch(page, 'Play again')
+    await expect.poll(() => confirmedIds(page)).toHaveLength(2)
+    const ids = await confirmedIds(page)
+    expect(ids).toContain(firstId)
+    expect(new Set(ids).size).toBe(2)
+    await expect.poll(() => pendingCount(page)).toBe(0)
+    await page.getByRole('button', { name: 'Main menu' }).click()
+    await page.getByRole('tab', { name: 'Match History' }).click()
+    await expect(page.getByRole('region', { name: 'Match History' }).getByRole('row')).toHaveCount(3)
+  })
+}
+
+async function confirmedIds(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const records = JSON.parse(localStorage.getItem('pirate-battle.confirmed-match-records') ?? '[]') as { matchId: string }[]
+    return records.map((record) => record.matchId)
+  })
+}
+
 async function completeTimedMatch(page: Page, buttonName: 'Play' | 'Play again'): Promise<void> {
   await page.getByRole('button', { name: buttonName, exact: true }).click()
   const arena = page.getByRole('img', { name: 'Pirate Battle arena' })

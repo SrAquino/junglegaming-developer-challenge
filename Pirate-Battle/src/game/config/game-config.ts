@@ -37,11 +37,13 @@ export interface GameConfig {
     shooter: number
   }
   arena: {
+    layoutId: string
     width: number
     height: number
     collisionPolygons?: readonly (readonly Readonly<Vector2>[])[]
   }
   simulation: {
+    timeScale: number
     fixedStepMs: number
     maxFrameDeltaMs: number
     maxStepsPerFrame: number
@@ -98,11 +100,13 @@ export const defaultGameConfig: GameConfigSnapshot = deepFreeze({
     shooter: 0.45,
   },
   arena: {
+    layoutId: 'arena.tmj:2026-09-17',
     width: 1_600,
     height: 896,
     collisionPolygons: [],
   },
   simulation: {
+    timeScale: 1,
     fixedStepMs: 1_000 / 60,
     maxFrameDeltaMs: 250,
     maxStepsPerFrame: 15,
@@ -200,7 +204,7 @@ export function withArenaMap(
 ): GameConfigSnapshot {
   return deepFreeze({
     ...cloneConfig(configuration),
-    arena: { width, height, collisionPolygons: structuredClone(collisionPolygons) },
+    arena: { ...configuration.arena, width, height, collisionPolygons: structuredClone(collisionPolygons) },
   })
 }
 
