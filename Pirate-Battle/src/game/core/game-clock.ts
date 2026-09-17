@@ -8,6 +8,19 @@ export class BrowserGameClock implements GameClock {
   }
 }
 
+export class ScaledBrowserGameClock implements GameClock {
+  private readonly rate: number
+
+  public constructor(rate: number) {
+    if (!Number.isFinite(rate) || rate < 1 || rate > 15) throw new RangeError('Clock rate must be between 1 and 15.')
+    this.rate = rate
+  }
+
+  public now(): number {
+    return performance.now() * this.rate
+  }
+}
+
 export class ManualGameClock implements GameClock {
   private currentTimeMs = 0
 

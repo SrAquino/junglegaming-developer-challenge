@@ -9,6 +9,8 @@ import type { AudioSettings } from '../../storage/audio-settings.ts'
 import type { GameOptions } from '../../game/config/game-config.ts'
 import { enemySpawnIntervalLimits, sessionDurationLimits } from '../../game/config/game-config.ts'
 import type { GameAudio } from '../../game/audio/game-audio.ts'
+import type { RandomSource } from '../../game/core/random-source.ts'
+import { ScaledBrowserGameClock } from '../../game/core/game-clock.ts'
 
 type LoadState = 'loading' | 'ready' | 'error'
 
@@ -20,11 +22,12 @@ interface GameCanvasProps {
   onExit: () => void
   onFinished: (result: MatchResult) => void
   onSaveOptions: (options: GameOptions, audioSettings: AudioSettings) => void
+  random?: RandomSource
 }
 
 const initialHud: HudSnapshot = { status: 'playing', score: 0, remainingSeconds: 0, playerHealth: 0, playerMaxHealth: 0 }
 
-export function GameCanvas({ audio, audioSettings, configuration, gameOptions, onExit, onFinished, onSaveOptions }: GameCanvasProps) {
+export function GameCanvas({ audio, audioSettings, configuration, gameOptions, onExit, onFinished, onSaveOptions, random }: GameCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<BrowserGameInput | null>(null)
   const sceneRef = useRef<FirstPlayableScene | null>(null)
@@ -69,9 +72,13 @@ export function GameCanvas({ audio, audioSettings, configuration, gameOptions, o
     const input = new BrowserGameInput()
     inputRef.current = input
     let cancelled = false
+    const requestedRate = Number(new URLSearchParams(window.location.search).get('simulation-rate'))
+    const clock = Number.isInteger(requestedRate) && requestedRate >= 1 && requestedRate <= 15 ? new ScaledBrowserGameClock(requestedRate) : undefined
     const scene = new FirstPlayableScene(input, {
       audio,
+      clock,
       configuration: configurationRef.current,
+      random,
       onHud: (snapshot) => { if (!cancelled) setHud(snapshot) },
       onFinished: (result) => { if (!cancelled) onFinishedRef.current(result) },
     })
@@ -102,7 +109,7 @@ export function GameCanvas({ audio, audioSettings, configuration, gameOptions, o
       sceneRef.current = null
       inputRef.current = null
     }
-  }, [attempt, audio])
+  }, [attempt, audio, random])
 
   const resume = () => {
     sceneRef.current?.resume()

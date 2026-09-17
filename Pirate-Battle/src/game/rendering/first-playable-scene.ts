@@ -26,6 +26,8 @@ import type { GameRenderer } from './game-renderer.ts'
 import { loadTiledArenaMap } from './tiled-map-loader.ts'
 import { createTiledMapContainer } from './tiled-map-renderer.ts'
 import { GameAudio, soundsForGameEvent } from '../audio/game-audio.ts'
+import type { RandomSource } from '../core/random-source.ts'
+import type { GameClock } from '../core/game-clock.ts'
 
 const MAX_DEVICE_PIXEL_RATIO = 2
 
@@ -34,6 +36,8 @@ export interface PlayableSceneOptions {
   audio: GameAudio
   onHud?: (snapshot: Readonly<HudSnapshot>) => void
   onFinished?: (result: Readonly<MatchResult>) => void
+  random?: RandomSource
+  clock?: GameClock
 }
 
 export class FirstPlayableScene implements GameRenderer {
@@ -47,7 +51,7 @@ export class FirstPlayableScene implements GameRenderer {
     this.input = input
     this.options = options
     this.audio = options.audio
-    this.session = new GameSession({ systems: [playerMovementSystem, enemySpawnSystem, weaponSystem, projectileSystem, combatSystem, enemyBehaviorSystem, effectSystem] })
+    this.session = new GameSession({ clock: options.clock, random: options.random, systems: [playerMovementSystem, enemySpawnSystem, weaponSystem, projectileSystem, combatSystem, enemyBehaviorSystem, effectSystem] })
     this.unsubscribeHud = this.session.subscribeHud((snapshot) => this.options.onHud?.(snapshot))
     this.unsubscribeLifecycle = this.session.subscribeLifecycle((event) => {
       if (event.type === 'started') this.audio.startSession()

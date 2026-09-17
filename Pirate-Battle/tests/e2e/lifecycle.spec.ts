@@ -75,3 +75,75 @@ test('restores a completed result after refresh and starts a clean new match', a
   await expect(page.getByRole('img', { name: 'Pirate Battle arena' })).toBeVisible()
   await expect(page.getByText('Score: 0')).toBeVisible()
 })
+
+test('ends from the real timer, registers once, updates both logbook tabs and restarts cleanly', async ({ page }) => {
+  test.setTimeout(60_000)
+  await page.clock.install()
+  await page.addInitScript(() => {
+    localStorage.setItem('pirate-battle.player-id', 'real-timeout-player')
+    localStorage.setItem('pirate-battle.game-options', JSON.stringify({ sessionDurationSeconds: 60, enemySpawnIntervalSeconds: 20 }))
+  })
+  await page.goto('/?performance-profile=1&simulation-rate=15&simulation-seed=17')
+  await page.getByRole('button', { name: 'Play' }).click()
+  const arena = page.getByRole('img', { name: 'Pirate Battle arena' })
+  await expect(arena).toHaveAttribute('aria-busy', 'false')
+  const firstMatchId = await arena.getAttribute('data-match-id')
+
+  await page.clock.runFor(4_100)
+  await expect(page.getByRole('heading', { name: 'Battle complete' })).toBeVisible()
+  await expect(page.getByText('Points · 01:00 · Time expired')).toBeVisible()
+  await expect(page.getByText('Submission status: submitted')).toBeVisible()
+  await expect(page.locator('canvas')).toHaveCount(0)
+  const completedResult = await page.evaluate(() => localStorage.getItem('pirate-battle.last-match-result'))
+  await page.clock.runFor(1_000)
+  expect(await page.evaluate(() => localStorage.getItem('pirate-battle.last-match-result'))).toBe(completedResult)
+
+  await page.getByRole('button', { name: 'Main menu' }).click()
+  const localRankingRow = page.getByRole('region', { name: 'Ranking' }).getByRole('row').filter({ hasText: 'Captain You' })
+  await expect(localRankingRow).toHaveCount(1)
+  await page.getByRole('tab', { name: 'Match History' }).click()
+  await expect(page.getByRole('region', { name: 'Match History' }).getByRole('row')).toHaveCount(2)
+
+  await page.getByRole('button', { name: 'Play' }).click()
+  await expect(arena).toHaveAttribute('aria-busy', 'false')
+  await expect(arena).not.toHaveAttribute('data-match-id', firstMatchId ?? '')
+  await expect(arena).toHaveAttribute('data-score', '0')
+  expect(Number(await arena.getAttribute('data-elapsed-ms'))).toBeLessThan(3_000)
+  await expect(arena).toHaveAttribute('data-enemies', '[]')
+})
+
+test('ends from real enemy damage with a seeded simulation', async ({ page }) => {
+  test.setTimeout(60_000)
+  await page.clock.install()
+  await page.addInitScript(() => {
+    localStorage.setItem('pirate-battle.player-id', 'real-defeat-player')
+    localStorage.setItem('pirate-battle.game-options', JSON.stringify({ sessionDurationSeconds: 60, enemySpawnIntervalSeconds: 20 }))
+  })
+  await page.goto('/?simulation-rate=15&simulation-seed=17')
+  await page.getByRole('button', { name: 'Play' }).click()
+  await expect(page.getByRole('img', { name: 'Pirate Battle arena' })).toHaveAttribute('aria-busy', 'false')
+  await page.clock.runFor(4_000)
+  await expect(page.getByText(/Points · 00:5\d · Ship destroyed/)).toBeVisible()
+  await expect(page.getByText('Submission status: submitted')).toBeVisible()
+})
+
+test('abandons through the pause menu without registering a match', async ({ page }) => {
+  await page.clock.install()
+  await page.addInitScript(() => localStorage.setItem('pirate-battle.player-id', 'abandon-player'))
+  await page.goto('/?simulation-seed=23')
+  await page.getByRole('button', { name: 'Play' }).click()
+  await expect(page.getByRole('img', { name: 'Pirate Battle arena' })).toHaveAttribute('aria-busy', 'false')
+  await page.clock.runFor(2_000)
+  await page.getByRole('button', { name: 'Pause match' }).click()
+  await page.getByRole('dialog', { name: 'Match paused' }).getByRole('button', { name: 'Main menu' }).click()
+  await expect(page.getByRole('heading', { name: 'Pirate Battle' })).toBeVisible()
+
+  const stored = await page.evaluate(() => ({
+    pending: JSON.parse(localStorage.getItem('pirate-battle.pending-matches') ?? '[]') as unknown[],
+    confirmed: JSON.parse(localStorage.getItem('pirate-battle.confirmed-match-records') ?? '[]') as unknown[],
+  }))
+  expect(stored.pending).toEqual([])
+  expect(stored.confirmed).toEqual([])
+  await page.getByRole('tab', { name: 'Match History' }).click()
+  await expect(page.getByText('No completed matches yet.')).toBeVisible()
+})

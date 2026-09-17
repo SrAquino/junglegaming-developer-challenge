@@ -131,6 +131,24 @@ test('honors mute without creating voices or loops', async ({ page }) => {
   expect((await audioState(page)).attempts).toHaveLength(0)
 })
 
+test('suspends ambience and sailing when the tab becomes hidden', async ({ page }) => {
+  await page.goto('/?disable-msw')
+  await page.getByRole('button', { name: 'Play' }).click()
+  await page.keyboard.down('w')
+  await expect.poll(() => successfulSources(page)).toEqual(expect.arrayContaining(['ocean_ambience_loop.wav', 'ship_sailing_loop.wav']))
+  const pauseCuesBefore = (await successfulSources(page)).filter((source) => source === 'game_pause.wav').length
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true })
+    document.dispatchEvent(new Event('visibilitychange'))
+  })
+  await expect(page.getByRole('dialog', { name: 'Match paused' })).toBeVisible()
+  await expect.poll(async () => (await audioState(page)).pauses).toEqual(expect.arrayContaining([
+    expect.stringContaining('ocean_ambience_loop.wav'),
+    expect.stringContaining('ship_sailing_loop.wav'),
+  ]))
+  expect((await successfulSources(page)).filter((source) => source === 'game_pause.wav')).toHaveLength(pauseCuesBefore)
+})
+
 test('recovers after blocked playback and contains a failed WAV without stopping play', async ({ page }) => {
   await page.addInitScript(() => { (window as unknown as { __audioTest: { allow: boolean } }).__audioTest.allow = false })
   await page.goto('/?disable-msw')

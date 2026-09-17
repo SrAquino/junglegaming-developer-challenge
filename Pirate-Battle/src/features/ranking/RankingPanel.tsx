@@ -8,7 +8,7 @@ interface RankingPanelProps { configurationKey: string; configurationLabel: stri
 export function RankingPanel({ configurationKey, configurationLabel, playerId }: RankingPanelProps) {
   const [page, setPage] = useState(1)
   const pageSize = 5
-  const query = useQuery({ queryKey: queryKeys.ranking(configurationKey, page, pageSize), queryFn: () => fetchRanking(page, pageSize, configurationKey), placeholderData: (previous) => previous })
+  const query = useQuery({ queryKey: queryKeys.ranking(configurationKey, page, pageSize), queryFn: ({ signal }) => fetchRanking(page, pageSize, configurationKey, signal), placeholderData: (previous) => previous })
   useEffect(() => { const refresh = () => void query.refetch(); window.addEventListener('pirate-network-scenario-change', refresh); return () => window.removeEventListener('pirate-network-scenario-change', refresh) }, [query])
   if (query.isPending) return <p>Loading rankingâ€¦</p>
   if (query.isError) return <section role="alert"><p>Unable to load ranking.</p><button onClick={() => query.refetch()} type="button">Retry ranking</button></section>

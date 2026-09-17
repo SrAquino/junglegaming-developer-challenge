@@ -9,7 +9,7 @@ interface MatchHistoryPanelProps { playerId: string }
 export function MatchHistoryPanel({ playerId }: MatchHistoryPanelProps) {
   const [page, setPage] = useState(1)
   const pageSize = 5
-  const query = useQuery({ queryKey: queryKeys.matchHistory(playerId, page, pageSize), queryFn: () => fetchMatchHistory(playerId, page, pageSize), placeholderData: (previous) => previous })
+  const query = useQuery({ queryKey: queryKeys.matchHistory(playerId, page, pageSize), queryFn: ({ signal }) => fetchMatchHistory(playerId, page, pageSize, signal), placeholderData: (previous) => previous })
   useEffect(() => { const refresh = () => void query.refetch(); window.addEventListener('pirate-network-scenario-change', refresh); return () => window.removeEventListener('pirate-network-scenario-change', refresh) }, [query])
   if (query.isPending) return <p>Loading match historyâ€¦</p>
   if (query.isError) return <section role="alert"><p>Unable to load match history.</p><button onClick={() => query.refetch()} type="button">Retry history</button></section>

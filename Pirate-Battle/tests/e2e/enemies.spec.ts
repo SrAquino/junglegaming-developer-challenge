@@ -104,7 +104,8 @@ test('destroyed ships cannot fire or damage, and repeated hits score once', () =
 })
 
 test('renders both seeded enemy types and accepts real keyboard attacks', async ({ page }) => {
-  await page.clock.install()
+  await page.clock.install({ time: new Date('2026-09-16T12:00:00.000Z') })
+  await page.clock.pauseAt(new Date('2026-09-16T12:00:01.000Z'))
   await page.addInitScript(() => {
     let state = 42
     Math.random = () => { state = (state * 1_664_525 + 1_013_904_223) >>> 0; return state / 4_294_967_296 }
@@ -123,3 +124,54 @@ test('renders both seeded enemy types and accepts real keyboard attacks', async 
   await expect(arena).toHaveAttribute('data-enemies', /shooter/)
   await expect(page.locator('canvas')).toHaveCount(1)
 })
+
+test('damages and scores one seeded enemy once through real keyboard fire', async ({ page }) => {
+  test.setTimeout(60_000)
+  await page.clock.install({ time: new Date('2026-09-16T12:00:00.000Z') })
+  await page.clock.pauseAt(new Date('2026-09-16T12:00:01.000Z'))
+  await page.addInitScript(() => localStorage.setItem('pirate-battle.game-options', JSON.stringify({ sessionDurationSeconds: 60, enemySpawnIntervalSeconds: 20 })))
+  await page.goto('/?simulation-rate=5&simulation-seed=8')
+  await page.getByRole('button', { name: 'Play' }).click()
+  const arena = page.getByRole('img', { name: 'Pirate Battle arena' })
+  await expect(arena).toHaveAttribute('aria-busy', 'false')
+  await page.clock.runFor(4_020)
+  await expect.poll(() => enemies(page)).toHaveLength(1)
+  expect((await enemies(page))[0]?.health).toBe(30)
+
+  await aimAtFirstEnemy(page, arena)
+  await fireOneFrontShot(page)
+  expect((await enemies(page))[0]?.health).toBe(10)
+  await aimAtFirstEnemy(page, arena)
+  await fireOneFrontShot(page)
+  expect(Number(await arena.getAttribute('data-score'))).toBe(1)
+  expect(await enemies(page)).toHaveLength(0)
+  await page.clock.runFor(500)
+  await expect(arena).toHaveAttribute('data-score', '1')
+})
+
+async function enemies(page: import('@playwright/test').Page): Promise<{ position: { x: number; y: number }; health: number }[]> {
+  const value = await page.getByRole('img', { name: 'Pirate Battle arena' }).getAttribute('data-enemies')
+  return JSON.parse(value ?? '[]') as { position: { x: number; y: number }; health: number }[]
+}
+
+async function aimAtFirstEnemy(page: import('@playwright/test').Page, arena: import('@playwright/test').Locator): Promise<void> {
+  for (let correction = 0; correction < 2; correction += 1) {
+    const player = { x: Number(await arena.getAttribute('data-player-x')), y: Number(await arena.getAttribute('data-player-y')) }
+    const target = (await enemies(page))[0]
+    if (!target) throw new Error('Seeded enemy did not spawn.')
+    const rotation = Number(await arena.getAttribute('data-player-rotation'))
+    const desired = Math.atan2(target.position.y - player.y, target.position.x - player.x)
+    const difference = Math.atan2(Math.sin(desired - rotation), Math.cos(desired - rotation))
+    const key = difference >= 0 ? 'ArrowRight' : 'ArrowLeft'
+    await page.keyboard.down(key)
+    await page.clock.runFor(Math.abs(difference) / (Math.PI * 0.9) * 1_000 / 5)
+    await page.keyboard.up(key)
+  }
+}
+
+async function fireOneFrontShot(page: import('@playwright/test').Page): Promise<void> {
+  await page.keyboard.down('f')
+  await page.clock.runFor(20)
+  await page.keyboard.up('f')
+  await page.clock.runFor(240)
+}

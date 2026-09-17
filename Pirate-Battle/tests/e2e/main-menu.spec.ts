@@ -21,7 +21,8 @@ test('mounts one Pixi canvas and returns to the main menu', async ({ page }) => 
   await expect(page.getByRole('img', { name: 'Pirate Battle arena' })).toBeVisible()
   await expect(page.locator('canvas')).toHaveCount(1)
 
-  await page.getByRole('button', { name: 'Back to menu' }).click()
+  await page.getByRole('button', { name: 'Pause match' }).click()
+  await page.getByRole('dialog', { name: 'Match paused' }).getByRole('button', { name: 'Main menu' }).click()
   await expect(page.getByRole('heading', { name: 'Pirate Battle' })).toBeVisible()
 
   await page.getByRole('button', { name: 'Play' }).click()
@@ -37,6 +38,18 @@ test('shows a retry action when the ship asset fails to load', async ({ page }) 
 
   await page.unroute('**/assets/png/default/ships/ship_1.png')
   await page.getByRole('button', { name: 'Retry' }).click()
+  await expect(page.locator('canvas')).toHaveCount(1)
+})
+
+test('shows the same retry flow when the combat atlas fails to load', async ({ page }) => {
+  await page.route('**/assets/spritesheet/ships_miscellaneous_sheet.png', (route) => route.abort())
+  await page.goto('/?disable-msw=1')
+  await page.getByRole('button', { name: 'Play' }).click()
+  await expect(page.getByRole('alert')).toContainText('Unable to load game assets.')
+  await expect(page.locator('canvas')).toHaveCount(0)
+  await page.unroute('**/assets/spritesheet/ships_miscellaneous_sheet.png')
+  await page.getByRole('button', { name: 'Retry' }).click()
+  await expect(page.getByRole('img', { name: 'Pirate Battle arena' })).toHaveAttribute('aria-busy', 'false')
   await expect(page.locator('canvas')).toHaveCount(1)
 })
 
@@ -86,11 +99,11 @@ test('fires while sailing with keyboard and touch controls', async ({ page }) =>
   const initialY = Number(await arena.getAttribute('data-player-y'))
 
   await page.keyboard.down('ArrowUp')
-  await page.keyboard.press('f')
-  await page.waitForTimeout(100)
+  await page.keyboard.down('f')
+  await expect.poll(async () => Number(await arena.getAttribute('data-projectile-count'))).toBeGreaterThan(0)
+  await page.keyboard.up('f')
   await page.keyboard.up('ArrowUp')
   expect(Number(await arena.getAttribute('data-player-y'))).toBeLessThan(initialY)
-  expect(Number(await arena.getAttribute('data-projectile-count'))).toBeGreaterThan(0)
 
   const broadsideControl = page.getByRole('button', { name: 'Fire left broadside' })
   await broadsideControl.hover()

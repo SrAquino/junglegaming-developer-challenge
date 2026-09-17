@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { registerMatch } from '../api/match-history.ts'
 import type { MatchRegistrationRequest } from '../api/contracts.ts'
-import { queryKeys } from '../api/queries/query-keys.ts'
 import type { MatchResult } from '../game/types/game.ts'
 import { getLocalPlayerIdentity } from '../storage/player-identity.ts'
 import { loadPendingMatches, removePendingMatch, savePendingMatch } from '../storage/pending-match-store.ts'
@@ -20,7 +19,7 @@ export function useMatchSubmission(): { status: SubmissionStatus; submit: (resul
     onSuccess: (record) => {
       removePendingMatch(record.matchId)
       setStatus(loadPendingMatches().length ? 'pending' : 'submitted')
-      void queryClient.invalidateQueries({ queryKey: queryKeys.matchHistory(record.playerId, 1, 10) })
+      void queryClient.invalidateQueries({ queryKey: ['match-history', record.playerId] })
       void queryClient.invalidateQueries({ queryKey: ['ranking'] })
     },
     onError: () => setStatus('failed'),
@@ -30,10 +29,7 @@ export function useMatchSubmission(): { status: SubmissionStatus; submit: (resul
   useEffect(() => {
     if (recovered.current || !loadPendingMatches().length) return
     recovered.current = true
-    const recoveryTimer = window.setTimeout(() => {
-      for (const record of loadPendingMatches()) mutation.mutate(record)
-    }, 0)
-    return () => window.clearTimeout(recoveryTimer)
+    for (const record of loadPendingMatches()) mutation.mutate(record)
   })
   return {
     status,

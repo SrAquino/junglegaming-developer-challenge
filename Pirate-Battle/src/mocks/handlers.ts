@@ -5,7 +5,8 @@ import type { MatchRecord, MatchRegistrationRequest, PaginatedResponse, RankingE
 import { fixturePlayers, fixtureRecords } from './fixtures/ranking-fixtures.ts'
 import type { NetworkScenario } from './scenarios/network-scenario.ts'
 
-let records: MatchRecord[] = [...fixtureRecords]
+const mockRecordsStorageKey = 'pirate-battle.mock-records'
+let records: MatchRecord[] = loadMockRecords()
 
 export const handlers: RequestHandler[] = [
   http.get('/api/ranking', async ({ request }) => {
@@ -28,7 +29,8 @@ export const handlers: RequestHandler[] = [
     const url = new URL(request.url)
     const page = positiveInteger(url.searchParams.get('page'), 1)
     const pageSize = positiveInteger(url.searchParams.get('pageSize'), 10)
-    const history = scenario === 'empty' ? [] : recordsForScenario(scenario).filter((record) => record.playerId === params.playerId).sort((left, right) => right.playedAt.localeCompare(left.playedAt) || left.matchId.localeCompare(right.matchId))
+    const playerId = String(params.playerId)
+    const history = scenario === 'empty' ? [] : historyRecordsForScenario(scenario, playerId).sort((left, right) => right.playedAt.localeCompare(left.playedAt) || left.matchId.localeCompare(right.matchId))
     return HttpResponse.json(pageResponse(history, page, pageSize))
   }),
   http.post('/api/matches', async ({ request }) => {
@@ -38,16 +40,30 @@ export const handlers: RequestHandler[] = [
     const candidate = await request.json() as Partial<MatchRegistrationRequest>
     if (!isCompletedMatch(candidate)) return HttpResponse.json({ message: 'Invalid completed match.' }, { status: 400 })
     const existing = records.find((record) => record.matchId === candidate.matchId)
-    if (existing) return HttpResponse.json(existing)
+    if (existing) return scenario === 'timeout-after-register' ? HttpResponse.error() : HttpResponse.json(existing)
     const record: MatchRecord = { ...candidate }
     records.push(record)
+    persistMockRecords()
     if (scenario === 'timeout-after-register') return HttpResponse.error()
     return HttpResponse.json(record, { status: 201 })
   }),
   http.post('/api/mock/reset', () => { resetMockRecords(); return HttpResponse.json({ ok: true }) }),
 ]
 
-export function resetMockRecords(): void { records = [...fixtureRecords] }
+export function resetMockRecords(): void { records = [...fixtureRecords]; persistMockRecords() }
+
+function loadMockRecords(): MatchRecord[] {
+  try {
+    const stored = sessionStorage.getItem(mockRecordsStorageKey)
+    return stored ? JSON.parse(stored) as MatchRecord[] : [...fixtureRecords]
+  } catch {
+    return [...fixtureRecords]
+  }
+}
+
+function persistMockRecords(): void {
+  try { sessionStorage.setItem(mockRecordsStorageKey, JSON.stringify(records)) } catch { /* storage is optional for mocks */ }
+}
 
 function isCompletedMatch(value: Partial<MatchRegistrationRequest>): value is MatchRegistrationRequest {
   return typeof value.matchId === 'string' && typeof value.playerId === 'string' && typeof value.playedAt === 'string' && typeof value.score === 'number' && typeof value.activeDurationMs === 'number' && (value.endReason === 'time-expired' || value.endReason === 'player-destroyed') && value.configuration !== undefined
@@ -79,8 +95,21 @@ async function scenarioFailure(scenario: NetworkScenario, resource: 'ranking' | 
 }
 
 function recordsForScenario(scenario: NetworkScenario): MatchRecord[] {
+  if (scenario === 'out-of-order') return records.map((record) => ({ ...record, score: record.score + 100 }))
   if (scenario !== 'multiple-pages') return records
   return records.flatMap((record) => Array.from({ length: 12 }, (_, index) => ({ ...record, matchId: `${record.matchId}-multiple-${index}`, score: record.score + 12 - index, playedAt: `2026-09-${String(index + 1).padStart(2, '0')}T12:00:00.000Z` })))
+}
+
+function historyRecordsForScenario(scenario: NetworkScenario, playerId: string): MatchRecord[] {
+  if (scenario !== 'multiple-pages') return records.filter((record) => record.playerId === playerId)
+  const template = records.find((record) => record.playerId === playerId) ?? fixtureRecords[0]
+  return Array.from({ length: 12 }, (_, index) => ({
+    ...template,
+    matchId: `${playerId}-history-${index}`,
+    playerId,
+    score: template.score + index,
+    playedAt: `2026-09-${String(index + 1).padStart(2, '0')}T12:00:00.000Z`,
+  }))
 }
 
 function delay(milliseconds: number): Promise<void> { return new Promise((resolve) => setTimeout(resolve, milliseconds)) }
