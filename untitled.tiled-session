@@ -1,0 +1,43 @@
+{
+    "activeFile": "Pirate-Battle/public/maps/arena.tmj",
+    "expandedProjectPaths": [
+        "Pirate-Battle/public",
+        "Pirate-Battle/public/maps",
+        ".",
+        "Pirate-Battle"
+    ],
+    "fileStates": {
+        "Pirate-Battle/public/maps/arena.tmj": {
+            "scale": 0.5,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 799,
+                "y": 618
+            }
+        },
+        "Pirate-Battle/public/maps/tiles_sheet.tsj": {
+            "scaleInDock": 0.5,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "C:/Users/dougl/Documents/My Projects/game-developer-challenge/Pirate-Battle/public/assets/tilesheet",
+    "map.height": 14,
+    "map.lastUsedFormat": "json",
+    "map.tileHeight": 64,
+    "map.tileWidth": 64,
+    "map.width": 25,
+    "openFiles": [
+        "Pirate-Battle/public/maps/arena.tmj",
+        "Pirate-Battle/public/maps/tiles_sheet.tsj"
+    ],
+    "project": "untitled.tiled-project",
+    "recentFiles": [
+        "Pirate-Battle/public/maps/tiles_sheet.tsj",
+        "Pirate-Battle/public/maps/arena.tmj"
+    ],
+    "tileset.lastUsedFormat": "json",
+    "tileset.tileSize": {
+        "height": 64,
+        "width": 64
+    }
+}

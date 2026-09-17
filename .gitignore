@@ -3,6 +3,8 @@
 
 # Dependencies
 node_modules/
+study-notes/
+report.md
 
 # Build output
 dist/
